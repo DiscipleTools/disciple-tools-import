@@ -47,7 +47,8 @@ function dt_import_export() {
     /*
      * Check if the Disciple.Tools theme is loaded and is the latest required version
      */
-    if ( 'disciple-tools-theme' !== $wp_theme->get_template() || $version < $dt_import_export_required_dt_theme_version ) {
+    $is_theme_dt = strpos( $wp_theme->get_template(), "disciple-tools-theme" ) !== false || $wp_theme->name === "Disciple Tools";
+    if ( !$is_theme_dt || version_compare( $version,  $dt_import_export_required_dt_theme_version, "<" ) ) {
         add_action( 'admin_notices', 'dt_import_export_hook_admin_notice' );
         add_action( 'wp_ajax_dismissed_notice_handler', 'dt_hook_ajax_notice_handler' );
         return new WP_Error( 'current_theme_not_dt', 'Disciple Tools Theme not active or not latest version.' );
