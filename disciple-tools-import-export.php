@@ -320,13 +320,13 @@ function dt_import_export_hook_admin_notice() {
 /**
  * AJAX handler to store the state of dismissible notices.
  */
-if ( !function_exists( "dt_hook_ajax_notice_handler" )){
-    function dt_hook_ajax_notice_handler(){
-        check_ajax_referer( 'wp_rest_dismiss', 'security' );
-        if ( isset( $_POST["type"] ) ){
-            $type = sanitize_text_field( wp_unslash( $_POST["type"] ) );
-            update_option( 'dismissed-' . $type, true );
-        }
-    }
-}
+//if ( !function_exists( "dt_hook_ajax_notice_handler" )){
+//    function dt_hook_ajax_notice_handler(){
+//        check_ajax_referer( 'wp_rest_dismiss', 'security' );
+//        if ( isset( $_POST["type"] ) ){
+//            $type = sanitize_text_field( wp_unslash( $_POST["type"] ) );
+//            update_option( 'dismissed-' . $type, true );
+//        }
+//    }
+//}
 
