@@ -1944,8 +1944,7 @@ class DT_Import_Export_Tab_Contact {
         $data['fields'] = Disciple_Tools_Contact_Post_Type::instance()->get_custom_fields_settings();   
         
         if(isset($data['fields']['sources'])){ 
-            //$data['fields']['sources']['default'] = Disciple_Tools_Contacts::list_sources();
-            $_list_sources = Disciple_Tools_Contacts::list_sources();
+            $_list_sources = $data['fields']['sources']['default']; 
             foreach($_list_sources as $_lsi=>$_lsi_label){
                 if(!(isset($_list_source) && strlen($_list_source)>0)){ 
                     $_lsi_label = $_lsi;
