@@ -431,6 +431,11 @@ class DT_Import_Export_Tab_Second
     }
 }
 
+class DT_Import_Export_Tab_Test{
+    public function content(){
+        Disciple_Tools_Contacts::getAllDefaultValues();
+    }
+}
 
 /**
  * Class DT_Import_Export_Tab_General
@@ -686,6 +691,7 @@ class DT_Import_Export_Tab_Contact {
         $_opt_fields = $data['_opt_fields'];
         
         $tempContactsData = $data['tempContactsData'];
+        $unique = $data['unique'];
 
         
         ?>
@@ -854,7 +860,7 @@ class DT_Import_Export_Tab_Contact {
                         </tr>
                         
                         
-                        <tr>
+                        <?php /** <tr>
                             <td colspan="3">
                                 DELIMETER:<strong><?= $delimeter ?></strong><br/>
                                 MULTI-SEPARATOR:<strong><?= $multiSeparator ?></strong><br/>
@@ -862,7 +868,7 @@ class DT_Import_Export_Tab_Contact {
                                 SOURCE:<strong><?= $fileSource ?></strong><br/>
                                 ASSIGNED-TO:<strong><?= $fileAssignedTo ?></strong><br/>                            
                             </td>
-                        </tr>
+                        </tr> */ ?>
                     </tfoot>
                     
                     </table>
@@ -1075,6 +1081,7 @@ class DT_Import_Export_Tab_Contact {
                 '_opt_fields' => $_opt_fields, 
                 'csvHeaders' => $csvHeaders, 
                 'conHeadersInfo'=>$conHeadersInfo, 
+                'unique'=>$unique, 
                 'delimeter'=>$delimeter, 
                 'multiSeperator'=>$multiSeparator];
     }
