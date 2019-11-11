@@ -1,4 +1,3 @@
-<?php ?>
 <script type="text/javascript">
 var pid = 1000;
 function process( q, num, fn, done ) {
