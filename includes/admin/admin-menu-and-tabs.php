@@ -115,9 +115,9 @@ class DT_Import_Export_Menu {
 
             ] as $mytab): ?>
 
-                <a href="<?php echo esc_attr_e ( esc_attr( $link ), 'dt_import_export' ) . $mytab['tab'] ?>"
-                   class="nav-tab <?php ( $tab == $mytab['tab'] ) ? esc_attr_e ( 'nav-tab-active', 'dt_import_export' ) : print ''; ?>">
-                <?php esc_attr_e ( $mytab['label'], 'dt_import_export' ) ?>
+                <a href="<?php echo esc_attr_e( esc_attr( $link ), 'dt_import_export' ) . $mytab['tab'] ?>"
+                   class="nav-tab <?php ( $tab == $mytab['tab'] ) ? esc_attr_e( 'nav-tab-active', 'dt_import_export' ) : print ''; ?>">
+                <?php esc_attr_e( esc_attr( $mytab['label'] ), 'dt_import_export' ) ?>
             </a>
 
             <?php endforeach; ?>
@@ -167,13 +167,13 @@ class DT_Import_Export_Menu {
                         //echo plugin_dir_path(__FILE__); ///home/bicomau/public_html/wpdt/wp-content/plugins/disciple-tools-import-export/includes/admin/
                         //echo plugin_dir_url(__FILE__); //https://bicom.shalomsoft.com/wpdt/wp-content/plugins/disciple-tools-import-export/includes/admin/
 
-                        $path = plugin_dir_path(__FILE__).'../../uploads/'.$timestamp;
-                        if ( !file_exists ( $path ) ) {  mkdir ( $path, 0777, true ); }
+                        $path = plugin_dir_path( __FILE__ ).'../../uploads/'.$timestamp;
+                        if ( !file_exists( $path ) ) {  mkdir( $path, 0777, true ); }
 
-                        $basename = $_FILES["csv_file"]['name'];
-                        $source = $_FILES["csv_file"]["tmp_name"];
+                        $basename = sanitize_text_field( wp_unslash( $_FILES["csv_file"]['name'] ) );
+                        $source = sanitize_text_field( wp_unslash( $_FILES["csv_file"]["tmp_name"] ) );
                         $destination = "{$path}/{$basename}";
-                        move_uploaded_file ( $source, $destination );
+                        move_uploaded_file( $source, $destination );
                         //
                         //$filename   = uniqid() . "_" . $timestamp; // 5dab1961e93a7_1571494241
                         //$extension  = pathinfo( $_FILES["csv_file"]["name"], PATHINFO_EXTENSION ); // csv
@@ -185,35 +185,35 @@ class DT_Import_Export_Menu {
                         //    throw new RuntimeException('Failed to move uploaded file.');
                         //}
 
-                        $fileSource = sanitize_text_field ( wp_unslash( $_POST[ 'csv_source' ] ) );
-                        $fileAssignedTo = sanitize_text_field ( wp_unslash( $_POST[ 'csv_assign' ] ) );
+                        $fileSource = sanitize_text_field( wp_unslash( $_POST[ 'csv_source' ] ) );
+                        $fileAssignedTo = sanitize_text_field( wp_unslash( $_POST[ 'csv_assign' ] ) );
 
-                        $object->mapping ( $destination, $fileSource, $fileAssignedTo );
+                        $object->mapping( $destination, $fileSource, $fileAssignedTo );
 
                     } /**end-of condition --isset( $_FILES["csv_file"] )-- */
 
-                } else if ( isset ( $_POST['csv_mappings_nonce'] ) 
-                            && wp_verify_nonce ( sanitize_text_field ( wp_unslash( $_POST['csv_mappings_nonce'] ) ), 'csv_mappings' ) 
+                } else if ( isset( $_POST['csv_mappings_nonce'] ) 
+                            && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['csv_mappings_nonce'] ) ), 'csv_mappings' ) 
                             && $run ) {
 
-                    if ( isset ( $_POST["csv_mapper"], $_POST["csv_data"] ) ) {
+                    if ( isset( $_POST["csv_mapper"], $_POST["csv_data"] ) ) {
                         $mappingData = $_POST["csv_mapper"];
 
-                        $valueMapperiData = isset($_POST['VMD']) ? $_POST['VMD'] : [];
-                        $valueMapperData = isset($_POST['VM']) ? $_POST['VM'] : [];
+                        $valueMapperiData = isset( $_POST['VMD']) ? $_POST['VMD'] : [];
+                        $valueMapperData = isset( $_POST['VM']) ? $_POST['VM'] : [];
 
                         //$mappingData = unserialize( base64_decode( $_POST["csv_mapper"] ) );
-                        $csvData = unserialize ( base64_decode( $_POST["csv_data"] ) );
-                        $csvHeaders = unserialize ( base64_decode( $_POST["csv_headers"] ) );
+                        $csvData = unserialize( base64_decode( $_POST["csv_data"] ) );
+                        $csvHeaders = unserialize( base64_decode( $_POST["csv_headers"] ) );
 
 
                         //$tempContactsData
 
-                        $delimeter = sanitize_text_field ( wp_unslash( $_POST[ 'csv_delimeter_temp' ] ) );
-                        $multiseperator = sanitize_text_field ( wp_unslash( $_POST[ 'csv_multiseperator_temp' ] ) );
-                        $filepath = sanitize_text_field ( wp_unslash( $_POST[ 'csv_file_path' ] ) );
-                        $fileSource = sanitize_text_field ( wp_unslash( $_POST[ 'csv_source_temp' ] ) );
-                        $fileAssignedTo = sanitize_text_field ( wp_unslash( $_POST[ 'csv_assign_temp' ] ) );
+                        $delimeter = sanitize_text_field( wp_unslash( $_POST[ 'csv_delimeter_temp' ] ) );
+                        $multiseperator = sanitize_text_field( wp_unslash( $_POST[ 'csv_multiseperator_temp' ] ) );
+                        $filepath = sanitize_text_field( wp_unslash( $_POST[ 'csv_file_path' ] ) );
+                        $fileSource = sanitize_text_field( wp_unslash( $_POST[ 'csv_source_temp' ] ) );
+                        $fileAssignedTo = sanitize_text_field( wp_unslash( $_POST[ 'csv_assign_temp' ] ) );
 
                         $object->preview(
                             $filepath, 
@@ -231,14 +231,14 @@ class DT_Import_Export_Menu {
 
                     }
 
-                } else if ( isset ( $_POST['csv_correct_nonce'] ) 
-                            && wp_verify_nonce ( sanitize_text_field ( wp_unslash( $_POST['csv_correct_nonce'] ) ), 'csv_correct' ) 
+                } else if ( isset( $_POST['csv_correct_nonce'] ) 
+                            && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['csv_correct_nonce'] ) ), 'csv_correct' ) 
                             && $run ) { 
 
                     //@codingStandardsIgnoreLine
-                    if ( isset ( $_POST["csv_contacts"] ) ) {            
+                    if ( isset( $_POST["csv_contacts"] ) ) {            
                         //@codingStandardsIgnoreLine
-                        $object->insert_contacts ( unserialize( base64_decode( $_POST["csv_contacts"] ) ) );
+                        $object->insert_contacts( unserialize( base64_decode( $_POST["csv_contacts"] ) ) );
                     }
                     exit;
 
@@ -711,17 +711,17 @@ class DT_Import_Export_Tab_Contact {
                 //correct csv headers
                 foreach ( $csvHeaders as $ci=>$ch):
 
-                    $colDataType = isset($myOptionalFields['fields'][$ch]['type'])?$myOptionalFields['fields'][$ch]['type']:null;
+                    $colDataType = isset( $myOptionalFields['fields'][$ch]['type'] )?$myOptionalFields['fields'][$ch]['type']:null;
 
                         $mapperTitle = '';
                         if ( isset($conHeadersInfo[$ch]['name']) ) { 
-            $mapperTitle = $conHeadersInfo[$ch]['name'];
+                            $mapperTitle = $conHeadersInfo[$ch]['name'];
                         } else if ( $ch=='title' ) { 
-            //$mapperTitle = 'Contact Name';
-            $mapperTitle = ucwords($ch);
+                            //$mapperTitle = 'Contact Name';
+                            $mapperTitle = ucwords($ch);
                         } else {
-            //$mapperTitle = "<span style=\"color:red\" title=\"un-mapped data column\">{$ch}</span>";
-            $mapperTitle = "<span class=\"unmapped\" title=\"un-mapped data column\">{$ch}</span>";
+                            //$mapperTitle = "<span style=\"color:red\" title=\"un-mapped data column\">{$ch}</span>";
+                            $mapperTitle = "<span class=\"unmapped\" title=\"un-mapped data column\">{$ch}</span>";
                         }
 
                     ?>
@@ -733,14 +733,14 @@ class DT_Import_Export_Tab_Contact {
 
 
                         <td class="dest-column">
-            <?= self::getDropdownListHtml($ch,"csv_mapper_{$ci}",$conHeadersInfo,$ch,[
-                'name'=>"csv_mapper[{$ci}]", 
-                'class'=>'cf-mapper', 
-                //'onchange'=>"check_column_mappings({$ci})"
-                'onchange'=>"getDefaultValues({$ci})"
-                ],true) ?>
-            <?php /** <div id="helper-fields-<?= $ci ?>" class="helper-fields"<?php if ( $colDataType!='key_select'): ?> style="display:none"<?php endif; ?>></div> */ ?>
-            <div id="helper-fields-<?= $ci ?>" class="helper-fields" style="display:none"></div>
+                            <?= self::getDropdownListHtml( $ch, "csv_mapper_{$ci}", $conHeadersInfo,$ch, [
+                                'name' => "csv_mapper[{$ci}]", 
+                                'class' => 'cf-mapper', 
+                                //'onchange'=>"check_column_mappings({$ci})"
+                                'onchange' => "getDefaultValues({$ci})"
+                                ],true) ?>
+                            <?php /** <div id="helper-fields-<?= $ci ?>" class="helper-fields"<?php if ( $colDataType!='key_select'): ?> style="display:none"<?php endif; ?>></div> */ ?>
+                            <div id="helper-fields-<?= $ci ?>" class="helper-fields" style="display:none"></div>
 
                         </td>
 
@@ -751,7 +751,7 @@ class DT_Import_Export_Tab_Contact {
             data-id="<?= $ci ?>"
             data-type="<?= $colDataType ?>"
             <?php /** <?php if ( $colDataType!='key_select'): ?> style="display:none"<?php endif; ?>> */ ?>
-            <?php if ( !($colDataType=='key_select'||$colDataType=='multi_select')): ?> style="display:none"<?php endif; ?>>
+            <?php if ( !( $colDataType == 'key_select' || $colDataType == 'multi_select' )): ?> style="display:none"<?php endif; ?>>
 
             <div class="mapper-helper-text">
                 <span class="mapper-helper-title">Map import values to DT values</span><br/>
@@ -973,7 +973,7 @@ class DT_Import_Export_Tab_Contact {
                 //cleanup
                 $i = str_replace( "\"", "", $i );
                
-                if ( isset ( $csvHeaders[$index] ) ) { 
+                if ( isset( $csvHeaders[$index] ) ) { 
                     $ch = $csvHeaders[$index];
                     $pos = strpos ( $i, $multiSeparator );
 
@@ -998,7 +998,7 @@ class DT_Import_Export_Tab_Contact {
                         if ($pos === false) {
                             $fields[$ch][] = [ "value" => $i ];
                         } else {
-                            $multivalued = explode ( $multiSeparator, $i );
+                            $multivalued = explode( $multiSeparator, $i );
                             foreach ( $multivalued as $mx ) { 
                                //$fields[$ch][] = [ "value" => $mx ]; 
                                $fields[$ch][] = [ "value" => trim($mx) ]; 
@@ -1028,9 +1028,9 @@ class DT_Import_Export_Tab_Contact {
         
         
         foreach ( $unique as $ci => $list ) {             
-            $unique[$ci] = array_unique ( $list ); 
+            $unique[$ci] = array_unique( $list ); 
             
-            asort ( $unique[$ci] ); //sort-the-value(s)
+            asort( $unique[$ci] ); //sort-the-value(s)
             
             $ch = $csvHeaders[$ci];  
             //if ( isset($myOptionalFields['fields'][$ch]['type'])
@@ -1043,14 +1043,14 @@ class DT_Import_Export_Tab_Contact {
 
                     } else {
                         unset ( $unique[$ci][$ui] );
-                        $multivalued = explode ( $multiSeparator, $uv );
+                        $multivalued = explode( $multiSeparator, $uv );
                         foreach ( $multivalued as $mxid => $mx ) { 
-                            $unique[$ci][] = trim ( $mx );
+                            $unique[$ci][] = trim( $mx );
                         }
                     }
                 }
 
-                $unique[$ci] = array_unique ( $unique[$ci] );
+                $unique[$ci] = array_unique( $unique[$ci] );
                 asort ( $unique[$ci] ); //sort-the-value(s)
             //}
         }
@@ -1334,9 +1334,9 @@ class DT_Import_Export_Tab_Contact {
         return $column_name;
     }
     
-    public static function getDropdownListHtml($field, $id='selector',$data=[],$selected=null,$htmlOptions=[],$allowAllTypes=true ) { 
+    public static function getDropdownListHtml($field, $id = 'selector', $data = [], $selected = null, $htmlOptions = [], $allowAllTypes = true ) { 
         
-        if ( isset($htmlOptions['id']) ) {  unset($htmlOptions['id']); }
+        if ( isset($htmlOptions['id']) ) { unset($htmlOptions['id']); }
         
         $f = true;
         
