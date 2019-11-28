@@ -86,9 +86,9 @@ class DT_Import_Export_Menu {
         }
 
         $link = 'admin.php?page='.$this->token.'&tab=';
-        
+
         $run = true; if ( ! is_admin() ) { $run = false; } //check for admin
-        
+
         $timestamp = time();
         
         ?>
@@ -2008,6 +2008,5 @@ class DT_Import_Export_Tab_Contact {
         }        
         //}        
         return $errCount;
-    }
-    
+    }    
 }
