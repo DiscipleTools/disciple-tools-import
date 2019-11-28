@@ -115,9 +115,9 @@ class DT_Import_Export_Menu {
 
             ] as $mytab): ?>
 
-                <a href="<?php echo esc_attr_e( (string)$link, 'dt_import_export' ) . $mytab['tab'] ?>"
+                <a href="<?php echo esc_attr_e( (string) $link, 'dt_import_export' ) . $mytab['tab'] ?>"
                    class="nav-tab <?php ( $tab == $mytab['tab'] ) ? esc_attr_e( 'nav-tab-active', 'dt_import_export' ) : print ''; ?>">
-                <?php esc_attr_e( (string)$mytab['label'], 'dt_import_export' ) ?>
+                <?php esc_attr_e( (string) $mytab['label'], 'dt_import_export' ) ?>
             </a>
 
             <?php endforeach; ?>
@@ -197,7 +197,7 @@ class DT_Import_Export_Menu {
                             && $run ) {
 
                     if ( isset( $_POST["csv_mapper"], $_POST["csv_data"] ) ) {
-                        $mapping_data = $_POST["csv_mapper"];
+                        $mapping_data = sanitize_text_field ( wp_unslash( $_POST[ 'csv_mapper' ] ) );
 
                         $value_mapper_idata = isset( $_POST['VMD']) ? $_POST['VMD'] : [];
                         $value_mapper_data = isset( $_POST['VM']) ? $_POST['VM'] : [];
@@ -216,25 +216,22 @@ class DT_Import_Export_Menu {
                         $file_assigned_to = sanitize_text_field( wp_unslash( $_POST['csv_assign_temp'] ) );
 
                         $object->preview(
-                            $filepath, 
+                            $filepath,
                             $csv_data,
                             $csv_headers,
                             $delimeter,
                             $multiseperator,
-                            $file_source, 
+                            $file_source,
                             $file_assigned_to,
-
                             $mapping_data,
                             $value_mapper_idata,
                             $value_mapper_data
                         );
-
                     }
 
                 } else if ( isset( $_POST['csv_correct_nonce'] ) 
-                            && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['csv_correct_nonce'] ) ), 'csv_correct' ) 
-                            && $run ) { 
-
+                            && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['csv_correct_nonce'] ) ), 'csv_correct' )
+                            && $run ) {
                     //@codingStandardsIgnoreLine
                     if ( isset( $_POST["csv_contacts"] ) ) {            
                         //@codingStandardsIgnoreLine
