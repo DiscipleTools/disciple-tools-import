@@ -122,7 +122,7 @@ class DT_Import_Export_Menu {
                 ?>
 
                 <a href="<?php echo $mytab_link ?>"
-                   class="nav-tab <?php ( $tab == $mytab_name) ? esc_attr_e( 'nav-tab-active', 'dt_import_export' ) : print ''; ?>">
+                   class="nav-tab <?php ( $tab == $mytab_name ) ? esc_attr_e( 'nav-tab-active', 'dt_import_export' ) : print ''; ?>">
                 <?php esc_attr_e( $mytab_label, 'dt_import_export' ) ?>
                 </a>
 
@@ -203,10 +203,10 @@ class DT_Import_Export_Menu {
                             && $run ) {
 
                     if ( isset( $_POST["csv_mapper"], $_POST["csv_data"] ) ) {
-                        $mapping_data = sanitize_text_field ( wp_unslash( $_POST[ 'csv_mapper' ] ) );
+                        $mapping_data = sanitize_text_field( wp_unslash( $_POST['csv_mapper'] ) );
 
-                        $value_mapper_idata = isset( $_POST['VMD']) ? $_POST['VMD'] : [];
-                        $value_mapper_data = isset( $_POST['VM']) ? $_POST['VM'] : [];
+                        $value_mapper_idata = isset( $_POST['VMD'] ) ? $_POST['VMD'] : [];
+                        $value_mapper_data = isset( $_POST['VM'] ) ? $_POST['VM'] : [];
 
                         //$mapping_data = unserialize( base64_decode( $_POST["csv_mapper"] ) );
                         $csv_data = unserialize( base64_decode( $_POST["csv_data"] ) );
@@ -234,8 +234,8 @@ class DT_Import_Export_Menu {
                             $value_mapper_data
                         );
                     }
-
-                } else if ( isset( $_POST['csv_correct_nonce'] ) 
+////////////////////////////////////////////////////////////////////////////////
+                } else if ( isset( $_POST['csv_correct_nonce'] )
                             && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['csv_correct_nonce'] ) ), 'csv_correct' )
                             && $run ) {
                     //@codingStandardsIgnoreLine
@@ -248,18 +248,18 @@ class DT_Import_Export_Menu {
                 } else {
                     $object->content();
                 }
+////////////////////////////////////////////////////////////////////////////////
 
 
-
-                            } else if ( $tab == 'location' ) { 
-                die ( 'ERROR_'.__LINE__ );
+            } else if ( $tab == 'location' ) {
+                die( 'ERROR_'.__LINE__ );
                 $object = new DT_Import_Export_Tab_Location();
-                $object->content();  
-
+                $object->content();
+////////////////////////////////////////////////////////////////////////////////
             } else {
 
             }
-            
+////////////////////////////////////////////////////////////////////////////////
             ?>
 
         </div><!-- End wrap -->
@@ -416,7 +416,7 @@ class DT_Import_Export_Tab_Second
 }
 
 class DT_Import_Export_Tab_Test{
-    public function content( ) { 
+    public function content() {
 
     }
 }
@@ -425,16 +425,16 @@ class DT_Import_Export_Tab_Test{
  * Class DT_Import_Export_Tab_General
  */
 class DT_Import_Export_Tab_Contact {
-    
+
     public static $contact_phone_headings;
     public static $contact_address_headings;
     public static $contact_email_headings;
     public static $contact_name_headings;
     public static $contact_gender_headings;
     public static $contact_notes_headings;
-    
+
     public function __construct() {
-        self::$contact_phone_headings = [ 
+        self::$contact_phone_headings = [
             'contact_phone',
             'phone',
             'mobile',
@@ -446,32 +446,32 @@ class DT_Import_Export_Tab_Contact {
             'address'
         ];
 
-        self::$contact_email_headings = [ 
-            'contact_email',               
+        self::$contact_email_headings = [
+            'contact_email',    
             'email',
             'email_address',
         ];
 
-        self::$contact_name_headings = [ 
-            'title',               
+        self::$contact_name_headings = [
+            'title',
             'name',
             'contact_name',
         ];
-        self::$contact_gender_headings = [ 
-            'gender',               
+        self::$contact_gender_headings = [
+            'gender',
             'sex',
         ];
 
         self::$contact_notes_headings = [
             'cf_notes',
-            'note', 
+            'note',
             'notes',
             'comment',
             'comments'
         ];
-    
+
     }
-    
+
     public function content() {
         ?>
         <div class="wrap">
@@ -635,13 +635,13 @@ class DT_Import_Export_Tab_Contact {
         <!-- End Box -->
         <?php
     }
-    
+
     public function go_back() {
         ?>
         <!-- Box -->
         <table class="widefat striped">
             <thead>
-            <th>ERROR <?= date('Y-m-d H:i:s') ?></th>
+            <th>ERROR <?php esc_html_e( date('Y-m-d H:i:s'), 'disciple_tools' ) ?></th>
             </thead>
             <tbody>
             <tr>
@@ -1225,7 +1225,7 @@ class DT_Import_Export_Tab_Contact {
     
     
 
-    public function getContactHeaderInfo( ) { 
+    public function getContactHeaderInfo() { 
         //return Disciple_Tools_Contacts::getContactHeaderInfo();
         
 /** //global $wpdb;
@@ -1927,7 +1927,7 @@ class DT_Import_Export_Tab_Contact {
         return $html;        
     }
     
-    public static function getAllDefaultValues( ) { 
+    public static function getAllDefaultValues() { 
         $data = array();
         $data['channels'] = Disciple_Tools_Contact_Post_Type::instance()->get_channels_list();        
         $data['fields'] = Disciple_Tools_Contact_Post_Type::instance()->get_custom_fields_settings();   
