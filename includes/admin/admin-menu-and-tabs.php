@@ -910,7 +910,7 @@ class DT_Import_Export_Tab_Contact {
                     <?php
 
                     ob_start();
-                    include __DIR__ .'/_script1.php';
+                    include __DIR__ .'/script1.php';
                     $jsCodeBlock = ob_get_clean();
                     echo $jsCodeBlock;
                     ?>    
@@ -1195,7 +1195,7 @@ class DT_Import_Export_Tab_Contact {
                     
                     <?php
                     ob_start();
-                    include __DIR__ .'/_script2.php';
+                    include __DIR__ .'/script2.php';
                     $jsCodeBlock = ob_get_clean();
                     echo $jsCodeBlock;
                     ?>
