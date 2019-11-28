@@ -724,36 +724,36 @@ class DT_Import_Export_Tab_Contact {
                     ?>
                     <tr class="mapper-coloumn" data-row-id="<?php echo $ci ?>">
 
-                        <th data-field="<?= $ch ?>" class="src-column">
-                        <?php //= $mapper_title ?><?= $uploade_file_headers[$ci] ?>
+                        <th data-field="<?php echo $ch ?>" class="src-column">
+                        <?php //= $mapper_title ?><?php echo $uploade_file_headers[$ci] ?>
                         </th>
 
 
                         <td class="dest-column">
-                            <?= self::getDropdownListHtml( $ch, "csv_mapper_{$ci}", $con_headers_info,$ch, [
+                            <?php echo self::getDropdownListHtml( $ch, "csv_mapper_{$ci}", $con_headers_info,$ch, [
                                 'name' => "csv_mapper[{$ci}]", 
                                 'class' => 'cf-mapper', 
                                 //'onchange'=>"check_column_mappings({$ci})"
                                 'onchange' => "getDefaultValues({$ci})"
                                 ],true) ?>
-                            <?php /** <div id="helper-fields-<?= $ci ?>" class="helper-fields"<?php if ( $col_data_type!='key_select'): ?> style="display:none"<?php endif; ?>></div> */ ?>
-                            <div id="helper-fields-<?= $ci ?>" class="helper-fields" style="display:none"></div>
+                            <?php /** <div id="helper-fields-<?php echo $ci ?>" class="helper-fields"<?php if ( $col_data_type!='key_select'): ?> style="display:none"<?php endif; ?>></div> */ ?>
+                            <div id="helper-fields-<?php echo $ci ?>" class="helper-fields" style="display:none"></div>
 
                         </td>
 
 
                         <td class="mapper-column">
-                        <div id="unique-values-<?= $ci ?>" 
+                        <div id="unique-values-<?php echo $ci ?>" 
             class="unique-values"
-            data-id="<?= $ci ?>"
-            data-type="<?= $col_data_type ?>"
+            data-id="<?php echo $ci ?>"
+            data-type="<?php echo $col_data_type ?>"
             <?php /** <?php if ( $col_data_type!='key_select'): ?> style="display:none"<?php endif; ?>> */ ?>
             <?php if ( !( $col_data_type == 'key_select' || $col_data_type == 'multi_select' )): ?> style="display:none"<?php endif; ?>>
 
             <div class="mapper-helper-text">
                 <span class="mapper-helper-title">Map import values to DT values</span><br/>
                 <span class="mapper-helper-description">
-                    <span class="selected-mapper-column-name"><?= $ch ?><?php //echo $mapper_title ?></span> 
+                    <span class="selected-mapper-column-name"><?php echo $ch ?><?php //echo $mapper_title ?></span> 
                     only accepts specific values (as a Selection). 
                     Please map following unique values from your data to existing values in DT. 
                     You can add new values into the DT system if you want by first ...</span>
@@ -767,7 +767,7 @@ class DT_Import_Export_Tab_Contact {
                <tr>
                    <td>
                        <?php if ( strlen(trim($v))>0): ?>
-            <?= $v ?>
+            <?php echo $v ?>
                         <?php else: ?>
             <span class="empty">-blank/null-</span>
                         <?php endif; ?>
@@ -776,17 +776,17 @@ class DT_Import_Export_Tab_Contact {
 
                    <td>  
 
-                       <input name="VMD[<?= $ci ?>][<?= $vi ?>]" type="hidden" value="<?= $v ?>" />
+                       <input name="VMD[<?php echo $ci ?>][<?php echo $vi ?>]" type="hidden" value="<?php echo $v ?>" />
 
-                       <select id="value-mapper-<?= $ci ?>-<?= $vi ?>" 
-               name="VM[<?= $ci ?>][<?= $vi ?>]" 
-               class="value-mapper-<?= $ci ?>" 
-               data-value="<?= $v ?>">
+                       <select id="value-mapper-<?php echo $ci ?>-<?php echo $vi ?>" 
+               name="VM[<?php echo $ci ?>][<?php echo $vi ?>]" 
+               class="value-mapper-<?php echo $ci ?>" 
+               data-value="<?php echo $v ?>">
                        <option>--Not Selected--</option>
                        <?php /**/ ?>
                        <?php if ( isset($my_optional_fields['fields'][$ch]['default'])): ?>               
                        <?php foreach ( $my_optional_fields['fields'][$ch]['default'] as $di=>$dt): ?>
-                           <option value="<?= $di ?>"<?php if ( $di==$v): ?> selected="selected"<?php endif; ?>><?= $dt['label'] ?></option>
+                           <option value="<?php echo $di ?>"<?php if ( $di==$v): ?> selected="selected"<?php endif; ?>><?php echo $dt['label'] ?></option>
                        <?php endforeach; ?>
                        <?php endif; ?> 
                        <?php /***/ ?>   
@@ -821,11 +821,11 @@ class DT_Import_Export_Tab_Contact {
             <input type="hidden" name="csv_headers" value="<?php echo esc_html( base64_encode( serialize( $csv_headers ) ) ); ?>">
             <?php /** */ ?>
 
-            <input type="hidden" name="csv_delimeter_temp" value='<?= $delimeter ?>' />
-            <input type="hidden" name="csv_multiseperator_temp" value='<?= $multi_separator ?>' />
-            <input type="hidden" name="csv_file_path" value='<?= $filepath ?>' />
-            <input type="hidden" name="csv_source_temp" value='<?= $file_source ?>' />
-            <input type="hidden" name="csv_assign_temp" value='<?= $file_assigned_to ?>' />
+            <input type="hidden" name="csv_delimeter_temp" value='<?php echo $delimeter ?>' />
+            <input type="hidden" name="csv_multiseperator_temp" value='<?php echo $multi_separator ?>' />
+            <input type="hidden" name="csv_file_path" value='<?php echo $filepath ?>' />
+            <input type="hidden" name="csv_source_temp" value='<?php echo $file_source ?>' />
+            <input type="hidden" name="csv_assign_temp" value='<?php echo $file_assigned_to ?>' />
 
             <?php wp_nonce_field( 'csv_mapping', 'csv_mapping_nonce' ); ?>
 
@@ -840,11 +840,11 @@ class DT_Import_Export_Tab_Contact {
 
                     <?php /** <tr>
                         <td colspan="3">
-            DELIMETER:<strong><?= $delimeter ?></strong><br/>
-            MULTI-SEPARATOR:<strong><?= $multi_separator ?></strong><br/>
-            FILE-PATH:<strong><?= $filepath ?></strong><br/>
-            SOURCE:<strong><?= $file_source ?></strong><br/>
-            ASSIGNED-TO:<strong><?= $file_assigned_to ?></strong><br/>            
+            DELIMETER:<strong><?php echo $delimeter ?></strong><br/>
+            MULTI-SEPARATOR:<strong><?php echo $multi_separator ?></strong><br/>
+            FILE-PATH:<strong><?php echo $filepath ?></strong><br/>
+            SOURCE:<strong><?php echo $file_source ?></strong><br/>
+            ASSIGNED-TO:<strong><?php echo $file_assigned_to ?></strong><br/>            
                         </td>
                     </tr> */ ?>
                 </tfoot>
@@ -854,11 +854,11 @@ class DT_Import_Export_Tab_Contact {
 
                 <div class="helper-fields-txt" style="display:none">
                 <?php foreach ( $my_optional_fields['fields'] as $myfi=>$myfield): ?>
-                <div id="helper-fields-<?= $myfi ?>-txt" data-type="<?= $myfield['type'] ?>">
+                <div id="helper-fields-<?php echo $myfi ?>-txt" data-type="<?php echo $myfield['type'] ?>">
 
-                    <span>Field: <strong><?= $myfi ?></strong></span><br/>
-                    <span>Type: <strong><?= $myfield['type'] ?></strong></span><br/>
-                    <span>Description: <strong><?= $myfield['description'] ?></strong></span><br/>
+                    <span>Field: <strong><?php echo $myfi ?></strong></span><br/>
+                    <span>Type: <strong><?php echo $myfield['type'] ?></strong></span><br/>
+                    <span>Description: <strong><?php echo $myfield['description'] ?></strong></span><br/>
 
                     <?php if ( $myfield['type']=='key_select'||$myfield['type']=='multi_select'): ?>
 
@@ -867,14 +867,14 @@ class DT_Import_Export_Tab_Contact {
                     <?php asort($myfield['default']); ?>    
                     <?php foreach ( $myfield['default'] as $di=>$dt): ?>
                     <li>
-                        <strong><span class="hlp-value"><?= $di ?></span></strong>:
-                        <span class="hlp-label"><?= $dt['label'] ?></span>
+                        <strong><span class="hlp-value"><?php echo $di ?></span></strong>:
+                        <span class="hlp-label"><?php echo $dt['label'] ?></span>
                     </li>
                     <?php endforeach; ?>
                     </ul>
 
                     <?php else: ?>
-                    <span>Value: <strong><?= $myfield['default'] ?></strong></span><br/>   
+                    <span>Value: <strong><?php echo $myfield['default'] ?></strong></span><br/>   
                     <?php endif; ?>    
 
                 </div>
@@ -1117,8 +1117,8 @@ class DT_Import_Export_Tab_Contact {
             <tbody>
             <tr>
 <td>
-<fieldset id="debug-data-<?= __LINE__ ?>" class="debug-data" style="display:none"><legend onclick="jQuery('#debug-data-<?= __LINE__ ?> section').toggle()">CSV DATA</legend><section><pre><?php print_r($csv_data) ?></pre></section></fieldset> 
-<fieldset id="debug-data-<?= __LINE__ ?>" class="debug-data" style="display:none"><legend onclick="jQuery('#debug-data-<?= __LINE__ ?> section').toggle()">PPL</legend><section><pre><?php print_r($people) ?></pre></section></fieldset>
+<fieldset id="debug-data-<?php echo __LINE__ ?>" class="debug-data" style="display:none"><legend onclick="jQuery('#debug-data-<?php echo __LINE__ ?> section').toggle()">CSV DATA</legend><section><pre><?php print_r($csv_data) ?></pre></section></fieldset> 
+<fieldset id="debug-data-<?php echo __LINE__ ?>" class="debug-data" style="display:none"><legend onclick="jQuery('#debug-data-<?php echo __LINE__ ?> section').toggle()">PPL</legend><section><pre><?php print_r($people) ?></pre></section></fieldset>
 
 
 <?php echo $html; ?> 
@@ -1129,7 +1129,7 @@ class DT_Import_Export_Tab_Contact {
     
     <?php wp_nonce_field( 'csv_correct', 'csv_correct_nonce' ); ?>
     
-    <a href="<?= admin_url( 'admin.php?page=dt_utilities&tab=contact-import' ) ?>" 
+    <a href="<?php echo admin_url( 'admin.php?page=dt_utilities&tab=contact-import' ) ?>" 
        class="button button-primary"> 
            <?php esc_html_e( "Back - Something is wrong!", 'disciple_tools' ) ?> 
     </a>
