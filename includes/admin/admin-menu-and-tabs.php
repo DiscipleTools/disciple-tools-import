@@ -114,10 +114,15 @@ class DT_Import_Export_Menu {
                 ]
 
             ] as $mytab): ?>
+                
+                <?php 
+                $mytab_name = (string) $mytab['tab'];
+                $mytab_label = (string) $mytab['label'];
+                ?>
 
-                <a href="<?php echo esc_attr_e( (string) $link, 'dt_import_export' ) . $mytab['tab'] ?>"
-                   class="nav-tab <?php ( $tab == $mytab['tab'] ) ? esc_attr_e( 'nav-tab-active', 'dt_import_export' ) : print ''; ?>">
-                <?php esc_attr_e( (string) $mytab['label'], 'dt_import_export' ) ?>
+                <a href="<?php echo esc_attr_e(  $link, 'dt_import_export' ) . $mytab_name ?>"
+                   class="nav-tab <?php ( $tab == $mytab_name) ? esc_attr_e( 'nav-tab-active', 'dt_import_export' ) : print ''; ?>">
+                <?php esc_attr_e( $mytab_label, 'dt_import_export' ) ?>
             </a>
 
             <?php endforeach; ?>
