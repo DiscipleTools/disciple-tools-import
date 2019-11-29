@@ -447,7 +447,7 @@ class DT_Import_Export_Tab_Contact {
         ];
 
         self::$contact_email_headings = [
-            'contact_email', 
+            'contact_email',
             'email',
             'email_address',
         ];
@@ -658,7 +658,7 @@ class DT_Import_Export_Tab_Contact {
     }
 
     public function mapping( $filepath, $file_source = 'web', $file_assigned_to = '' ) {
-       
+
         $data = $this->mapping_process( $filepath, $file_source, $file_assigned_to );
 
         $delimeter = $data['delimeter'];
@@ -711,9 +711,9 @@ class DT_Import_Export_Tab_Contact {
                     $col_data_type = isset( $my_optional_fields['fields'][$ch]['type'] ) ? $my_optional_fields['fields'][$ch]['type'] : null;
 
                         $mapper_title = '';
-                        if ( isset( $con_headers_info[$ch]['name'] ) ) { 
+                        if ( isset( $con_headers_info[$ch]['name'] ) ) {
                             $mapper_title = $con_headers_info[$ch]['name'];
-                        } else if ( $ch == 'title' ) { 
+                        } else if ( $ch == 'title' ) {
                             //$mapper_title = 'Contact Name';
                             $mapper_title = ucwords( $ch );
                         } else {
@@ -731,8 +731,8 @@ class DT_Import_Export_Tab_Contact {
 
                         <td class="dest-column">
                             <?php echo self::get_dropdown_list_html( $ch, "csv_mapper_{$ci}", $con_headers_info, $ch, [
-                                'name' => "csv_mapper[{$ci}]", 
-                                'class' => 'cf-mapper', 
+                                'name' => "csv_mapper[{$ci}]",
+                                'class' => 'cf-mapper',
                                 //'onchange'=>"check_column_mappings({$ci})"
                                 'onchange' => "getDefaultValues({$ci})"
                                 ],true) ?>
@@ -1085,7 +1085,7 @@ class DT_Import_Export_Tab_Contact {
                         }
                         $fields['cf_gender'] = $gender;
 
-                    } else if ( $ch == 'cf_notes' ) {  
+                    } else if ( $ch == 'cf_notes' ) {
                     //} else if ( $ch == 'cf_notes' || $ch == 'cf_dob' || $ch == 'cf_join_date' ) {
                         $fields[$ch][] = $i;
 
@@ -1136,7 +1136,7 @@ class DT_Import_Export_Tab_Contact {
                 } else {
                     unset( $unique[$ci][$ui] );
                     $multivalued = explode( $multi_separator, $uv );
-                    foreach ( $multivalued as $mxid => $mx ) { 
+                    foreach ( $multivalued as $mxid => $mx ) {
                         $unique[$ci][] = trim( $mx );
                     }
                 }
@@ -1645,7 +1645,7 @@ class DT_Import_Export_Tab_Contact {
                         //    $gender = "not-set";
                         //    if ($i == "m"  ) {  $gender = "male";
                         //    } else if ($i == "f"  ) {  $gender = "female"; }
-                        //    $fields[$ch] = $gender;       
+                        //    $fields[$ch] = $gender;
 
                     } else if ( $type == 'key_select' ) {
 
