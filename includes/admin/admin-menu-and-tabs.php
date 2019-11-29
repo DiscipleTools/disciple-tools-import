@@ -100,7 +100,8 @@ class DT_Import_Export_Menu {
             <h2><?php esc_attr_e( 'Import and Export', 'dt_import_export' ) ?></h2>
             <h2 class="nav-tab-wrapper">
 
-            <?php foreach ( [
+            <?php
+            foreach ( [
                 //'general' => ['tab' => 'general', 'label' => 'General'],
                 //'second' => ['tab' => 'second', 'label' => 'Second'],
                 'contact' => [
@@ -113,17 +114,15 @@ class DT_Import_Export_Menu {
                     'label' => 'Location'
                 ]
 
-            ] as $mytab): ?>
-                
-                <?php
+            ] as $mytab):
                 $mytab_name = "{$mytab['tab']}";
                 $mytab_label = "{$mytab['label']}";
                 $mytab_link = "admin.php?page={$this->token}&tab={$mytab_name}";
                 ?>
 
-                <a href="<?php echo $mytab_link ?>"
+                <a href="<?php echo esc_html( $mytab_link ) ?>"
                    class="nav-tab <?php ( $tab == $mytab_name ) ? esc_attr_e( 'nav-tab-active', 'dt_import_export' ) : print ''; ?>">
-                <?php esc_attr_e( $mytab_label, 'dt_import_export' ) ?>
+                <?php echo esc_attr( $mytab_label ) ?>
                 </a>
 
             <?php endforeach; ?>
@@ -149,10 +148,10 @@ class DT_Import_Export_Menu {
                             && $run ) {
 
                     //@codingStandardsIgnoreLine
-                    if ( isset( $_FILES["csv_file"] ) ) {
+                    if ( isset( $_FILES["csv_file"]["name"] ) ) {
                         $file_parts = explode( ".", sanitize_text_field( wp_unslash( $_FILES["csv_file"]["name"] ) ) )[ count( explode( ".", sanitize_text_field( wp_unslash( $_FILES["csv_file"]["name"] ) ) ) ) - 1 ];
 
-                        if ( $_FILES["csv_file"]["error"] > 0 ) {
+                        if ( isset( $_FILES["csv_file"]["error"] ) && $_FILES["csv_file"]["error"] > 0 ) {
                             esc_html_e( "ERROR UPLOADING FILE", 'disciple_tools' );
                             $object->go_back();
                             exit;
@@ -505,7 +504,7 @@ class DT_Import_Export_Tab_Contact {
         <!-- Box -->
         <table class="widefat striped">
             <thead>
-            <th><h1><?php echo esc_html_e( "Step 1: Upload File", 'disciple_tools' ); ?></h1></th>
+            <th><h1><?php esc_html_e( "Step 1: Upload File", 'disciple_tools' ); ?></h1></th>
             </thead>
             <tbody>
             <tr>
@@ -641,7 +640,7 @@ class DT_Import_Export_Tab_Contact {
         <!-- Box -->
         <table class="widefat striped">
             <thead>
-            <th>ERROR <?php esc_html_e( date( 'Y-m-d H:i:s' ), 'disciple_tools' ) ?></th>
+            <th>ERROR <?php echo esc_html( date( 'Y-m-d H:i:s' ) ) ?></th>
             </thead>
             <tbody>
             <tr>
