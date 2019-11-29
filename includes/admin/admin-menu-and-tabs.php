@@ -706,16 +706,16 @@ class DT_Import_Export_Tab_Contact {
                 <?php
 
                 //correct csv headers
-                foreach ( $csv_headers as $ci => $ch):
+                foreach ( $csv_headers as $ci => $ch ):
 
                     $col_data_type = isset( $my_optional_fields['fields'][$ch]['type'] ) ? $my_optional_fields['fields'][$ch]['type'] : null;
 
                         $mapper_title = '';
-                        if ( isset( $con_headers_info[$ch]['name']) ) { 
+                        if ( isset( $con_headers_info[$ch]['name'] ) ) { 
                             $mapper_title = $con_headers_info[$ch]['name'];
                         } else if ( $ch == 'title' ) { 
                             //$mapper_title = 'Contact Name';
-                            $mapper_title = ucwords($ch);
+                            $mapper_title = ucwords( $ch );
                         } else {
                             //$mapper_title = "<span style=\"color:red\" title=\"un-mapped data column\">{$ch}</span>";
                             $mapper_title = "<span class=\"unmapped\" title=\"un-mapped data column\">{$ch}</span>";
@@ -730,7 +730,7 @@ class DT_Import_Export_Tab_Contact {
 
 
                         <td class="dest-column">
-                            <?php echo self::get_dropdown_list_html( $ch, "csv_mapper_{$ci}", $con_headers_info,$ch, [
+                            <?php echo self::get_dropdown_list_html( $ch, "csv_mapper_{$ci}", $con_headers_info, $ch, [
                                 'name' => "csv_mapper[{$ci}]", 
                                 'class' => 'cf-mapper', 
                                 //'onchange'=>"check_column_mappings({$ci})"
@@ -762,13 +762,13 @@ class DT_Import_Export_Tab_Contact {
                            <?php if ( isset( $unique[$ci] ) ): ?>
                            <table>
 
-                           <?php foreach ( $unique[$ci] as $vi => $v): ?>
+                           <?php foreach ( $unique[$ci] as $vi => $v ): ?>
 
                <tr>
                    <td>
-                       <?php if ( strlen( trim( $v ) )>0): ?>
-            <?php echo $v ?>
-                        <?php else: ?>
+                       <?php if ( strlen( trim( $v ) ) > 0 ): ?>
+            <?php echo $v; ?>
+                        <?php else : ?>
             <span class="empty">-blank/null-</span>
                         <?php endif; ?>
                    </td>
@@ -791,24 +791,17 @@ class DT_Import_Export_Tab_Contact {
                         <?php endif; ?>
                         <?php /***/ ?>
                         </select>
-
-
-
-
                    </td>
                </tr>
 
                            <?php endforeach; ?>
 
                            </table>
-
                            <?php endif; ?>
                         </div>
                         </td>
-
-
                     </tr>
-                <?php  endforeach; ?>
+                <?php endforeach; ?>
                 </tbody>
 
                 <tfoot>
@@ -853,7 +846,7 @@ class DT_Import_Export_Tab_Contact {
                 </div>
 
                 <div class="helper-fields-txt" style="display:none">
-                <?php foreach ( $my_optional_fields['fields'] as $myfi=>$myfield): ?>
+                <?php foreach ( $my_optional_fields['fields'] as $myfi => $myfield ): ?>
                 <div id="helper-fields-<?php echo $myfi ?>-txt" data-type="<?php echo $myfield['type'] ?>">
 
                     <span>Field: <strong><?php echo $myfi ?></strong></span><br/>
@@ -873,7 +866,7 @@ class DT_Import_Export_Tab_Contact {
                     <?php endforeach; ?>
                     </ul>
 
-                    <?php else: ?>
+                    <?php else : ?>
                     <span>Value: <strong><?php echo $myfield['default'] ?></strong></span><br/>
                     <?php endif; ?>
 
@@ -883,13 +876,110 @@ class DT_Import_Export_Tab_Contact {
 
                 </form>
 
-                <?php
+                <script type="text/javascript">
 
-                ob_start();
-                include __DIR__ .'/script1.php';
-                $js_code_block = ob_get_clean();
-                echo $js_code_block;
-                ?>
+                    jQuery(document).ready(function(){
+                        getAllDefaultValues();
+                    });
+
+                    function check_column_mappings(id){
+                        //console.log('check_column_mappings');
+                        var elements, selected, selectedValue, c; 
+
+                        selected = document.getElementById('csv_mapper_'+id);
+                        selectedValue = selected.options[selected.selectedIndex].value;
+
+                        //console.log('selected_value='+selectedValue);
+                        elements = document.getElementsByClassName('cf-mapper');
+                        for(var i=0; i<elements.length; i++){
+                            if(i!=id && selectedValue==elements[i].value){
+                                //console.log('IND:' + i + ' ID:' + elements[i].id + ' VALUE:' + elements[i].value);
+                                selected.selectedIndex = 'IGNORE';
+                                if(elements[i].value!='IGNORE'){
+                                    alert('Already Mapped!');
+                                }                       
+                            }
+                        }
+                    }            
+
+                    function getAllDefaultValues(){                
+                        jQuery('.mapper-table tbody > tr.mapper-coloumn').each(function(){
+                            //console.log('C:'+jQuery(this).attr('data-row-id'));
+                            var i = jQuery(this).attr('data-row-id');
+                            if(typeof i !== 'undefined'){ getDefaultValues(i); }
+                        });                
+                    }
+
+                    function getDefaultValues2(id){ 
+                        alert('Checkpoint');
+
+                    }
+
+                    function getDefaultValues(id){                
+
+                        var selected, selectedValue, dom, ty, hlp;
+                        selected = document.getElementById('csv_mapper_'+id);
+                        selectedValue = selected.options[selected.selectedIndex].value;
+
+                        jQuery('.helper-fields').hide().html(''); 
+                        //jQuery
+
+                        //console.log('id:' + id + ' v:'+ selectedValue);
+
+                        //hlp = document.getElementById('helper-fields-'+selectedValue+'-txt').innerHTML;
+                        //document.getElementById('helper-fields-'+id).innerHTML = hlp;
+
+                        dom = jQuery('#helper-fields-'+selectedValue+'-txt');                
+                        ty = dom.attr('data-type');
+
+                        if(ty == 'key_select' || ty == 'multi_select'){
+                            hlp = dom.html(); //console.log('hlp:' + hlp);
+
+                            jQuery('#unique-values-'+id).show();
+                            //jQuery('#unique-values-'+id).find('.selected-mapper-column-name').html( jQuery('#csv_mapper_'+id).val() );
+                            jQuery('#unique-values-'+id).find('.selected-mapper-column-name').html( jQuery('#csv_mapper_'+id+' option:selected').text() );
+                            jQuery('#helper-fields-'+id).html( hlp ); //.show();
+
+                            jQuery('.value-mapper-'+id).html('');
+
+                            jQuery('.value-mapper-'+id).append('<option value="">--select-one--</option>');
+
+                            //h_sel = jQuery('.value-mapper-'+id).attr('data-value');
+
+                            //default-value-options
+                            jQuery.each( dom.find('.default-value-options li'), function(i,v){
+                                var h_this, h_value, h_label, h_html, h_sel;
+                                h_this = jQuery(this);
+                                h_value = h_this.find('.hlp-value').html();
+                                h_label = h_this.find('.hlp-label').html();
+                                if(!h_label.length>0){ h_label = h_value.toUpperCase(); }
+                                //console.log('id:' +i+' value:'+h_value+' label:'+h_label);                        
+
+
+                                h_html = '<option value="'+h_value+'"'; 
+                                //if(h_sel==h_value){ h_html = h_html + ' selected="selected"'; }
+                                h_html = h_html + '>'+h_label+'</option>';
+
+                                jQuery('.value-mapper-'+id).append(h_html);
+                            });
+
+                            jQuery('.value-mapper-'+id).each(function(){
+                                h_sel = jQuery(this).attr('data-value');
+
+                                jQuery(this).find('option').each(function(){
+                                    if(h_sel==jQuery(this).attr('value')){
+                                        jQuery(this).attr('selected','selected');
+                                    }
+                                });
+
+                            });
+
+                        } else {
+                            jQuery('#unique-values-'+id).hide();
+                        }
+                    }
+
+                </script>
 
 
             </td>
@@ -913,14 +1003,16 @@ class DT_Import_Export_Tab_Contact {
     public function mapping_process( $filepath, $file_source = 'web', $file_assigned_to = '' ) {
         $people = [];
 
-        $delimeter = ','; $incl_headers = 'yes'; $multi_separator = ';';
+        $delimeter = ',';
+        $incl_headers = 'yes';
+        $multi_separator = ';';
 
         //open file
         ini_set( 'auto_detect_line_endings', true );
         $file_data = fopen( $filepath, "r" );
-        
+
         $data_rows = array();
-        while ( $row = fgetcsv( $file_data, 0, $delimeter,'"','"' ) ) {
+        while ( $row = fgetcsv( $file_data, 0, $delimeter, '"', '"' ) ) {
             $data_rows[] = $row;
         }
 
@@ -933,7 +1025,7 @@ class DT_Import_Export_Tab_Contact {
         if ( $incl_headers == "yes" && isset( $data_rows[0] ) ) {
             $csv_headers = $data_rows[0];
             $uploade_file_headers = $data_rows[0];
-            unset($data_rows[0]);
+            unset( $data_rows[0] );
 
         } else {
             //if csv headers are not provided
@@ -953,40 +1045,47 @@ class DT_Import_Export_Tab_Contact {
         foreach ( $csv_headers as $ci => $ch ) {
             $dest = $ch;
             $my_mapper_column = self::get_mapper( $ch );
-            if ( $my_mapper_column != null && strlen( $my_mapper_column )>0 ) { $csv_headers[$ci] = $my_mapper_column; }
+            if ( $my_mapper_column != null && strlen( $my_mapper_column ) > 0 ) {
+                $csv_headers[$ci] = $my_mapper_column;
+            }
         }
 
         //loop over array
         foreach ( $data_rows as $ri => $row) {
 
-            $fields = []; 
+            $fields = [];
 
             foreach ( $row as $index => $i) {
 
                 if ($file_assigned_to != '') { $fields["assigned_to"] = (int) $file_assigned_to; }
 
-                $fields["sources"] = [ "values" => array ( [ "value" => $file_source ] ) ];
+                $fields["sources"] = [ "values" => array( [ "value" => $file_source ] ) ];
 
                 //cleanup
                 $i = str_replace( "\"", "", $i );
 
                 if ( isset( $csv_headers[$index] ) ) {
                     $ch = $csv_headers[$index];
-                    $pos = strpos ( $i, $multi_separator );
+                    $pos = strpos( $i, $multi_separator );
 
-                    if ( $ch == 'title' ) { 
+                    if ( $ch == 'title' ) {
                         $fields['title'] = $i;
 
                     } else if ( $ch == 'cf_gender' ) {
 
                         $i = strtolower( $i );
                         $i = substr( $i, 0, 1 );
+
                         $gender = "not-set";
-                        if ( $i == "m"  ) {  $gender = "male";
-                        } else if ( $i == "f"  ) {  $gender = "female"; }
+
+                        if ( $i == "m" ) {
+                            $gender = "male";
+                        } else if ( $i == "f" ) {
+                            $gender = "female";
+                        }
                         $fields['cf_gender'] = $gender;
 
-                    } else if ( $ch == 'cf_notes' ) {      
+                    } else if ( $ch == 'cf_notes' ) {  
                     //} else if ( $ch == 'cf_notes' || $ch == 'cf_dob' || $ch == 'cf_join_date' ) {
                         $fields[$ch][] = $i;
 
@@ -996,12 +1095,12 @@ class DT_Import_Export_Tab_Contact {
                             $fields[$ch][] = [ "value" => $i ];
                         } else {
                             $multivalued = explode( $multi_separator, $i );
-                            foreach ( $multivalued as $mx ) { 
-                               //$fields[$ch][] = [ "value" => $mx ]; 
-                               $fields[$ch][] = [ "value" => trim( $mx ) ]; 
+                            foreach ( $multivalued as $mx ) {
+                               //$fields[$ch][] = [ "value" => $mx ];
+                               $fields[$ch][] = [ "value" => trim( $mx ) ];
                             }
                         }
-
+////////////////////////////////////////////////////////////////////////////////
                     }
                 }
             }
@@ -1028,26 +1127,24 @@ class DT_Import_Export_Tab_Contact {
             asort( $unique[$ci] ); //sort-the-value(s)
 
             $ch = $csv_headers[$ci];
-            //if ( isset($my_optional_fields['fields'][$ch]['type'])
-            //         &&$my_optional_fields['fields'][$ch]['type'] == 'multi_select' ) {
-                //$multi_separator = ';';
-                foreach ( $unique[$ci] as $ui => $uv ) {
 
-                    $pos = strpos( $uv, $multi_separator );
-                    if ( $pos === false ) {
+            foreach ( $unique[$ci] as $ui => $uv ) {
 
-                    } else {
-                        unset( $unique[$ci][$ui] );
-                        $multivalued = explode( $multi_separator, $uv );
-                        foreach ( $multivalued as $mxid => $mx ) { 
-                            $unique[$ci][] = trim( $mx );
-                        }
+                $pos = strpos( $uv, $multi_separator );
+                if ( $pos === false ) {
+
+                } else {
+                    unset( $unique[$ci][$ui] );
+                    $multivalued = explode( $multi_separator, $uv );
+                    foreach ( $multivalued as $mxid => $mx ) { 
+                        $unique[$ci][] = trim( $mx );
                     }
                 }
+            }
 
-                $unique[$ci] = array_unique( $unique[$ci] );
-                asort( $unique[$ci] ); //sort-the-value(s)
-            //}
+            $unique[$ci] = array_unique( $unique[$ci] );
+            asort( $unique[$ci] ); //sort-the-value(s)
+
         }
 
         return [
@@ -1064,7 +1161,7 @@ class DT_Import_Export_Tab_Contact {
     }
 
     public function preview_process( $csv_data = [], $csv_headers = [], $value_mapper_idata = [], $value_mapper_data = [], $file_assigned_to = '', $file_source = '', $delimeter = ',' ) {
-        return self::process_data( $csv_data, $csv_headers, $value_mapper_idata, $value_mapper_data, $file_assigned_to, $file_source, $delimeter);
+        return self::process_data( $csv_data, $csv_headers, $value_mapper_idata, $value_mapper_data, $file_assigned_to, $file_source, $delimeter );
     }
 
     public function preview( $filepath, $csv_data, $csv_headers, $delimeter = ',', $multiseperator = ';', $file_source = 'web', $file_assigned_to = '', $mapping_data, $value_mapper_idata, $value_mapper_data ) {
@@ -1140,12 +1237,78 @@ class DT_Import_Export_Tab_Contact {
     <div id="import-logs">&nbsp;</div>
     <div id="contact-links">&nbsp;</div>
 
-    <?php
-    ob_start();
-    include __DIR__ .'/script2.php';
-    $js_code_block = ob_get_clean();
-    echo $js_code_block;
-    ?>
+    <script type="text/javascript">
+    var pid = 1000;
+    function process( q, num, fn, done ) {
+        // remove a batch of items from the queue
+        var items = q.splice(0, num),
+            count = items.length;
+
+        // no more items?
+        if ( !count ) {
+            // exec done callback if specified
+            done && done();
+            // quit
+            return;
+        }
+
+        // loop over each item
+        for ( var i = 0; i < count; i++ ) {
+            // call callback, passing item and
+            // a "done" callback
+            fn(items[i], function() {
+                // when done, decrement counter and
+                // if counter is 0, process next batch
+                --count || process(q, num, fn, done);
+                pid++;
+            });                    
+
+        }
+    }
+
+    // a per-item action
+    function doEach( item, done ) {                
+        console.log('starting ...' ); //t('starting ...');
+        jQuery.ajax({
+            type: "POST",
+            data: item,
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            url: "<?php echo esc_url_raw( rest_url() ); ?>" + `dt/v1/contact/create?silent=true`,
+            beforeSend: function(xhr) {
+                xhr.setRequestHeader('X-WP-Nonce', "<?php /*@codingStandardsIgnoreLine*/ echo sanitize_text_field( wp_unslash( wp_create_nonce( 'wp_rest' ) ) ); ?>");
+            },
+            success: function(data) {
+                console.log('done'); t('PID#'+pid+' done');
+                //jQuery('#contact-links').append('<li><a href="'+data.permalink+'" target="_blank">Contact #'+data.post_id+'</a></li>');
+                done();
+            },
+            error: function(xhr) { // if error occured
+                alert("Error occured.please try again");
+                console.log("%o",xhr);
+                t('PID#'+pid+' Error occured.please try again');
+            }
+        });
+    }
+
+    // an all-done action
+    function doDone() {
+        console.log('all done!'); t('all done');
+        jQuery("#back").show();
+    }
+
+    function t(m){
+        var el, v;
+        el = document.getElementById("import-logs");
+        v = el.innerHTML;
+        v = v + '<br/>' + m;
+        el.innerHTML = v;                
+    }
+
+    function reset(){
+        document.getElementById("import-logs").value = '';
+    }
+    </script>
 
     <?php
     global $wpdb;
@@ -1482,7 +1645,7 @@ class DT_Import_Export_Tab_Contact {
                         //    $gender = "not-set";
                         //    if ($i == "m"  ) {  $gender = "male";
                         //    } else if ($i == "f"  ) {  $gender = "female"; }
-                        //    $fields[$ch] = $gender;         
+                        //    $fields[$ch] = $gender;       
 
                     } else if ( $type == 'key_select' ) {
 
@@ -1719,9 +1882,11 @@ class DT_Import_Export_Tab_Contact {
                 $html_heading .='<span class="cflabel">';
                 $ch = str_replace( $prefix, '', $heading );
                 if ( isset( $cfs[$ch], $cfs[$ch]['name'] ) ) {
-                    $html_heading .= esc_html( translate( $cfs[$ch]['name'], 'disciple_tools' ) );
+                    $channel_label = $cfs[$ch]['name'];
+                    $html_heading .= esc_html( translate( $channel_label, 'disciple_tools' ) );
                 } else if ( isset( $channels[$ch], $channels[$ch]['label'] ) ) {
-                    $html_heading .= esc_html( translate( $channels[$ch]['label'], 'disciple_tools' ) );
+                    $channel_label = $channels[$ch]['label'];
+                    $html_heading .= esc_html( translate( $channel_label, 'disciple_tools' ) );
                 }
                 $html_heading .= '</span>';
 
