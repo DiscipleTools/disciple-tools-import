@@ -208,7 +208,7 @@ class DT_Import_Export_Menu {
                             && $run ) {
 
                     if ( isset( $_POST["csv_mapper"], $_POST["csv_data"] ) ) {
-                        
+
                         $mapping_data = [];
                         if ( isset( $_POST['csv_mapper'] ) ) {
                             $mapping_data = sanitize_text_field( wp_unslash( $_POST['csv_mapper'] ) );
@@ -216,12 +216,12 @@ class DT_Import_Export_Menu {
 
                         $value_mapper_idata = [];
                         if ( isset( $_POST['csv_mapper'] ) ) {
-                            $value_mapper_idata = $_POST['VMD'];
+                            $value_mapper_idata = sanitize_text_field( wp_unslash( $_POST['VMD'] ) );
                         }
 
                         $value_mapper_data = [];
                         if ( isset( $_POST['csv_mapper'] ) ) {
-                            $value_mapper_data = $_POST['VM'];
+                            $value_mapper_data = sanitize_text_field( wp_unslash( $_POST['VM'] ) );
                         }
 
                         //$mapping_data = unserialize( base64_decode( $_POST["csv_mapper"] ) );
