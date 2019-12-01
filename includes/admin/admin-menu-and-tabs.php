@@ -189,12 +189,12 @@ class DT_Import_Export_Menu {
                         //if (!move_uploaded_file( $source, $destination ) ) {
                         //    throw new RuntimeException('Failed to move uploaded file.');
                         //}
-                        $file_source = NULL;
+                        $file_source = null;
                         if ( isset( $_POST['csv_source'] ) ) {
                             $file_source = sanitize_text_field( wp_unslash( $_POST['csv_source'] ) );
                         }
-                        
-                        $file_assigned_to = NULL; 
+
+                        $file_assigned_to = null;
                         if ( isset( $_POST['csv_assign'] ) ) {
                             $file_assigned_to = sanitize_text_field( wp_unslash( $_POST['csv_assign'] ) );
                         }
@@ -208,23 +208,60 @@ class DT_Import_Export_Menu {
                             && $run ) {
 
                     if ( isset( $_POST["csv_mapper"], $_POST["csv_data"] ) ) {
-                        $mapping_data = sanitize_text_field( wp_unslash( $_POST['csv_mapper'] ) );
+                        
+                        $mapping_data = [];
+                        if ( isset( $_POST['csv_mapper'] ) ) {
+                            $mapping_data = sanitize_text_field( wp_unslash( $_POST['csv_mapper'] ) );
+                        }
 
-                        $value_mapper_idata = isset( $_POST['VMD'] ) ? $_POST['VMD'] : [];
-                        $value_mapper_data = isset( $_POST['VM'] ) ? $_POST['VM'] : [];
+                        $value_mapper_idata = [];
+                        if ( isset( $_POST['csv_mapper'] ) ) {
+                            $value_mapper_idata = $_POST['VMD'];
+                        }
+
+                        $value_mapper_data = [];
+                        if ( isset( $_POST['csv_mapper'] ) ) {
+                            $value_mapper_data = $_POST['VM'];
+                        }
 
                         //$mapping_data = unserialize( base64_decode( $_POST["csv_mapper"] ) );
-                        $csv_data = unserialize( base64_decode( $_POST["csv_data"] ) );
-                        $csv_headers = unserialize( base64_decode( $_POST["csv_headers"] ) );
+                        $csv_data = [];
+                        if ( isset( $_POST['csv_data'] ) ) {
+                            $csv_data = unserialize( base64_decode( $_POST["csv_data"] ) );
+                        }
 
+                        $csv_headers = [];
+                        if ( isset( $_POST['csv_headers'] ) ) {
+                            $csv_headers = unserialize( base64_decode( $_POST["csv_headers"] ) );
+                        }
+
+                        $delimeter = ',';
+                        if ( isset( $_POST['csv_delimeter_temp'] ) ) {
+                            $delimeter = sanitize_text_field( wp_unslash( $_POST['csv_delimeter_temp'] ) );
+                        }
+
+                        $multiseperator = ';';
+                        if ( isset( $_POST['csv_multiseperator_temp'] ) ) {
+                            $multiseperator = sanitize_text_field( wp_unslash( $_POST['csv_multiseperator_temp'] ) );
+                        }
+
+                        $filepath= '';
+                        if ( isset( $_POST['csv_file_path'] ) ) {
+                            $filepath = sanitize_text_field( wp_unslash( $_POST['csv_file_path'] ) );
+                        }
+
+                        $file_source = '';
+                        if ( isset( $_POST['csv_source_temp'] ) ) {
+                            $file_source = sanitize_text_field( wp_unslash( $_POST['csv_source_temp'] ) );
+                        }
+
+                        $file_assigned_to = '';
+                        if ( isset( $_POST['csv_assign_temp'] ) ) {
+                            $file_assigned_to = sanitize_text_field( wp_unslash( $_POST['csv_assign_temp'] ) );
+                        }
 
                         //$temp_contacts_data
 
-                        $delimeter = sanitize_text_field( wp_unslash( $_POST['csv_delimeter_temp'] ) );
-                        $multiseperator = sanitize_text_field( wp_unslash( $_POST['csv_multiseperator_temp'] ) );
-                        $filepath = sanitize_text_field( wp_unslash( $_POST['csv_file_path'] ) );
-                        $file_source = sanitize_text_field( wp_unslash( $_POST['csv_source_temp'] ) );
-                        $file_assigned_to = sanitize_text_field( wp_unslash( $_POST['csv_assign_temp'] ) );
 
                         $object->preview(
                             $filepath,
