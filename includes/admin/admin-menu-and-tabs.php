@@ -215,12 +215,12 @@ class DT_Import_Export_Menu {
                         }
 
                         $value_mapper_idata = [];
-                        if ( isset( $_POST['csv_mapper'] ) ) {
+                        if ( isset( $_POST['VMD'] ) ) {
                             $value_mapper_idata = sanitize_text_field( wp_unslash( $_POST['VMD'] ) );
                         }
 
                         $value_mapper_data = [];
-                        if ( isset( $_POST['csv_mapper'] ) ) {
+                        if ( isset( $_POST['VM'] ) ) {
                             $value_mapper_data = sanitize_text_field( wp_unslash( $_POST['VM'] ) );
                         }
 
