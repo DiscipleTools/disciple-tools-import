@@ -206,8 +206,11 @@ class DT_Import_Export_Menu {
 
                         //$mapping_data = unserialize( base64_decode( $_POST["csv_mapper"] ) );
                         $csv_data = unserialize( base64_decode( $_POST["csv_data"] ) );
-                        $csv_headers = unserialize( base64_decode( $_POST["csv_headers"] ) );
 
+                        $csv_headers = '';
+                        if ( isset( $_POST["csv_headers"] ) ) {
+                            $csv_headers = unserialize( base64_decode( $_POST["csv_headers"] ) );
+                        }
 
                         //$temp_contacts_data
 
@@ -651,14 +654,14 @@ class DT_Import_Export_Tab_Contact {
         $data = $this->mapping_process( $filepath, $file_source, $file_assigned_to );
 
         $delimeter = $data['delimeter'];
-        $multi_separator = $data['multiSeperator'];
+        $multi_separator = $data['multi_seperator'];
 
-        $csv_headers = $data['csvHeaders'];
-        $con_headers_info = $data['conHeadersInfo'];
-        $uploaded_file_headers = $data['uploadeFileHeaders'];
+        $csv_headers = $data['csv_headers'];
+        $con_headers_info = $data['con_headers_info'];
+        $uploaded_file_headers = $data['uploade_file_headers'];
         $my_opt_fields = $data['my_opt_fields'];
 
-        $temp_contacts_data = $data['tempContactsData'];
+        $temp_contacts_data = $data['temp_contacts_data'];
         $unique = $data['unique'];
 
 
@@ -705,7 +708,7 @@ class DT_Import_Export_Tab_Contact {
                             $mapper_title = $con_headers_info[$ch]['name'];
                         } else if ( $ch == 'title') {
                             //$mapper_title = 'Contact Name';
-                            $mapper_title = ucwords($ch);
+                            $mapper_title = ucwords( $ch );
                         } else {
                             //$mapper_title = "<span style=\"color:red\" title=\"un-mapped data column\">{$ch}</span>";
                             $mapper_title = "<span class=\"unmapped\" title=\"un-mapped data column\">{$ch}</span>";
@@ -720,12 +723,13 @@ class DT_Import_Export_Tab_Contact {
 
 
                             <td class="dest-column">
-                                <?php echo self::get_dropdown_list_html( $ch, "csv_mapper_{$ci}", $con_headers_info, $ch, [
-                                    'name' => "csv_mapper[{$ci}]",
-                                    'class' => 'cf-mapper',
-                                    //'onchange' => "check_column_mappings({$ci})"
-                                    'onchange' => "getDefaultValues({$ci})"
-                                    ], true ) ?>
+                                <?php echo self::get_dropdown_list_html( $ch, "csv_mapper_{$ci}", $con_headers_info, $ch, 
+                                        [
+                                            'name' => "csv_mapper[{$ci}]",
+                                            'class' => 'cf-mapper',
+                                            //'onchange' => "check_column_mappings({$ci})"
+                                            'onchange' => "getDefaultValues({$ci})"
+                                        ], true ) ?>
                                 <?php /** <div id="helper-fields-<?php echo $ci ?>" class="helper-fields"<?php if ( $col_data_type!='key_select'): ?> style="display:none"<?php endif; ?>></div> */ ?>
                                 <div id="helper-fields-<?php echo $ci ?>" class="helper-fields" style="display:none"></div>
 
@@ -1017,7 +1021,7 @@ class DT_Import_Export_Tab_Contact {
 
         $my_opt_fields = self::get_all_default_values();
         $con_headers_info = self::get_contact_header_info();
-        $con_headers_info_keys = array_keys($con_headers_info);
+        $con_headers_info_keys = array_keys( $con_headers_info );
 
         if ( $incl_headers == "yes" && isset( $data_rows[0] ) ) {
             $csv_headers = $data_rows[0];
@@ -1143,14 +1147,14 @@ class DT_Import_Export_Tab_Contact {
 
         return [
             'people' => $people,
-            'tempContactsData' => $temp_contacts_data,
-            'uploadeFileHeaders' => $uploaded_file_headers,
+            'temp_contacts_data' => $temp_contacts_data,
+            'uploade_file_headers' => $uploaded_file_headers,
             'my_opt_fields' => $my_opt_fields,
-            'csvHeaders' => $csv_headers,
-            'conHeadersInfo' => $con_headers_info,
+            'csv_headers' => $csv_headers,
+            'con_headers_info' => $con_headers_info,
             'unique' => $unique,
             'delimeter' => $delimeter,
-            'multiSeperator' => $multi_separator
+            'multi_seperator' => $multi_separator
         ];
     }
 
@@ -1160,7 +1164,11 @@ class DT_Import_Export_Tab_Contact {
 
     public function preview( $filepath, $csv_data, $csv_headers, $delimeter = ',', $multiseperator = ';', $file_source = 'web', $file_assigned_to = '', $mapping_data, $value_mapperi_data, $value_mapper_data ) {
         $con_headers_info = self::get_contact_header_info();
-        foreach ( (array) $mapping_data as $my_id => $my_data ){ if ( $my_data == 'IGNORE' || $my_data == 'NONE'){ unset( $mapping_data[$my_id] ); } }
+        foreach ( (array) $mapping_data as $my_id => $my_data ){
+            if ( $my_data == 'IGNORE' || $my_data == 'NONE'){
+                unset( $mapping_data[$my_id] );
+            }
+        }
 
         $people = $this->preview_process( $csv_data, $mapping_data, $value_mapperi_data, $value_mapper_data, $file_assigned_to, $file_source, $delimeter, $multiseperator, $filepath);
         $html = self::display_data( $people );
@@ -1174,8 +1182,8 @@ class DT_Import_Export_Tab_Contact {
             <tbody>
             <tr>
                 <td>
-<fieldset id="debug-data-<?php echo __LINE__ ?>" class="debug-data" style="display:none"><legend onclick="jQuery('#debug-data-<?php echo __LINE__ ?> section').toggle()">CSV DATA</legend><section><pre><?php print_r($csv_data) ?></pre></section></fieldset>
-<fieldset id="debug-data-<?php echo __LINE__ ?>" class="debug-data" style="display:none"><legend onclick="jQuery('#debug-data-<?php echo __LINE__ ?> section').toggle()">PPL</legend><section><pre><?php print_r($people) ?></pre></section></fieldset>
+<fieldset id="debug-data-<?php echo __LINE__ ?>" class="debug-data" style="display:none"><legend onclick="jQuery('#debug-data-<?php echo __LINE__ ?> section').toggle()">CSV DATA</legend><section><pre><?php print_r( $csv_data ) ?></pre></section></fieldset>
+<fieldset id="debug-data-<?php echo __LINE__ ?>" class="debug-data" style="display:none"><legend onclick="jQuery('#debug-data-<?php echo __LINE__ ?> section').toggle()">PPL</legend><section><pre><?php print_r( $people ) ?></pre></section></fieldset>
 
 
 <?php echo $html; ?> 
@@ -1211,7 +1219,7 @@ class DT_Import_Export_Tab_Contact {
 
     public function insert_contacts( $contacts ){
 
-        set_time_limit(0);
+        set_time_limit( 0 );
         global $wpdb;
 
         ?>
