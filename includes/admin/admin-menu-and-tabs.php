@@ -656,7 +656,7 @@ class DT_Import_Export_Tab_Contact {
         $csv_headers = $data['csvHeaders'];
         $con_headers_info = $data['conHeadersInfo'];
         $uploaded_file_headers = $data['uploadeFileHeaders'];
-        $_opt_fields = $data['_opt_fields'];
+        $my_opt_fields = $data['my_opt_fields'];
 
         $temp_contacts_data = $data['tempContactsData'];
         $unique = $data['unique'];
@@ -698,7 +698,7 @@ class DT_Import_Export_Tab_Contact {
                     //correct csv headers
                     foreach ( $csv_headers as $ci => $ch ):
 
-                        $col_data_type = isset( $_opt_fields['fields'][$ch]['type'] ) ? $_opt_fields['fields'][$ch]['type'] : null;
+                        $col_data_type = isset( $my_opt_fields['fields'][$ch]['type'] ) ? $my_opt_fields['fields'][$ch]['type'] : null;
 
                             $mapperTitle = '';
                             if ( isset( $con_headers_info[$ch]['name'] ) ) {
@@ -774,8 +774,8 @@ class DT_Import_Export_Tab_Contact {
                                                    data-value="<?php echo $v ?>">
                                            <option>--Not Selected--</option>
                                            <?php /**/ ?>
-                                           <?php if ( isset( $_opt_fields['fields'][$ch]['default'] ) ): ?>
-                                           <?php foreach ( $_opt_fields['fields'][$ch]['default'] as $di => $dt ): ?>
+                                           <?php if ( isset( $my_opt_fields['fields'][$ch]['default'] ) ): ?>
+                                           <?php foreach ( $my_opt_fields['fields'][$ch]['default'] as $di => $dt ): ?>
                                                <option value="<?php echo $di ?>"<?php if ( $di == $v ): ?> selected="selected"<?php endif; ?>><?php echo $dt['label'] ?></option>
                                            <?php endforeach; ?>
                                            <?php endif; ?> 
@@ -843,7 +843,7 @@ class DT_Import_Export_Tab_Contact {
                     </div>
 
                     <div class="helper-fields-txt" style="display:none">
-                    <?php foreach ( $_opt_fields['fields'] as $_fi => $_flds ): ?>
+                    <?php foreach ( $my_opt_fields['fields'] as $_fi => $_flds ): ?>
                     <div id="helper-fields-<?php echo $_fi ?>-txt" data-type="<?php echo $_flds['type'] ?>">
 
                         <span>Field: <strong><?php echo $_fi ?></strong></span><br/>
@@ -873,13 +873,110 @@ class DT_Import_Export_Tab_Contact {
 
                     </form>
 
-                    <?php
+                    <script type="text/javascript">
 
-                    ob_start();
-                    include __DIR__ .'/script1.php';
-                    $jsCodeBlock = ob_get_clean();
-                    echo $jsCodeBlock;
-                    ?>
+                        jQuery(document).ready(function(){
+                            getAllDefaultValues();
+                        });
+
+                        function check_column_mappings(id){
+                            //console.log('check_column_mappings');
+                            var elements, selected, selectedValue, c; 
+
+                            selected = document.getElementById('csv_mapper_'+id);
+                            selectedValue = selected.options[selected.selectedIndex].value;
+
+                            //console.log('selected_value='+selectedValue);
+                            elements = document.getElementsByClassName('cf-mapper');
+                            for(var i=0; i<elements.length; i++){
+                                if(i!=id && selectedValue==elements[i].value){
+                                    //console.log('IND:' + i + ' ID:' + elements[i].id + ' VALUE:' + elements[i].value);
+                                    selected.selectedIndex = 'IGNORE';
+                                    if(elements[i].value!='IGNORE'){
+                                        alert('Already Mapped!');
+                                    }                       
+                                }
+                            }
+                        }            
+
+                        function getAllDefaultValues(){                
+                            jQuery('.mapper-table tbody > tr.mapper-coloumn').each(function(){
+                                //console.log('C:'+jQuery(this).attr('data-row-id'));
+                                var i = jQuery(this).attr('data-row-id');
+                                if(typeof i !== 'undefined'){ getDefaultValues(i); }
+                            });                
+                        }
+
+                        function getDefaultValues2(id){ 
+                            alert('Checkpoint');
+
+                        }
+
+                        function getDefaultValues(id){                
+
+                            var selected, selectedValue, dom, ty, hlp;
+                            selected = document.getElementById('csv_mapper_'+id);
+                            selectedValue = selected.options[selected.selectedIndex].value;
+
+                            jQuery('.helper-fields').hide().html(''); 
+                            //jQuery
+
+                            //console.log('id:' + id + ' v:'+ selectedValue);
+
+                            //hlp = document.getElementById('helper-fields-'+selectedValue+'-txt').innerHTML;
+                            //document.getElementById('helper-fields-'+id).innerHTML = hlp;
+
+                            dom = jQuery('#helper-fields-'+selectedValue+'-txt');                
+                            ty = dom.attr('data-type');
+
+                            if(ty == 'key_select' || ty == 'multi_select'){
+                                hlp = dom.html(); //console.log('hlp:' + hlp);
+
+                                jQuery('#unique-values-'+id).show();
+                                //jQuery('#unique-values-'+id).find('.selected-mapper-column-name').html( jQuery('#csv_mapper_'+id).val() );
+                                jQuery('#unique-values-'+id).find('.selected-mapper-column-name').html( jQuery('#csv_mapper_'+id+' option:selected').text() );
+                                jQuery('#helper-fields-'+id).html( hlp ); //.show();
+
+                                jQuery('.value-mapper-'+id).html('');
+
+                                jQuery('.value-mapper-'+id).append('<option value="">--select-one--</option>');
+
+                                //h_sel = jQuery('.value-mapper-'+id).attr('data-value');
+
+                                //default-value-options
+                                jQuery.each( dom.find('.default-value-options li'), function(i,v){
+                                    var h_this, h_value, h_label, h_html, h_sel;
+                                    h_this = jQuery(this);
+                                    h_value = h_this.find('.hlp-value').html();
+                                    h_label = h_this.find('.hlp-label').html();
+                                    if(!h_label.length>0){ h_label = h_value.toUpperCase(); }
+                                    //console.log('id:' +i+' value:'+h_value+' label:'+h_label);                        
+
+
+                                    h_html = '<option value="'+h_value+'"'; 
+                                    //if(h_sel==h_value){ h_html = h_html + ' selected="selected"'; }
+                                    h_html = h_html + '>'+h_label+'</option>';
+
+                                    jQuery('.value-mapper-'+id).append(h_html);
+                                });
+
+                                jQuery('.value-mapper-'+id).each(function(){
+                                    h_sel = jQuery(this).attr('data-value');
+
+                                    jQuery(this).find('option').each(function(){
+                                        if(h_sel==jQuery(this).attr('value')){
+                                            jQuery(this).attr('selected','selected');
+                                        }
+                                    });
+
+                                });
+
+                            } else {
+                                jQuery('#unique-values-'+id).hide();
+                            }
+                        }
+
+                    </script>
 
 
                 </td>
@@ -918,7 +1015,7 @@ class DT_Import_Export_Tab_Contact {
 
         $uploaded_file_headers = [];
         
-        $_opt_fields = self::get_all_default_values();
+        $my_opt_fields = self::get_all_default_values();
         $con_headers_info = self::get_contact_header_info();
         $con_headers_info_keys = array_keys($con_headers_info);
 
@@ -934,7 +1031,7 @@ class DT_Import_Export_Tab_Contact {
 
         $temp_contacts_data = $data_rows;
 
-//echo '<hr/>OPT_FLDS:<br/><pre>'; print_r($_opt_fields); echo '</pre>';
+//echo '<hr/>OPT_FLDS:<br/><pre>'; print_r($my_opt_fields); echo '</pre>';
 //echo '<hr/>HEADER:<br/><pre>'; print_r($con_headers_info); echo '</pre>';
 //echo '<hr/>KEYS:<br/><pre>'; print_r($con_headers_info_keys); echo '</pre>';
 //echo '<hr/>DATA_ROWS:<br/><pre>'; print_r($data_rows); echo '</pre>';
@@ -1022,8 +1119,8 @@ class DT_Import_Export_Tab_Contact {
             asort( $unique[$ci] ); //sort-the-value(s)
 
             $ch = $csv_headers[$ci];  
-            //if ( isset( $_opt_fields['fields'][$ch]['type'] )
-            //         && $_opt_fields['fields'][$ch]['type'] == 'multi_select' ) {
+            //if ( isset( $my_opt_fields['fields'][$ch]['type'] )
+            //         && $my_opt_fields['fields'][$ch]['type'] == 'multi_select' ) {
                 //$multi_separator = ';';
                 foreach ( $unique[$ci] as $ui => $uv ) {
 
@@ -1049,7 +1146,7 @@ class DT_Import_Export_Tab_Contact {
             'people' => $people, 
             'tempContactsData' => $temp_contacts_data,
             'uploadeFileHeaders' => $uploaded_file_headers,
-            '_opt_fields' => $_opt_fields,
+            'my_opt_fields' => $my_opt_fields,
             'csvHeaders' => $csv_headers,
             'conHeadersInfo' => $con_headers_info,
             'unique' => $unique,
@@ -1113,7 +1210,7 @@ class DT_Import_Export_Tab_Contact {
         <?php 
     }
 
-    public function insert_contacts($contacts){
+    public function insert_contacts( $contacts ){
 
         set_time_limit(0);
         global $wpdb;
@@ -1130,12 +1227,78 @@ class DT_Import_Export_Tab_Contact {
                     <div id="import-logs">&nbsp;</div>
                     <div id="contact-links">&nbsp;</div>
 
-                    <?php 
-                    ob_start();
-                    include __DIR__ .'/script2.php';
-                    $jsCodeBlock = ob_get_clean();
-                    echo $jsCodeBlock;
-                    ?>
+                    <script type="text/javascript">
+                    var pid = 1000;
+                    function process( q, num, fn, done ) {
+                        // remove a batch of items from the queue
+                        var items = q.splice(0, num),
+                            count = items.length;
+
+                        // no more items?
+                        if ( !count ) {
+                            // exec done callback if specified
+                            done && done();
+                            // quit
+                            return;
+                        }
+
+                        // loop over each item
+                        for ( var i = 0; i < count; i++ ) {
+                            // call callback, passing item and
+                            // a "done" callback
+                            fn(items[i], function() {
+                                // when done, decrement counter and
+                                // if counter is 0, process next batch
+                                --count || process(q, num, fn, done);
+                                pid++;
+                            });                    
+
+                        }
+                    }
+
+                    // a per-item action
+                    function doEach( item, done ) {                
+                        console.log('starting ...' ); //t('starting ...');
+                        jQuery.ajax({
+                            type: "POST",
+                            data: item,
+                            contentType: "application/json; charset=utf-8",
+                            dataType: "json",
+                            url: "<?php echo esc_url_raw( rest_url() ); ?>" + `dt/v1/contact/create?silent=true`,
+                            beforeSend: function(xhr) {
+                                xhr.setRequestHeader('X-WP-Nonce', "<?php /*@codingStandardsIgnoreLine*/ echo sanitize_text_field( wp_unslash( wp_create_nonce( 'wp_rest' ) ) ); ?>");
+                            },
+                            success: function(data) {
+                                console.log('done'); t('PID#'+pid+' done');
+                                //jQuery('#contact-links').append('<li><a href="'+data.permalink+'" target="_blank">Contact #'+data.post_id+'</a></li>');
+                                done();
+                            },
+                            error: function(xhr) { // if error occured
+                                alert("Error occured.please try again");
+                                console.log("%o",xhr);
+                                t('PID#'+pid+' Error occured.please try again');
+                            }
+                        });
+                    }
+
+                    // an all-done action
+                    function doDone() {
+                        console.log('all done!'); t('all done');
+                        jQuery("#back").show();
+                    }
+
+                    function t(m){
+                        var el, v;
+                        el = document.getElementById("import-logs");
+                        v = el.innerHTML;
+                        v = v + '<br/>' + m;
+                        el.innerHTML = v;                
+                    }
+
+                    function reset(){
+                        document.getElementById("import-logs").value = '';
+                    }
+                    </script>
 
                     <?php
                     global $wpdb;
@@ -1172,7 +1335,7 @@ class DT_Import_Export_Tab_Contact {
         <?php
     }
 
-    private function _get_file_headers($filepath){
+    private function _get_file_headers( $filepath ){
 
     }
 
@@ -1206,7 +1369,11 @@ class DT_Import_Export_Tab_Contact {
 
         foreach ( $channels as $label => $channel ) {
             $label = "contact_{$label}";  // @NOTE: prefix "contact_"
-            $data[$label] = ['name' => $channel['label'], 'type' => 'standard', 'defaults' => null];
+            $data[$label] = [
+                'name' => $channel['label'],
+                'type' => 'standard',
+                'defaults' => null
+            ];
         }
 
         $fields = Disciple_Tools_Contacts::get_contact_fields();
@@ -1239,7 +1406,7 @@ class DT_Import_Export_Tab_Contact {
 
         // @NOTE: prefix "contact_"
         $prefix = 'contact_';
-        
+
         if ( array_search( $src, self::$contact_name_headings ) > 0 ) {
             $column_name = 'title';
         } else if ( array_search( $src, self::$contact_phone_headings ) > 0 ) {
@@ -1291,16 +1458,16 @@ class DT_Import_Export_Tab_Contact {
         return $column_name;
     }
 
-    public static function get_dropdown_list_html( $field, $id = 'selector', $data = [], $selected = null, $htmlOptions = [], $allowAllTypes = true ) {
+    public static function get_dropdown_list_html( $field, $id = 'selector', $data = [], $selected = null, $html_options = [], $allow_all_types = true ) {
 
-        if ( isset( $htmlOptions['id'] ) ) { unset( $htmlOptions['id'] ); }
+        if ( isset( $html_options['id'] ) ) { unset( $html_options['id'] ); }
 
         $f = true;
 
         $html = "<select id=\"{$id}\"";
         $html .= " data=\"".$field."\"";
 
-        foreach ( $htmlOptions as $opt => $values ) {
+        foreach ( $html_options as $opt => $values ) {
             $html .= " {$opt}=\"{$values}\"";
         }
 
@@ -1392,18 +1559,18 @@ class DT_Import_Export_Tab_Contact {
 
         //handle N columns to ONE column mapping
         //phone(primary)/phone(mobile) -> phone
-        $mids = []; $delCsvHeaders = [];
+        $mids = []; $del_csv_headers = [];
         foreach ( $chi as $mch => $count ) {
             if ( $count > 1 ) {
                 $mids[$mch]['count'] = $count;
                 foreach ( $csv_headers as $ci => $ch ) {
-                    if ( $mch == $ch ) { 
+                    if ( $mch == $ch ) {
                         $mids[$mch]['columIds'][] = $ci;
                     }
                 }
                 $mids[$mch]['primaryCol'] = $mids[$mch]['columIds'][0];
                 unset( $mids[$mch]['columIds'][0] ); //array_pop
-             }
+            }
         }
 
         foreach ( $data_rows as $data_row_id => $data_row ) {
@@ -1436,8 +1603,8 @@ class DT_Import_Export_Tab_Contact {
 
         foreach ( $data_rows as $ri => $row ) {
             $fields = [];
-            foreach ($row as $index => $i) { 
-                
+            foreach ($row as $index => $i) {
+
                 if ( $assign != '') { $fields["assigned_to"] = (int) $assign; }
                 $fields["sources"] = [ "values" => array( [ "value" => $source ] ) ];
 
@@ -1447,7 +1614,7 @@ class DT_Import_Export_Tab_Contact {
                 if ( isset( $csv_headers[$index] ) ) {
 
                     $ch = $csv_headers[$index];
-                    
+
                     $type = isset( $cfs[$ch]['type'] ) ? $cfs[$ch]['type'] : null;
                     if ( $type == null ) { $type = isset( $channels[$ch] ) ? $channels[$ch] : null; }
 
@@ -1463,7 +1630,7 @@ class DT_Import_Export_Tab_Contact {
                         //    $gender = "not-set";
                         //    if ($i == "m" ){ $gender = "male";
                         //    } else if ($i == "f" ){ $gender = "female"; }
-                        //    $fields[$ch] = $gender;           
+                        //    $fields[$ch] = $gender;          
 
                     } else if ( $type == 'key_select' ) {
 
@@ -1474,7 +1641,7 @@ class DT_Import_Export_Tab_Contact {
                                 }
                             }
                         }
-
+////////////////////////////////////////////////////////////////////////////////
                     } else if ( $type == 'multi_select' ) {
 
                         $multivalued = explode( $multi_separator, $i );
@@ -1565,7 +1732,11 @@ class DT_Import_Export_Tab_Contact {
             //if ( isset( $headings['title'] ) ) { unset($headings['title'] ); }
         }
 
-        echo '<fieldset class="debug-data" style="display:none"> <legend>Heading</legend> <pre>'; print_r( $headings ); echo '</pre></fieldset>';
+        echo '<fieldset class="debug-data" style="display:none"> <legend>Heading</legend>';
+        echo '<pre>';
+        print_r( $headings );
+        echo '</pre>';
+        echo '</fieldset>';
 
         $prefix = 'contact_';
         $channels = Disciple_Tools_Contact_Post_Type::instance()->get_channels_list();
@@ -1638,7 +1809,7 @@ class DT_Import_Export_Tab_Contact {
 ////////////////////////////////////////////////////////////////////////////////
                     } else if ( isset( $person_data[$ch] ) ) {
                         $values = [];
-                        if ( isset( $person_data[$ch]["values"]) && is_array( $person_data[$ch]["values"] ) ) {
+                        if ( isset( $person_data[$ch]["values"] ) && is_array( $person_data[$ch]["values"] ) ) {
                             foreach ( $person_data[$ch]["values"] as $mi => $v ) {
                                 if ( isset( $v["value"] ) ) { $values[] = esc_html( $v["value"] ); }
                             }
@@ -1724,7 +1895,9 @@ class DT_Import_Export_Tab_Contact {
         $html = '<table class="data-table">'.$html_heading.$html_body.'</table>';
 
 
-        $error_html = ''; $total_data_rows = count( (array) $people );
+        $error_html = '';
+        $total_data_rows = count( (array) $people );
+
         foreach ( $error_summary as $ch => $err ){
             $column_type = null;
             $channel_field = str_replace( $prefix, '', $ch );
@@ -1751,7 +1924,7 @@ class DT_Import_Export_Tab_Contact {
                 $error_html .= ' needs to contain valid format';
             }
 
-            $error_html .= '</div>'; 
+            $error_html .= '</div>';
             //TODO Column Email needs to contain valid email address format
             //$error_html .= '<div style="clear:both;"></div>';
 
