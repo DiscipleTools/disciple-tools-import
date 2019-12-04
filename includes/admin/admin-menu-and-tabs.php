@@ -1001,25 +1001,25 @@ class DT_Import_Export_Tab_Contact {
 
         $people = [];
         $delimeter = ',';
-        $inclHeaders = 'yes';
+        $incl_headers = 'yes';
         $multi_separator = ';';
 
         //open file
         ini_set( 'auto_detect_line_endings', true );
         $file_data = fopen( $filepath, "r" );
-        
+
         $data_rows = array();
-        while ( $row = fgetcsv( $file_data, 0, $delimeter,'"','"' ) ) {
+        while ( $row = fgetcsv( $file_data, 0, $delimeter, '"', '"' ) ) {
             $data_rows[] = $row;
         }
 
         $uploaded_file_headers = [];
-        
+
         $my_opt_fields = self::get_all_default_values();
         $con_headers_info = self::get_contact_header_info();
         $con_headers_info_keys = array_keys($con_headers_info);
 
-        if ( $inclHeaders == "yes" && isset( $data_rows[0] ) ) {
+        if ( $incl_headers == "yes" && isset( $data_rows[0] ) ) {
             $csv_headers = $data_rows[0];
             $uploaded_file_headers = $data_rows[0];
             unset( $data_rows[0] );
@@ -1047,7 +1047,7 @@ class DT_Import_Export_Tab_Contact {
         //loop over array
         foreach ( $data_rows as $ri => $row ) {
 
-            $fields = []; 
+            $fields = [];
 
             foreach ( $row as $index => $i ) {
 
@@ -1057,7 +1057,7 @@ class DT_Import_Export_Tab_Contact {
 
                 //cleanup
                 $i = str_replace( "\"", "", $i );
-               
+
                 if ( isset( $csv_headers[$index] ) ) {
                     $ch = $csv_headers[$index];
                     $pos = strpos( $i, $multi_separator );
@@ -1079,13 +1079,13 @@ class DT_Import_Export_Tab_Contact {
                         $fields[$ch][] = $i;
 
                     } else {
-                        
+
                         if ( $pos === false ) {
                             $fields[$ch][] = [ "value" => $i ];
                         } else {
                             $multivalued = explode( $multi_separator, $i );
                             foreach ( $multivalued as $mx ) {
-                                //$fields[$ch][] = [ "value" => $mx ]; 
+                                //$fields[$ch][] = [ "value" => $mx ];
                                 $fields[$ch][] = [ "value" => trim( $mx ) ];
                             }
                         }
@@ -1142,7 +1142,7 @@ class DT_Import_Export_Tab_Contact {
 
 
         return [
-            'people' => $people, 
+            'people' => $people,
             'tempContactsData' => $temp_contacts_data,
             'uploadeFileHeaders' => $uploaded_file_headers,
             'my_opt_fields' => $my_opt_fields,
@@ -1206,7 +1206,7 @@ class DT_Import_Export_Tab_Contact {
         </table>
         <br>
         <!-- End Box -->
-        <?php 
+        <?php
     }
 
     public function insert_contacts( $contacts ){
@@ -1629,7 +1629,7 @@ class DT_Import_Export_Tab_Contact {
                         //    $gender = "not-set";
                         //    if ($i == "m" ){ $gender = "male";
                         //    } else if ($i == "f" ){ $gender = "female"; }
-                        //    $fields[$ch] = $gender;          
+                        //    $fields[$ch] = $gender;
 
                     } else if ( $type == 'key_select' ) {
 
