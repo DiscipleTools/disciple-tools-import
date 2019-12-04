@@ -221,9 +221,9 @@ class DT_Import_Export_Menu {
 
                     }
 
-                } else if ( isset( $_POST['csv_correct_nonce'] ) 
-                            && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['csv_correct_nonce'] ) ), 'csv_correct' ) 
-                            && $run ) { 
+                } else if ( isset( $_POST['csv_correct_nonce'] )
+                            && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['csv_correct_nonce'] ) ), 'csv_correct' )
+                            && $run ) {
 
                     //@codingStandardsIgnoreLine
                     if ( isset( $_POST["csv_contacts"] ) ) {
@@ -242,7 +242,7 @@ class DT_Import_Export_Menu {
                 $object->content();
  ////////////////////////////////////////////////////////////////////////////////
             } else {
-  
+
             }
 ////////////////////////////////////////////////////////////////////////////////
             ?>
@@ -454,9 +454,9 @@ class DT_Import_Export_Tab_Contact {
                                 'comment',
                                 'comments'
         ];
-    
+
     }
-    
+
     public function content() {
         ?>
         <div class="wrap">
@@ -626,7 +626,7 @@ class DT_Import_Export_Tab_Contact {
         <!-- Box -->
         <table class="widefat striped">
             <thead>
-            <th>ERROR <?php echo date('Y-m-d H:i:s') ?></th>
+            <th>ERROR <?php echo date( 'Y-m-d H:i:s' ) ?></th>
             </thead>
             <tbody>
             <tr>
@@ -700,22 +700,22 @@ class DT_Import_Export_Tab_Contact {
 
                         $col_data_type = isset( $my_opt_fields['fields'][$ch]['type'] ) ? $my_opt_fields['fields'][$ch]['type'] : null;
 
-                            $mapperTitle = '';
-                            if ( isset( $con_headers_info[$ch]['name'] ) ) {
-                                $mapperTitle = $con_headers_info[$ch]['name'];
-                            } else if ( $ch == 'title') {
-                                //$mapperTitle = 'Contact Name';
-                                $mapperTitle = ucwords($ch);
-                            } else {
-                                //$mapperTitle = "<span style=\"color:red\" title=\"un-mapped data column\">{$ch}</span>";
-                                $mapperTitle = "<span class=\"unmapped\" title=\"un-mapped data column\">{$ch}</span>";
-                            }
+                        $mapper_title = '';
+                        if ( isset( $con_headers_info[$ch]['name'] ) ) {
+                            $mapper_title = $con_headers_info[$ch]['name'];
+                        } else if ( $ch == 'title') {
+                            //$mapper_title = 'Contact Name';
+                            $mapper_title = ucwords($ch);
+                        } else {
+                            //$mapper_title = "<span style=\"color:red\" title=\"un-mapped data column\">{$ch}</span>";
+                            $mapper_title = "<span class=\"unmapped\" title=\"un-mapped data column\">{$ch}</span>";
+                        }
 
                         ?>
                         <tr class="mapper-coloumn" data-row-id="<?php echo $ci ?>">
 
                             <th data-field="<?php echo $ch ?>" class="src-column">
-                            <?php //= $mapperTitle ?><?php echo $uploaded_file_headers[$ci] ?>
+                            <?php //= $mapper_title ?><?php echo $uploaded_file_headers[$ci] ?>
                             </th>
 
 
@@ -743,7 +743,7 @@ class DT_Import_Export_Tab_Contact {
                                 <div class="mapper-helper-text">
                                     <span class="mapper-helper-title">Map import values to DT values</span><br/>
                                     <span class="mapper-helper-description">
-                                        <span class="selected-mapper-column-name"><?php echo $ch ?><?php //echo $mapperTitle ?></span>
+                                        <span class="selected-mapper-column-name"><?php echo $ch ?><?php //echo $mapper_title ?></span>
                                         only accepts specific values (as a Selection). 
                                         Please map following unique values from your data to existing values in DT.
                                         You can add new values into the DT system if you want by first ...</span>
@@ -1036,7 +1036,6 @@ class DT_Import_Export_Tab_Contact {
 //echo '<hr/>KEYS:<br/><pre>'; print_r($con_headers_info_keys); echo '</pre>';
 //echo '<hr/>DATA_ROWS:<br/><pre>'; print_r($data_rows); echo '</pre>';
 //echo '<hr/>TEMP<br/><pre>'; print_r($temp_contacts_data); echo '</pre>';
-        
 /******************************************************************************/
         //correct csv headers
         foreach ( $csv_headers as $ci => $ch ) {
@@ -1086,8 +1085,8 @@ class DT_Import_Export_Tab_Contact {
                         } else {
                             $multivalued = explode( $multi_separator, $i );
                             foreach ( $multivalued as $mx ) {
-                               //$fields[$ch][] = [ "value" => $mx ]; 
-                               $fields[$ch][] = [ "value" => trim($mx) ];
+                                //$fields[$ch][] = [ "value" => $mx ]; 
+                                $fields[$ch][] = [ "value" => trim( $mx ) ];
                             }
                         }
 
@@ -1118,7 +1117,7 @@ class DT_Import_Export_Tab_Contact {
 
             asort( $unique[$ci] ); //sort-the-value(s)
 
-            $ch = $csv_headers[$ci];  
+            $ch = $csv_headers[$ci];
             //if ( isset( $my_opt_fields['fields'][$ch]['type'] )
             //         && $my_opt_fields['fields'][$ch]['type'] == 'multi_select' ) {
                 //$multi_separator = ';';
@@ -1155,7 +1154,7 @@ class DT_Import_Export_Tab_Contact {
         ];
     }
 
-    public function preview_process( $csv_data = [], $csv_headers = [], $value_mapperi_data = [], $value_mapper_data = [], $file_assigned_to = '', $file_source = '', $delimeter = ',' ){
+    public function preview_process( $csv_data = [], $csv_headers = [], $value_mapperi_data = [], $value_mapper_data = [], $file_assigned_to = '', $file_source = '', $delimeter = ',' ) {
             return self::process_data( $csv_data, $csv_headers, $value_mapperi_data, $value_mapper_data, $file_assigned_to, $file_source, $delimeter );
     }
 
@@ -1697,7 +1696,7 @@ class DT_Import_Export_Tab_Contact {
                         } else {
                             $multivalued = explode( $multi_separator, $i );
                             foreach ( $multivalued as $mx ) {
-                               //$fields[$ch][] = [ "value" => trim($mx) ];
+                               //$fields[$ch][] = [ "value" => trim( $mx ) ];
                                 $fields[$ch]["values"][] = [ "value" => trim( $mx ) ];
                             }
                         }
