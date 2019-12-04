@@ -721,8 +721,8 @@ class DT_Import_Export_Tab_Contact {
 
                             <td class="dest-column">
                                 <?php echo self::get_dropdown_list_html( $ch, "csv_mapper_{$ci}", $con_headers_info, $ch, [
-                                    'name' => "csv_mapper[{$ci}]", 
-                                    'class' => 'cf-mapper', 
+                                    'name' => "csv_mapper[{$ci}]",
+                                    'class' => 'cf-mapper',
                                     //'onchange' => "check_column_mappings({$ci})"
                                     'onchange' => "getDefaultValues({$ci})"
                                     ], true ) ?>
@@ -843,19 +843,19 @@ class DT_Import_Export_Tab_Contact {
                     </div>
 
                     <div class="helper-fields-txt" style="display:none">
-                    <?php foreach ( $my_opt_fields['fields'] as $_fi => $_flds ): ?>
-                    <div id="helper-fields-<?php echo $_fi ?>-txt" data-type="<?php echo $_flds['type'] ?>">
+                    <?php foreach ( $my_opt_fields['fields'] as $my_opt_field_index => $my_opt_field ): ?>
+                    <div id="helper-fields-<?php echo $my_opt_field_index ?>-txt" data-type="<?php echo $my_opt_field['type'] ?>">
 
-                        <span>Field: <strong><?php echo $_fi ?></strong></span><br/>
-                        <span>Type: <strong><?php echo $_flds['type'] ?></strong></span><br/>
-                        <span>Description: <strong><?php echo $_flds['description'] ?></strong></span><br/>
+                        <span>Field: <strong><?php echo $my_opt_field_index ?></strong></span><br/>
+                        <span>Type: <strong><?php echo $my_opt_field['type'] ?></strong></span><br/>
+                        <span>Description: <strong><?php echo $my_opt_field['description'] ?></strong></span><br/>
 
-                        <?php if ( $_flds['type'] == 'key_select' || $_flds['type'] == 'multi_select' ): ?>
+                        <?php if ( $my_opt_field['type'] == 'key_select' || $my_opt_field['type'] == 'multi_select' ): ?>
 
                         <span>Value:</span><br/>
                         <ul class="default-value-options">
-                        <?php asort( $_flds['default'] ); ?>    
-                        <?php foreach ( $_flds['default'] as $di => $dt ): ?>
+                        <?php asort( $my_opt_field['default'] ); ?>    
+                        <?php foreach ( $my_opt_field['default'] as $di => $dt ): ?>
                         <li>
                             <strong><span class="hlp-value"><?php echo $di ?></span></strong>:
                             <span class="hlp-label"><?php echo $dt['label'] ?></span>
@@ -864,7 +864,7 @@ class DT_Import_Export_Tab_Contact {
                         </ul>
 
                         <?php else: ?>
-                        <span>Value: <strong><?php echo $_flds['default'] ?></strong></span><br/>
+                        <span>Value: <strong><?php echo $my_opt_field['default'] ?></strong></span><br/>
                         <?php endif; ?>
 
                     </div>
@@ -1040,8 +1040,8 @@ class DT_Import_Export_Tab_Contact {
         //correct csv headers
         foreach ( $csv_headers as $ci => $ch ) {
             $dest = $ch;
-            $_mc = self::get_mapper( $ch );
-            if ( $_mc != null && strlen( $_mc ) > 0 ) { $csv_headers[$ci] = $_mc; }
+            $mapped_column = self::get_mapper( $ch );
+            if ( $mapped_column != null && strlen( $mapped_column ) > 0 ) { $csv_headers[$ci] = $mapped_column; }
         }
 
         //loop over array
@@ -1160,7 +1160,7 @@ class DT_Import_Export_Tab_Contact {
 
     public function preview( $filepath, $csv_data, $csv_headers, $delimeter = ',', $multiseperator = ';', $file_source = 'web', $file_assigned_to = '', $mapping_data, $value_mapperi_data, $value_mapper_data ) {
         $con_headers_info = self::get_contact_header_info();
-        foreach ( (array) $mapping_data as $_i => $_d ){ if ( $_d == 'IGNORE' || $_d == 'NONE'){ unset( $mapping_data[$_i] ); } }
+        foreach ( (array) $mapping_data as $my_id => $my_data ){ if ( $my_data == 'IGNORE' || $my_data == 'NONE'){ unset( $mapping_data[$my_id] ); } }
 
         $people = $this->preview_process( $csv_data, $mapping_data, $value_mapperi_data, $value_mapper_data, $file_assigned_to, $file_source, $delimeter, $multiseperator, $filepath);
         $html = self::display_data( $people );
@@ -1550,9 +1550,9 @@ class DT_Import_Export_Tab_Contact {
         $chi = array_count_values( $csv_headers );
 
         foreach ( $csv_headers as $ci => $ch ) {
-            $_mc = self::get_mapper( $ch );
-            if ( $_mc != null && strlen( $_mc ) > 0 ) {
-                $csv_headers[$ci] = $_mc;
+            $mapped_column = self::get_mapper( $ch );
+            if ( $mapped_column != null && strlen( $mapped_column ) > 0 ) {
+                $csv_headers[$ci] = $mapped_column;
             }
         }
 
@@ -1672,9 +1672,9 @@ class DT_Import_Export_Tab_Contact {
                         $fields[$ch] = $i[0] === "1";
 
                     } else if ( $type == 'date' ) {
-                        $_temp_time = strtotime( $i );
-                        if ( $_temp_time ) {
-                            $fields[$ch] = date( 'Y-m-d', $_temp_time );
+                        $my_temp_time = strtotime( $i );
+                        if ( $my_temp_time ) {
+                            $fields[$ch] = date( 'Y-m-d', $my_temp_time );
                         } else {
                             $fields[$ch] = '';
                         }
@@ -2064,7 +2064,7 @@ class DT_Import_Export_Tab_Contact {
             //$data['fields']['sources']['default'] = Disciple_Tools_Contacts::list_sources();
             $my_list_sources = Disciple_Tools_Contacts::list_sources();
             foreach ( $my_list_sources as $my_list_source_index => $my_list_source_label ) {
-                if ( !( isset( $_list_source ) && strlen( $_list_source ) > 0 ) ) {
+                if ( !( isset( $my_list_source ) && strlen( $my_list_source ) > 0 ) ) {
                     $my_list_source_label = $my_list_source_index;
                 }
                 $data['fields']['sources']['default'][$my_list_source_index] = [ 'label' => $my_list_source_label ];
