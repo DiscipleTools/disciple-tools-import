@@ -213,12 +213,30 @@ class DT_Import_Export_Menu {
                         }
 
                         //$temp_contacts_data
+                        $delimeter = ',';
+                        if ( isset( $_POST["csv_delimeter_temp"] ) ) {
+                            $delimeter = sanitize_text_field( wp_unslash( $_POST['csv_delimeter_temp'] ) );
+                        }
 
-                        $delimeter = sanitize_text_field( wp_unslash( $_POST['csv_delimeter_temp'] ) );
-                        $multiseperator = sanitize_text_field( wp_unslash( $_POST['csv_multiseperator_temp'] ) );
-                        $filepath = sanitize_text_field( wp_unslash( $_POST['csv_file_path'] ) );
-                        $file_source = sanitize_text_field( wp_unslash( $_POST['csv_source_temp'] ) );
-                        $file_assigned_to = sanitize_text_field( wp_unslash( $_POST['csv_assign_temp'] ) );
+                        $multiseperator = ';';
+                        if ( isset( $_POST["csv_multiseperator_temp"] ) ) {
+                            $multiseperator = sanitize_text_field( wp_unslash( $_POST['csv_multiseperator_temp'] ) );
+                        }
+
+                        $filepath = '';
+                        if ( isset( $_POST["csv_file_path"] ) ) {
+                            $filepath = sanitize_text_field( wp_unslash( $_POST['csv_file_path'] ) );
+                        }
+
+                        $file_source = '';
+                        if ( isset( $_POST["csv_source_temp"] ) ) {
+                            $file_source = sanitize_text_field( wp_unslash( $_POST['csv_source_temp'] ) );
+                        }
+
+                        $file_assigned_to = '';
+                        if ( isset( $_POST["csv_assign_temp"] ) ) {
+                            $file_assigned_to = sanitize_text_field( wp_unslash( $_POST['csv_assign_temp'] ) );
+                        }
 
                         $object->preview( $filepath, $csv_data, $csv_headers, $delimeter, $multiseperator, $file_source, $file_assigned_to, $mapping_data, $value_mapperi_data, $value_mapper_data );
 
@@ -715,9 +733,9 @@ class DT_Import_Export_Tab_Contact {
                         }
 
                         ?>
-                        <tr class="mapper-coloumn" data-row-id="<?php echo $ci ?>">
+                        <tr class="mapper-coloumn" data-row-id="<?php esc_html_e( "{$ci}", 'disciple_tools' ) ?>">
 
-                            <th data-field="<?php echo $ch ?>" class="src-column">
+                            <th data-field="<?php esc_html_e( "{$ch}", 'disciple_tools' ) ?>" class="src-column">
                             <?php //= $mapper_title ?><?php echo $uploaded_file_headers[$ci] ?>
                             </th>
 
