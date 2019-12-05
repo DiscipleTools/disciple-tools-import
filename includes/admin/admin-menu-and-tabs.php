@@ -771,15 +771,15 @@ class DT_Import_Export_Tab_Contact {
                                         You can add new values into the DT system if you want by first ...</span>
                                 </div>
 
-                               <?php if ( isset( $unique[$ci] ) ): ?>
-                               <table>
+                                <?php if ( isset( $unique[$ci] ) ): ?>
+                                <table>
 
-                               <?php foreach ( $unique[$ci] as $vi => $v ): ?>
+                                <?php foreach ( $unique[$ci] as $vi => $v ): ?>
 
                                    <tr>
                                        <td>
                                            <?php if ( strlen( trim( $v ) ) > 0 ): ?>
-                                                <?php echo $v ?>
+                                                <?php esc_html_e( "{$v}", 'disciple_tools' ) ?>
                                             <?php else: ?>
                                                 <span class="empty">-blank/null-</span>
                                             <?php endif; ?>
@@ -788,17 +788,17 @@ class DT_Import_Export_Tab_Contact {
 
                                        <td>
 
-                                            <input name="VMD[<?php echo $ci ?>][<?php echo $vi ?>]" type="hidden" value="<?php echo $v ?>" />
+                                            <input name="VMD[<?php esc_attr_e( "{$ci}", 'disciple_tools' ) ?>][<?php esc_attr_e( "{$vi}", 'disciple_tools' ) ?>]" type="hidden" value="<?php esc_attr_e( "{$v}", 'disciple_tools' ) ?>" />
 
-                                            <select id="value-mapper-<?php echo $ci ?>-<?php echo $vi ?>"
-                                                    name="VM[<?php echo $ci ?>][<?php echo $vi ?>]"
-                                                    class="value-mapper-<?php echo $ci ?>"
-                                                    data-value="<?php echo $v ?>">
+                                            <select id="value-mapper-<?php esc_attr_e( "{$ci}", 'disciple_tools' ) ?>-<?php esc_attr_e( "{$vi}", 'disciple_tools' ) ?>"
+                                                    name="VM[<?php esc_attr_e( "{$ci}", 'disciple_tools' ) ?>][<?php esc_attr_e( "{$vi}", 'disciple_tools' ) ?>]"
+                                                    class="value-mapper-<?php esc_attr_e( "{$ci}", 'disciple_tools' ) ?>"
+                                                    data-value="<?php esc_attr_e( "{$v}", 'disciple_tools' ) ?>">
                                             <option>--Not Selected--</option>
                                             <?php /**/ ?>
                                             <?php if ( isset( $my_opt_fields['fields'][$ch]['default'] ) ): ?>
                                             <?php foreach ( $my_opt_fields['fields'][$ch]['default'] as $di => $dt ): ?>
-                                                <option value="<?php echo $di ?>"<?php if ( $di == $v ): ?> selected="selected"<?php endif; ?>><?php echo $dt['label'] ?></option>
+                                                <option value="<?php esc_attr_e( "{$di}", 'disciple_tools' ) ?>"<?php if ( $di == $v ): ?> selected="selected"<?php endif; ?>><?php esc_attr_e( "{$dt['label']}", 'disciple_tools' ) ?></option>
                                             <?php endforeach; ?>
                                             <?php endif; ?> 
                                             <?php /***/ ?>
@@ -810,9 +810,9 @@ class DT_Import_Export_Tab_Contact {
                                        </td>
                                    </tr>
 
-                               <?php endforeach; ?>
+                                <?php endforeach; ?>
 
-                               </table>
+                                </table>
 
                                <?php endif; ?>
                             </div>
