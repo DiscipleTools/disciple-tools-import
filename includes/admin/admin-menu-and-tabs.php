@@ -850,9 +850,9 @@ class DT_Import_Export_Tab_Contact {
                     <?php foreach ( $my_opt_fields['fields'] as $my_opt_field_index => $my_opt_field ): ?>
                     <div id="helper-fields-<?php echo $my_opt_field_index ?>-txt" data-type="<?php echo $my_opt_field['type'] ?>">
 
-                        <span>Field: <strong><?php echo $my_opt_field_index ?></strong></span><br/>
-                        <span>Type: <strong><?php echo $my_opt_field['type'] ?></strong></span><br/>
-                        <span>Description: <strong><?php echo $my_opt_field['description'] ?></strong></span><br/>
+                        <span>Field: <strong><?php esc_html_e( "{$my_opt_field_index}", 'disciple_tools' ) ?></strong></span><br/>
+                        <span>Type: <strong><?php esc_html_e( "{$my_opt_field['type']}", 'disciple_tools' ) ?></strong></span><br/>
+                        <span>Description: <strong><?php esc_html_e( "{$my_opt_field['description']}", 'disciple_tools' ) ?></strong></span><br/>
 
                         <?php if ( $my_opt_field['type'] == 'key_select' || $my_opt_field['type'] == 'multi_select' ): ?>
 
@@ -861,14 +861,14 @@ class DT_Import_Export_Tab_Contact {
                         <?php asort( $my_opt_field['default'] ); ?>    
                         <?php foreach ( $my_opt_field['default'] as $di => $dt ): ?>
                         <li>
-                            <strong><span class="hlp-value"><?php echo $di ?></span></strong>:
-                            <span class="hlp-label"><?php echo $dt['label'] ?></span>
+                            <strong><span class="hlp-value"><?php esc_html_e( "{$di}", 'disciple_tools' ) ?></span></strong>:
+                            <span class="hlp-label"><?php esc_html_e( "{$dt['label']}", 'disciple_tools' ) ?></span>
                         </li>
                         <?php endforeach; ?>
                         </ul>
 
                         <?php else : ?>
-                        <span>Value: <strong><?php echo $my_opt_field['default'] ?></strong></span><br/>
+                        <span>Value: <strong><?php esc_html_e( "{$my_opt_field['default']}", 'disciple_tools' ) ?></strong></span><br/>
                         <?php endif; ?>
 
                     </div>
@@ -1875,10 +1875,10 @@ class DT_Import_Export_Tab_Contact {
                 $html_heading .= '<span class="cflabel">';
                 $ch = str_replace( $prefix, '', $heading );
                 if ( isset( $cfs[$ch], $cfs[$ch]['name'] ) ) {
-                    $str = $cfs[$ch]['name'];
+                    $str = strval( $cfs[$ch]['name'] );
                     $html_heading .= esc_html( translate( $str, 'disciple_tools' ) );
                 } else if ( isset( $channels[$ch], $channels[$ch]['label'] ) ) {
-                    $str = $channels[$ch]['label'];
+                    $str = strval( $channels[$ch]['label'] );
                     $html_heading .= esc_html( translate( $str, 'disciple_tools' ) );
                 }
                 $html_heading .= '</span>';
