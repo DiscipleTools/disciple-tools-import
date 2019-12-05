@@ -741,7 +741,7 @@ class DT_Import_Export_Tab_Contact {
 
 
                             <td class="dest-column">
-                                <?php echo self::get_dropdown_list_html( $ch, "csv_mapper_{$ci}", $con_headers_info, $ch, 
+                                <?php echo self::get_dropdown_list_html( $ch, "csv_mapper_{$ci}", $con_headers_info, $ch,
                                         [
                                             'name' => "csv_mapper[{$ci}]",
                                             'class' => 'cf-mapper',
@@ -749,23 +749,23 @@ class DT_Import_Export_Tab_Contact {
                                             'onchange' => "getDefaultValues({$ci})"
                                         ], true ) ?>
                                 <?php /** <div id="helper-fields-<?php echo $ci ?>" class="helper-fields"<?php if ( $col_data_type!='key_select'): ?> style="display:none"<?php endif; ?>></div> */ ?>
-                                <div id="helper-fields-<?php echo $ci ?>" class="helper-fields" style="display:none"></div>
+                                <div id="helper-fields-<?php esc_attr_e( $ci, 'disciple_tools' ) ?>" class="helper-fields" style="display:none"></div>
 
                             </td>
 
 
                             <td class="mapper-column">
-                            <div id="unique-values-<?php echo $ci ?>"
+                            <div id="unique-values-<?php esc_attr_e( $ci, 'disciple_tools' ) ?>"
                                 class="unique-values"
-                                data-id="<?php echo $ci ?>"
-                                data-type="<?php echo $col_data_type ?>"
+                                data-id="<?php esc_attr_e( $ci, 'disciple_tools' ) ?>"
+                                data-type="<?php esc_attr_e( $col_data_type, 'disciple_tools' ) ?>"
                                 <?php /** <?php if ( $col_data_type!='key_select' ) : ?> style="display:none"<?php endif; ?>> */ ?>
                                 <?php if ( !( $col_data_type == 'key_select' || $col_data_type == 'multi_select' ) ) : ?> style="display:none"<?php endif; ?>>
 
                                 <div class="mapper-helper-text">
                                     <span class="mapper-helper-title">Map import values to DT values</span><br/>
                                     <span class="mapper-helper-description">
-                                        <span class="selected-mapper-column-name"><?php echo $ch ?><?php //echo $mapper_title ?></span>
+                                        <span class="selected-mapper-column-name"><?php esc_html_e( "{$ch}", 'disciple_tools' ) ?><?php //echo $mapper_title ?></span>
                                         only accepts specific values (as a Selection). 
                                         Please map following unique values from your data to existing values in DT.
                                         You can add new values into the DT system if you want by first ...</span>
@@ -788,21 +788,21 @@ class DT_Import_Export_Tab_Contact {
 
                                        <td>
 
-                                           <input name="VMD[<?php echo $ci ?>][<?php echo $vi ?>]" type="hidden" value="<?php echo $v ?>" />
+                                            <input name="VMD[<?php echo $ci ?>][<?php echo $vi ?>]" type="hidden" value="<?php echo $v ?>" />
 
-                                           <select id="value-mapper-<?php echo $ci ?>-<?php echo $vi ?>"
-                                                   name="VM[<?php echo $ci ?>][<?php echo $vi ?>]"
-                                                   class="value-mapper-<?php echo $ci ?>"
-                                                   data-value="<?php echo $v ?>">
-                                           <option>--Not Selected--</option>
-                                           <?php /**/ ?>
-                                           <?php if ( isset( $my_opt_fields['fields'][$ch]['default'] ) ): ?>
-                                           <?php foreach ( $my_opt_fields['fields'][$ch]['default'] as $di => $dt ): ?>
-                                               <option value="<?php echo $di ?>"<?php if ( $di == $v ): ?> selected="selected"<?php endif; ?>><?php echo $dt['label'] ?></option>
-                                           <?php endforeach; ?>
-                                           <?php endif; ?> 
-                                           <?php /***/ ?>
-                                           </select>
+                                            <select id="value-mapper-<?php echo $ci ?>-<?php echo $vi ?>"
+                                                    name="VM[<?php echo $ci ?>][<?php echo $vi ?>]"
+                                                    class="value-mapper-<?php echo $ci ?>"
+                                                    data-value="<?php echo $v ?>">
+                                            <option>--Not Selected--</option>
+                                            <?php /**/ ?>
+                                            <?php if ( isset( $my_opt_fields['fields'][$ch]['default'] ) ): ?>
+                                            <?php foreach ( $my_opt_fields['fields'][$ch]['default'] as $di => $dt ): ?>
+                                                <option value="<?php echo $di ?>"<?php if ( $di == $v ): ?> selected="selected"<?php endif; ?>><?php echo $dt['label'] ?></option>
+                                            <?php endforeach; ?>
+                                            <?php endif; ?> 
+                                            <?php /***/ ?>
+                                            </select>
 
 
 
@@ -929,22 +929,14 @@ class DT_Import_Export_Tab_Contact {
                             });                
                         }
 
-                        function getDefaultValues2(id){ 
-                            alert('Checkpoint');
-
-                        }
-
                         function getDefaultValues(id){                
 
                             var selected, selectedValue, dom, ty, hlp;
                             selected = document.getElementById('csv_mapper_'+id);
                             selectedValue = selected.options[selected.selectedIndex].value;
 
-                            jQuery('.helper-fields').hide().html(''); 
-                            //jQuery
-
+                            jQuery('.helper-fields').hide().html('');
                             //console.log('id:' + id + ' v:'+ selectedValue);
-
                             //hlp = document.getElementById('helper-fields-'+selectedValue+'-txt').innerHTML;
                             //document.getElementById('helper-fields-'+id).innerHTML = hlp;
 
@@ -958,11 +950,8 @@ class DT_Import_Export_Tab_Contact {
                                 //jQuery('#unique-values-'+id).find('.selected-mapper-column-name').html( jQuery('#csv_mapper_'+id).val() );
                                 jQuery('#unique-values-'+id).find('.selected-mapper-column-name').html( jQuery('#csv_mapper_'+id+' option:selected').text() );
                                 jQuery('#helper-fields-'+id).html( hlp ); //.show();
-
                                 jQuery('.value-mapper-'+id).html('');
-
                                 jQuery('.value-mapper-'+id).append('<option value="">--select-one--</option>');
-
                                 //h_sel = jQuery('.value-mapper-'+id).attr('data-value');
 
                                 //default-value-options
@@ -972,39 +961,30 @@ class DT_Import_Export_Tab_Contact {
                                     h_value = h_this.find('.hlp-value').html();
                                     h_label = h_this.find('.hlp-label').html();
                                     if(!h_label.length>0){ h_label = h_value.toUpperCase(); }
-                                    //console.log('id:' +i+' value:'+h_value+' label:'+h_label);                        
-
+                                    //console.log('id:' +i+' value:'+h_value+' label:'+h_label);                     
 
                                     h_html = '<option value="'+h_value+'"'; 
                                     //if(h_sel==h_value){ h_html = h_html + ' selected="selected"'; }
                                     h_html = h_html + '>'+h_label+'</option>';
-
                                     jQuery('.value-mapper-'+id).append(h_html);
                                 });
 
                                 jQuery('.value-mapper-'+id).each(function(){
                                     h_sel = jQuery(this).attr('data-value');
-
                                     jQuery(this).find('option').each(function(){
                                         if(h_sel==jQuery(this).attr('value')){
                                             jQuery(this).attr('selected','selected');
                                         }
                                     });
-
                                 });
 
                             } else {
                                 jQuery('#unique-values-'+id).hide();
                             }
                         }
-
                     </script>
-
-
                 </td>
             </tr>
-
-
             <?php /** <tr>
                 <td>
                     <a href="" class="button button-primary"> <?php esc_html_e( "Back", 'disciple_tools' ) ?> </a>
@@ -1014,9 +994,7 @@ class DT_Import_Export_Tab_Contact {
         </table>
         <br>
         <!-- End Box -->
-
         <?php
-
     }
 
     public function mapping_process( $filepath, $file_source = 'web', $file_assigned_to = '' ){
@@ -1354,8 +1332,6 @@ class DT_Import_Export_Tab_Contact {
             </tbody>
         </table>
         <br>
-
-
         <!-- End Box -->
         <?php
     }
@@ -1364,12 +1340,8 @@ class DT_Import_Export_Tab_Contact {
 
     }
 
-
-
-
     public function get_contact_header_info(){
         //return Disciple_Tools_Contacts::get_contact_header_info();
-
 /** //global $wpdb;
 //$query = "SELECT
 //            `id`,
@@ -1406,7 +1378,6 @@ class DT_Import_Export_Tab_Contact {
             $data = array_merge( $data, $fields );
         }
         return $data;
-
     }
 
     public static function get_mapper( $name = '' ) {
@@ -1420,7 +1391,6 @@ class DT_Import_Export_Tab_Contact {
 //    AND wp_dt_headers_aliases.alias = %s";
 //$column_name = $wpdb->get_var( $wpdb->prepare( $query, $name ) );
 //return $column_name; */
-
         return self::colheadcompare( $name );
     }
 
