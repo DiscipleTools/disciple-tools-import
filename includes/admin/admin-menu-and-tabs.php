@@ -199,7 +199,7 @@ class DT_Import_Export_Menu {
                             && $run ) {
 
                     if ( isset( $_POST["csv_mapper"], $_POST["csv_data"] ) ) {
-                        $mapping_data = $_POST["csv_mapper"];
+                        $mapping_data = wp_unslash( $_POST["csv_mapper"] );
 
                         $value_mapperi_data = isset( $_POST['VMD'] ) ? $_POST['VMD'] : [];
                         $value_mapper_data = isset( $_POST['VM'] ) ? $_POST['VM'] : [];
@@ -223,7 +223,7 @@ class DT_Import_Export_Menu {
                         $object->preview( $filepath, $csv_data, $csv_headers, $delimeter, $multiseperator, $file_source, $file_assigned_to, $mapping_data, $value_mapperi_data, $value_mapper_data );
 
                     }
-
+////////////////////////////////////////////////////////////////////////////////
                 } else if ( isset( $_POST['csv_correct_nonce'] )
                             && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['csv_correct_nonce'] ) ), 'csv_correct' )
                             && $run ) {
@@ -867,7 +867,7 @@ class DT_Import_Export_Tab_Contact {
                         <?php endforeach; ?>
                         </ul>
 
-                        <?php else: ?>
+                        <?php else : ?>
                         <span>Value: <strong><?php echo $my_opt_field['default'] ?></strong></span><br/>
                         <?php endif; ?>
 
@@ -1093,7 +1093,7 @@ class DT_Import_Export_Tab_Contact {
                                 $fields[$ch][] = [ "value" => trim( $mx ) ];
                             }
                         }
-
+////////////////////////////////////////////////////////////////////////////////
                     }
                 }
             }
@@ -1125,22 +1125,22 @@ class DT_Import_Export_Tab_Contact {
             //if ( isset( $my_opt_fields['fields'][$ch]['type'] )
             //         && $my_opt_fields['fields'][$ch]['type'] == 'multi_select' ) {
                 //$multi_separator = ';';
-                foreach ( $unique[$ci] as $ui => $uv ) {
+            foreach ( $unique[$ci] as $ui => $uv ) {
 
-                    $pos = strpos( $uv, $multi_separator );
-                    if ( $pos === false ) {
+                $pos = strpos( $uv, $multi_separator );
+                if ( $pos === false ) {
 
-                    } else {
-                        unset( $unique[$ci][$ui] );
-                        $multivalued = explode( $multi_separator, $uv );
-                        foreach ( $multivalued as $mxid => $mx ) {
-                            $unique[$ci][] = trim( $mx );
-                        }
+                } else {
+                    unset( $unique[$ci][$ui] );
+                    $multivalued = explode( $multi_separator, $uv );
+                    foreach ( $multivalued as $mxid => $mx ) {
+                        $unique[$ci][] = trim( $mx );
                     }
                 }
+            }
 
-                $unique[$ci] = array_unique( $unique[$ci] );
-                asort( $unique[$ci] ); //sort-the-value(s)
+            $unique[$ci] = array_unique( $unique[$ci] );
+            asort( $unique[$ci] ); //sort-the-value(s)
             //}
         }
 
@@ -1170,7 +1170,7 @@ class DT_Import_Export_Tab_Contact {
             }
         }
 
-        $people = $this->preview_process( $csv_data, $mapping_data, $value_mapperi_data, $value_mapper_data, $file_assigned_to, $file_source, $delimeter, $multiseperator, $filepath);
+        $people = $this->preview_process( $csv_data, $mapping_data, $value_mapperi_data, $value_mapper_data, $file_assigned_to, $file_source, $delimeter, $multiseperator, $filepath );
         $html = self::display_data( $people );
         ?>
         <!-- Box -->
@@ -1196,7 +1196,7 @@ class DT_Import_Export_Tab_Contact {
 
                     <a href="<?php echo admin_url( 'admin.php?page=dt_utilities&tab=contact-import' ) ?>"
                        class="button button-primary"> 
-                           <?php esc_html_e( "Back - Something is wrong!", 'disciple_tools' ) ?>
+                            <?php esc_html_e( "Back - Something is wrong!", 'disciple_tools' ) ?>
                     </a>
 
                     <input type="submit" name="submit" 
@@ -1526,13 +1526,13 @@ class DT_Import_Export_Tab_Contact {
             }
 
             //if ( $f ) {
-                $html .= "<option value=\"{$key}\"";
-                if ( $selected != null && $selected == $key ) {
-                    $html .= " selected=\"selected\"";
-                }
-                $html .= ">";
-                $html .= "{$label}";
-                $html .= "</option>";
+            $html .= "<option value=\"{$key}\"";
+            if ( $selected != null && $selected == $key ) {
+                $html .= " selected=\"selected\"";
+            }
+            $html .= ">";
+            $html .= "{$label}";
+            $html .= "</option>";
             //}
         }
         $html .= "</optgroup>";
@@ -1566,7 +1566,8 @@ class DT_Import_Export_Tab_Contact {
 
         //handle N columns to ONE column mapping
         //phone(primary)/phone(mobile) -> phone
-        $mids = []; $del_csv_headers = [];
+        $mids = [];
+        $del_csv_headers = [];
         foreach ( $chi as $mch => $count ) {
             if ( $count > 1 ) {
                 $mids[$mch]['count'] = $count;
@@ -1874,9 +1875,11 @@ class DT_Import_Export_Tab_Contact {
                 $html_heading .= '<span class="cflabel">';
                 $ch = str_replace( $prefix, '', $heading );
                 if ( isset( $cfs[$ch], $cfs[$ch]['name'] ) ) {
-                    $html_heading .= esc_html( translate( $cfs[$ch]['name'], 'disciple_tools' ) );
+                    $str = $cfs[$ch]['name'];
+                    $html_heading .= esc_html( translate( $str, 'disciple_tools' ) );
                 } else if ( isset( $channels[$ch], $channels[$ch]['label'] ) ) {
-                    $html_heading .= esc_html( translate( $channels[$ch]['label'], 'disciple_tools' ) );
+                    $str = $channels[$ch]['label'];
+                    $html_heading .= esc_html( translate( $str, 'disciple_tools' ) );
                 }
                 $html_heading .= '</span>';
 
