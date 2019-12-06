@@ -742,12 +742,12 @@ class DT_Import_Export_Tab_Contact {
 
                             <td class="dest-column">
                                 <?php echo self::get_dropdown_list_html( $ch, "csv_mapper_{$ci}", $con_headers_info, $ch,
-                                        [
-                                            'name' => "csv_mapper[{$ci}]",
-                                            'class' => 'cf-mapper',
-                                            //'onchange' => "check_column_mappings({$ci})"
-                                            'onchange' => "getDefaultValues({$ci})"
-                                        ], true ) ?>
+                                    [
+                                        'name' => "csv_mapper[{$ci}]",
+                                        'class' => 'cf-mapper',
+                                        //'onchange' => "check_column_mappings({$ci})"
+                                        'onchange' => "getDefaultValues({$ci})"
+                                    ], true ) ?>
                                 <?php /** <div id="helper-fields-<?php echo $ci ?>" class="helper-fields"<?php if ( $col_data_type!='key_select'): ?> style="display:none"<?php endif; ?>></div> */ ?>
                                 <div id="helper-fields-<?php esc_attr_e( $ci, 'disciple_tools' ) ?>" class="helper-fields" style="display:none"></div>
 
@@ -778,9 +778,9 @@ class DT_Import_Export_Tab_Contact {
 
                                    <tr>
                                        <td>
-                                           <?php if ( strlen( trim( $v ) ) > 0 ): ?>
+                                            <?php if ( strlen( trim( $v ) ) > 0 ): ?>
                                                 <?php esc_html_e( "{$v}", 'disciple_tools' ) ?>
-                                            <?php else: ?>
+                                            <?php else : ?>
                                                 <span class="empty">-blank/null-</span>
                                             <?php endif; ?>
                                        </td>
@@ -808,19 +808,19 @@ class DT_Import_Export_Tab_Contact {
 
 
                                        </td>
-                                   </tr>
+                                    </tr>
 
                                 <?php endforeach; ?>
 
                                 </table>
 
-                               <?php endif; ?>
+                                <?php endif; ?>
                             </div>
                             </td>
 
 
                         </tr>
-                    <?php  endforeach; ?>
+                    <?php endforeach; ?>
                     </tbody>
 
                     <tfoot>
