@@ -741,12 +741,14 @@ class DT_Import_Export_Tab_Contact {
 
 
                             <td class="dest-column">
-                                <?php echo self::get_dropdown_list_html( $ch, "csv_mapper_{$ci}", $con_headers_info, $ch,
-                                    [
-                                        'name' => "csv_mapper[{$ci}]",
-                                        'class' => 'cf-mapper',
-                                        //'onchange' => "check_column_mappings({$ci})"
-                                        'onchange' => "getDefaultValues({$ci})" ], true ) ?>
+                                <?php
+                                $dd_params = [
+                                                'name' => "csv_mapper[{$ci}]",
+                                                'class' => 'cf-mapper',
+                                                //'onchange' => "check_column_mappings({$ci})"
+                                                'onchange' => "getDefaultValues({$ci})"
+                                            ];
+                                echo self::get_dropdown_list_html( $ch, "csv_mapper_{$ci}", $con_headers_info, $ch, $dd_params, true ) ?>
                                 <?php /** <div id="helper-fields-<?php echo $ci ?>" class="helper-fields"<?php if ( $col_data_type!='key_select'): ?> style="display:none"<?php endif; ?>></div> */ ?>
                                 <div id="helper-fields-<?php esc_attr_e( $ci, 'disciple_tools' ) ?>" class="helper-fields" style="display:none"></div>
 
