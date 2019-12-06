@@ -746,8 +746,7 @@ class DT_Import_Export_Tab_Contact {
                                         'name' => "csv_mapper[{$ci}]",
                                         'class' => 'cf-mapper',
                                         //'onchange' => "check_column_mappings({$ci})"
-                                        'onchange' => "getDefaultValues({$ci})"
-                                    ], true ) ?>
+                                        'onchange' => "getDefaultValues({$ci})" ], true ) ?>
                                 <?php /** <div id="helper-fields-<?php echo $ci ?>" class="helper-fields"<?php if ( $col_data_type!='key_select'): ?> style="display:none"<?php endif; ?>></div> */ ?>
                                 <div id="helper-fields-<?php esc_attr_e( $ci, 'disciple_tools' ) ?>" class="helper-fields" style="display:none"></div>
 
