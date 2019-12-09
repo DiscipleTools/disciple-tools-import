@@ -647,7 +647,7 @@ class DT_Import_Export_Tab_Contact {
         <!-- Box -->
         <table class="widefat striped">
             <thead>
-            <th>ERROR <?php echo date( 'Y-m-d H:i:s' ) ?></th>
+            <th>ERROR <?php echo esc_html( date( 'Y-m-d H:i:s' ) ) ?></th>
             </thead>
             <tbody>
             <tr>
