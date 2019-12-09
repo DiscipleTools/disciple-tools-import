@@ -867,7 +867,7 @@ class DT_Import_Export_Tab_Contact {
 
                     <div class="helper-fields-txt" style="display:none">
                     <?php foreach ( $my_opt_fields['fields'] as $my_opt_field_index => $my_opt_field ): ?>
-                    <div id="helper-fields-<?php echo $my_opt_field_index ?>-txt" data-type="<?php echo $my_opt_field['type'] ?>">
+                    <div id="helper-fields-<?php echo esc_html( $my_opt_field_index ) ?>-txt" data-type="<?php echo esc_html( $my_opt_field['type'] ) ?>">
 
                         <span>Field: <strong><?php esc_html_e( "{$my_opt_field_index}", 'disciple_tools' ) ?></strong></span><br/>
                         <span>Type: <strong><?php esc_html_e( "{$my_opt_field['type']}", 'disciple_tools' ) ?></strong></span><br/>
@@ -1191,7 +1191,7 @@ class DT_Import_Export_Tab_Contact {
 
                     <?php wp_nonce_field( 'csv_correct', 'csv_correct_nonce' ); ?>
 
-                    <a href="<?php echo admin_url( 'admin.php?page=dt_utilities&tab=contact-import' ) ?>"
+                    <a href="<?php echo esc_html( admin_url( 'admin.php?page=dt_utilities&tab=contact-import' ) ) ?>"
                        class="button button-primary"> 
                             <?php esc_html_e( "Back - Something is wrong!", 'disciple_tools' ) ?>
                     </a>
