@@ -736,7 +736,7 @@ class DT_Import_Export_Tab_Contact {
                         <tr class="mapper-coloumn" data-row-id="<?php esc_html_e( "{$ci}", 'disciple_tools' ) ?>">
 
                             <th data-field="<?php esc_html_e( "{$ch}", 'disciple_tools' ) ?>" class="src-column">
-                            <?php //= $mapper_title ?><?php echo $uploaded_file_headers[$ci] ?>
+                            <?php //= $mapper_title ?><?php echo esc_html( $uploaded_file_headers[$ci] ) ?>
                             </th>
 
 
@@ -834,11 +834,11 @@ class DT_Import_Export_Tab_Contact {
                                 <input type="hidden" name="csv_headers" value="<?php echo esc_html( base64_encode( serialize( $csv_headers ) ) ); ?>">
                                 <?php /** */ ?>
 
-                                <input type="hidden" name="csv_delimeter_temp" value='<?php echo $delimeter ?>' />
-                                <input type="hidden" name="csv_multiseperator_temp" value='<?php echo $multi_separator ?>' />
-                                <input type="hidden" name="csv_file_path" value='<?php echo $filepath ?>' />
-                                <input type="hidden" name="csv_source_temp" value='<?php echo $file_source ?>' />
-                                <input type="hidden" name="csv_assign_temp" value='<?php echo $file_assigned_to ?>' />
+                                <input type="hidden" name="csv_delimeter_temp" value='<?php echo esc_html( $delimeter ) ?>' />
+                                <input type="hidden" name="csv_multiseperator_temp" value='<?php echo esc_html( $multi_separator ) ?>' />
+                                <input type="hidden" name="csv_file_path" value='<?php echo esc_html( $filepath ) ?>' />
+                                <input type="hidden" name="csv_source_temp" value='<?php echo esc_html( $file_source ) ?>' />
+                                <input type="hidden" name="csv_assign_temp" value='<?php echo esc_html( $file_assigned_to ) ?>' />
 
                                 <?php wp_nonce_field( 'csv_mapping', 'csv_mapping_nonce' ); ?>
 
@@ -1183,7 +1183,7 @@ class DT_Import_Export_Tab_Contact {
 <fieldset id="debug-data-<?php echo __LINE__ ?>" class="debug-data" style="display:none"><legend onclick="jQuery('#debug-data-<?php echo __LINE__ ?> section').toggle()">PPL</legend><section><pre><?php print_r( $people ) ?></pre></section></fieldset>
 
 
-<?php echo $html; ?> 
+<?php echo esc_html( $html ); ?> 
 
                 <form method="post" enctype="multipart/form-data">
 
