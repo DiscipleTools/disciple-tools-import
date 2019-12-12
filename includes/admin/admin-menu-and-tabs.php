@@ -7,7 +7,6 @@
  * @since       0.1.0
  */
 
-//@todo Replace all instances if DT_Import_Export
 if ( ! defined( 'ABSPATH' ) ) {
     exit; // Exit if accessed directly
 }
@@ -64,6 +63,26 @@ class DT_Import_Export_Menu {
      * Menu stub. Replaced when Disciple Tools Theme fully loads.
      */
     public function extensions_menu() {}
+
+
+    private static function dt_sanitize_array( &$array ) {
+        foreach ( $array as &$value ) {
+            if ( !is_array( $value ) ) {
+                $value = sanitize_text_field( wp_unslash( $value ) );
+            } else {
+                dt_sanitize_array( $value );
+            }
+        }
+        return $array;
+    }
+
+    private static function dt_sanitize_post( $post, $key ) {
+        if ( !isset( $post[$key] ) ){
+            return false;
+        }
+        $post[$key] = self::dt_sanitize_array( $post[$key] );
+        return $post[$key];
+    }
 
     /**
      * Builds page contents
@@ -137,8 +156,8 @@ class DT_Import_Export_Menu {
                             && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['csv_import_nonce'] ) ), 'csv_import' )
                             && $run ) {
 
-                    //@codingStandardsIgnoreLine
                     if ( isset( $_FILES["csv_file"]["name"] ) ) {
+                        $temp_name = isset( $_FILES["csv_file"]["tmp_name"] ) ? sanitize_text_field( wp_unslash( $_FILES["csv_file"]["tmp_name"] ) ) : '';
                         $file_parts = explode( ".", sanitize_text_field( wp_unslash( $_FILES["csv_file"]["name"] ) ) )[ count( explode( ".", sanitize_text_field( wp_unslash( $_FILES["csv_file"]["name"] ) ) ) ) - 1 ];
                         if ( isset( $_FILES["csv_file"]["error"] ) && $_FILES["csv_file"]["error"] > 0 ) {
                             esc_html_e( "ERROR UPLOADING FILE", 'disciple_tools' );
@@ -150,8 +169,7 @@ class DT_Import_Export_Menu {
                             $object->go_back();
                             exit;
 
-                        //@codingStandardsIgnoreLine
-                        } else if ( mb_detect_encoding( file_get_contents( $_FILES["csv_file"]['tmp_name'], false, null, 0, 100 ), 'UTF-8', true ) === false ) {
+                        } else if ( mb_detect_encoding( file_get_contents( $temp_name, false, null, 0, 100 ), 'UTF-8', true ) === false ) {
                             esc_html_e( "FILE IS NOT UTF-8", 'disciple_tools' );
                             $object->go_back();
                             exit;
@@ -166,7 +184,7 @@ class DT_Import_Export_Menu {
                         if ( !file_exists( $path ) ) { mkdir( $path, 0777, true ); }
 
                         $basename = sanitize_text_field( wp_unslash( $_FILES["csv_file"]['name'] ) );
-                        $source = sanitize_text_field( wp_unslash( $_FILES["csv_file"]["tmp_name"] ) );
+                        $source = $temp_name;
                         $destination = "{$path}/{$basename}";
                         move_uploaded_file( $source, $destination );
                         //
@@ -199,17 +217,17 @@ class DT_Import_Export_Menu {
                             && $run ) {
 
                     if ( isset( $_POST["csv_mapper"], $_POST["csv_data"] ) ) {
-                        $mapping_data = wp_unslash( $_POST["csv_mapper"] );
 
-                        $value_mapperi_data = isset( $_POST['VMD'] ) ? $_POST['VMD'] : [];
-                        $value_mapper_data = isset( $_POST['VM'] ) ? $_POST['VM'] : [];
+                        $mapping_data = self::dt_sanitize_post( $_POST, 'csv_mapper' );
+                        $value_mapperi_data = isset( $_POST['VMD'] ) ? self::dt_sanitize_post( $_POST, 'VMD' ) : [];
+                        $value_mapper_data = isset( $_POST['VM'] ) ? self::dt_sanitize_post( $_POST, 'VM' ) : [];
 
                         //$mapping_data = unserialize( base64_decode( $_POST["csv_mapper"] ) );
-                        $csv_data = unserialize( base64_decode( $_POST["csv_data"] ) );
+                        $csv_data = unserialize( base64_decode( sanitize_text_field( wp_unslash( $_POST["csv_data"] ) ) ) );
 
                         $csv_headers = '';
                         if ( isset( $_POST["csv_headers"] ) ) {
-                            $csv_headers = unserialize( base64_decode( $_POST["csv_headers"] ) );
+                            $csv_headers = unserialize( base64_decode( sanitize_text_field( wp_unslash( $_POST["csv_headers"] ) ) ) );
                         }
 
                         //$temp_contacts_data
@@ -256,16 +274,7 @@ class DT_Import_Export_Menu {
                 } else {
                     $object->content();
                 }
-////////////////////////////////////////////////////////////////////////////////
-            } else if ( $tab == 'location' ) {
-                die( 'ERROR_'.__LINE__ );
-                $object = new DT_Import_Export_Tab_Location();
-                $object->content();
- ////////////////////////////////////////////////////////////////////////////////
-            } else {
-
             }
-////////////////////////////////////////////////////////////////////////////////
             ?>
 
         </div><!-- End wrap -->
@@ -1168,7 +1177,7 @@ class DT_Import_Export_Tab_Contact {
         }
 
         $people = $this->preview_process( $csv_data, $mapping_data, $value_mapperi_data, $value_mapper_data, $file_assigned_to, $file_source, $delimeter, $multiseperator, $filepath );
-        $html = self::display_data( $people );
+
         ?>
         <!-- Box -->
         <span onclick="jQuery('.debug-data').toggle()" style="float:right;color:#e14d43;font-weight:bold;text-transform:uppercase;font-size:10px;background:#fde8eb;padding:5px;border:1px dashed #f4bbc3;">Show/Hide Debug Data</span>
@@ -1182,8 +1191,8 @@ class DT_Import_Export_Tab_Contact {
 <fieldset id="debug-data-<?php echo __LINE__ ?>" class="debug-data" style="display:none"><legend onclick="jQuery('#debug-data-<?php echo __LINE__ ?> section').toggle()">CSV DATA</legend><section><pre><?php print_r( $csv_data ) ?></pre></section></fieldset>
 <fieldset id="debug-data-<?php echo __LINE__ ?>" class="debug-data" style="display:none"><legend onclick="jQuery('#debug-data-<?php echo __LINE__ ?> section').toggle()">PPL</legend><section><pre><?php print_r( $people ) ?></pre></section></fieldset>
 
+                <?php self::display_data( $people );?>
 
-<?php echo esc_html( $html ); ?> 
 
                 <form method="post" enctype="multipart/form-data">
 
@@ -1720,6 +1729,12 @@ class DT_Import_Export_Tab_Contact {
         $delimeter = ',';
         $multi_separator = ';';
 
+        $prefix = 'contact_';
+        $channels = Disciple_Tools_Contact_Post_Type::instance()->get_channels_list();
+        $cfs = Disciple_Tools_Contact_Post_Type::instance()->get_custom_fields_settings();
+
+        $rowindex = 0;
+        $error_summary = [];
         if ( isset( $people[0][0] ) ) {
             $headings = array_keys( $people[0][0] );
             //echo '<pre>'; print_r($headings); echo '</pre>';
@@ -1728,36 +1743,78 @@ class DT_Import_Export_Tab_Contact {
             if ( isset( $headings['assigned_to'] ) ) { unset( $headings['assigned_to'] ); }
             //if ( isset( $headings['title'] ) ) { unset($headings['title'] ); }
         }
+        ?>
+        <fieldset class="debug-data" style="display:none"> <legend>Heading</legend>
+        <pre>
+        <?php print_r( $headings ) ?>
+        </pre>
+        </fieldset>
 
-        echo '<fieldset class="debug-data" style="display:none"> <legend>Heading</legend>';
-        echo '<pre>';
-        print_r( $headings );
-        echo '</pre>';
-        echo '</fieldset>';
+        <table class="data-table">
+            <thead>
+            <tr>
+                <th data-col-id=0></th>
 
-        $prefix = 'contact_';
-        $channels = Disciple_Tools_Contact_Post_Type::instance()->get_channels_list();
-        $cfs = Disciple_Tools_Contact_Post_Type::instance()->get_custom_fields_settings();
+                <th data-col-id=1>
+                    <span class="cflabel">
+                    <?php esc_html_e( 'Contact Name', 'disciple_tools' ); ?>
+                    </span>
+                </th>
 
-        $error_summary = [];
-        $html = '';
+                <?php
+                foreach ( $headings as $hi => $heading ) {
 
-        $html_body = '<tbody>';
-        $rowindex = 0;
-        foreach ( $people as $pid => $ppl_data ) {
+                    if ( $heading == 'title' ) {
+                    } else if ( $heading == 'assigned_to' ) {
+                    } else if ( $heading == 'sources' ) {
+                    } else {
+                        $ch = str_replace( $prefix, '', $heading );
+                        $str = '';
+                        if ( isset( $cfs[$ch], $cfs[$ch]['name'] ) ) {
+                            $str = strval( $cfs[$ch]['name'] );
 
+                        } else if ( isset( $channels[$ch], $channels[$ch]['label'] ) ) {
+                            $str = strval( $channels[$ch]['label'] );
+
+                        }
+                        ?>
+                        <th data-col-id="<?php echo esc_html( $hi ); ?>">
+                            <span class="cflabel">
+                                <?php echo esc_html( $str ); ?>
+                            </span>
+
+                            <br/>
+                        </th>
+                        <?php
+                    }
+                }
+                ?>
+                <th><span class="cflabel">
+                <?php esc_html_e( 'Source', 'disciple_tools' ); ?>
+                </span></th>
+
+                <th><span class="cflabel">
+                    <?php esc_html_e( 'Assigned To', 'disciple_tools' ); ?>
+
+                </span></th>
+
+            </tr>
+            </thead>
+        <tbody>
+        <?php foreach ( $people as $pid => $ppl_data ) {
             $rowindex++;
-            $person_data = $ppl_data[0];
+            $person_data = $ppl_data[0]; ?>
 
-            $html_body .= '<tr id="person-data-item-'.$pid.'" class="person-data-item">';
 
-            $html_body .= '<td data-col-id=0>'.$rowindex.'</td>';
+            <tr id="person-data-item-<?php echo esc_html( $pid ) ?>" class="person-data-item">
 
-            $html_body .= '<td data-col-id=1 data-key="title">';
-            $html_body .= $person_data['title'];
-            $html_body .= '</td>';
+            <td data-col-id=0><?php echo esc_html( $rowindex ); ?></td>
 
-            foreach ( $headings as $hi => $ch ) {
+            <td data-col-id=1 data-key="title">
+                <?php echo esc_html( $person_data['title'] ); ?>
+            </td>
+
+            <?php foreach ( $headings as $hi => $ch ) {
 
                 $type = isset( $cfs[$ch]['type'] ) ? $cfs[$ch]['type'] : null;
                 if ( $type == null ){ $type = isset( $channels[$ch] ) ? $channels[$ch] : null; }
@@ -1773,148 +1830,109 @@ class DT_Import_Export_Tab_Contact {
 
                     if ( $person_data[$ch] != null || strlen( trim( $person_data[$ch] ) ) > 0 ) {
                         $errors = self::validate_data( $ch, $person_data[$ch] );
-                    }
-
-                    $html_body .= '<td data-col-id='.$hi.' data-key="'.$ch.'"';
-                    if ( $errors > 0 ) {
-                        $html_body .= ' class="data-error"';
-
-                        if ( isset( $error_summary[$ch] ) ) {
-                            $error_summary[$ch]['error-count'] = intval( $error_summary[$ch]['error-count'] ) + 1;
-                        } else {
-                            $error_summary[$ch]['error-count'] = 1;
+                        if ( $errors > 0 ) {
+                            if ( isset( $error_summary[$ch] ) ) {
+                                $error_summary[$ch]['error-count'] = intval( $error_summary[$ch]['error-count'] ) + 1;
+                            } else {
+                                $error_summary[$ch]['error-count'] = 1;
+                            }
                         }
-////////////////////////////////////////////////////////////////////////////////
-                    }
-                    $html_body .= '>';
+                    } ?>
 
-                    if ( $type == 'key_select'
-                        || $type == 'date'
-                        || $type == 'boolean' ) {
+                    <td data-col-id='<?php echo esc_html( $hi ); ?>' data-key="<?php echo esc_html( $ch ); ?>" <?php echo esc_html( $errors > 0 ? 'class="data-error"' : '' ) ?> >
 
-                        $html_body .= esc_html( $person_data[$ch] );
+                        <?php
+                        $value = '';
+                        if ( $type == 'key_select'
+                            || $type == 'date'
+                            || $type == 'boolean' ) {
 
-                    } else if ( ( $type == 'multi_select' ) ) {
+                            $value = $person_data[$ch];
 
-                        if ( isset( $person_data[$ch]["values"] ) && is_array( $person_data[$ch]["values"] ) ) {
+                        } else if ( ( $type == 'multi_select' ) ) {
+
+                            if ( isset( $person_data[$ch]["values"] ) && is_array( $person_data[$ch]["values"] ) ) {
+                                $values = [];
+                                foreach ( $person_data[$ch]["values"] as $mi => $v ) {
+                                    if ( isset( $v["value"] ) ) { $values[] = esc_html( $v["value"] ); }
+                                }
+                                $value = implode( $multi_separator, (array) $values );
+                            }
+    ////////////////////////////////////////////////////////////////////////////////
+                        } else if ( isset( $person_data[$ch] ) ) {
                             $values = [];
-                            foreach ( $person_data[$ch]["values"] as $mi => $v ) {
-                                if ( isset( $v["value"] ) ) { $values[] = esc_html( $v["value"] ); }
+                            if ( isset( $person_data[$ch]["values"] ) && is_array( $person_data[$ch]["values"] ) ) {
+                                foreach ( $person_data[$ch]["values"] as $mi => $v ) {
+                                    if ( isset( $v["value"] ) ) { $values[] = esc_html( $v["value"] ); }
+                                }
+    ////////////////////////////////////////////////////////////////////////////////
+                            } else {
+                                foreach ( $person_data[$ch] as $mi => $v ) {
+                                    if ( isset( $v["value"] ) ){ $values[] = esc_html( $v["value"] ); }
+                                }
                             }
-                            $html_body .= implode( $multi_separator, (array) $values );
-                        }
-////////////////////////////////////////////////////////////////////////////////
-                    } else if ( isset( $person_data[$ch] ) ) {
-                        $values = [];
-                        if ( isset( $person_data[$ch]["values"] ) && is_array( $person_data[$ch]["values"] ) ) {
-                            foreach ( $person_data[$ch]["values"] as $mi => $v ) {
-                                if ( isset( $v["value"] ) ) { $values[] = esc_html( $v["value"] ); }
-                            }
-////////////////////////////////////////////////////////////////////////////////
-                        } else {
-                            foreach ( $person_data[$ch] as $mi => $v ) {
-                                if ( isset( $v["value"] ) ){ $values[] = esc_html( $v["value"] ); }
-                            }
-                        }
 
-                        $html_body .= implode( $multi_separator, (array) $values );
-                    }
-                    $html_body .= '</td>';
+                            $value = implode( $multi_separator, (array) $values );
+                        }
+                        echo esc_html( $value );
+                        ?>
+                    </td> <?php
                 }
             }
+            ?>
+            <td>
+                <?php echo esc_html( $person_data['sources']["values"][0]["value"] ); ?>
+            </td>
 
-            $html_body .= '<td>';
-            $html_body .= $person_data['sources']["values"][0]["value"];
-            $html_body .= '</td>';
 
-
-            $html_body .= '<td>';
+            <td>
+            <?php
             if ( ( isset( $person_data['assigned_to'] ) && $person_data['assigned_to'] != '' ) ) {
-                $html_body .= esc_html( get_user_by( 'id', $person_data['assigned_to'] )->data->display_name );
-            } else { $html_body .= 'Not Set'; }
-            $html_body .= '</td>';
-
-            $html_body .= '</tr>';
-        }
-
-        $html_body .= '</tbody>';
-
-
-
-        $html_heading = '<thead>';
-        $html_heading .= '<tr>';
-        $html_heading .= '<th data-col-id=0></th>';
-
-        $html_heading .= '<th data-col-id=1>';
-        $html_heading .= '<span class="cflabel">';
-        $html_heading .= esc_html( translate( 'Contact Name', 'disciple_tools' ) );
-        $html_heading .= '</span>';
-        //$html_heading .= '<br/><span class="cffield">title</span>';
-        $html_heading .= '</th> ';
-
-
-        foreach ( $headings as $hi => $heading ) {
-
-            if ( $heading == 'title' ) {
-            } else if ( $heading == 'assigned_to' ) {
-            } else if ( $heading == 'sources' ) {
+                echo esc_html( get_user_by( 'id', $person_data['assigned_to'] )->data->display_name );
             } else {
-
-                $html_heading .= '<th data-col-id='.$hi.'>';
-                $html_heading .= '<span class="cflabel">';
-                $ch = str_replace( $prefix, '', $heading );
-                if ( isset( $cfs[$ch], $cfs[$ch]['name'] ) ) {
-                    $str = strval( $cfs[$ch]['name'] );
-                    $html_heading .= esc_html( translate( $str, 'disciple_tools' ) );
-                } else if ( isset( $channels[$ch], $channels[$ch]['label'] ) ) {
-                    $str = strval( $channels[$ch]['label'] );
-                    $html_heading .= esc_html( translate( $str, 'disciple_tools' ) );
-                }
-                $html_heading .= '</span>';
-
-                //$html_heading .= '<br/>';
-                //$html_heading .= '<span class="cffield">';
-                //$html_heading .= esc_html( translate( $heading, 'disciple_tools' ) );
-                //$html_heading .= '</span>';
-                $html_heading .= '</th>';
+                echo esc_html( 'Not Set' );
             }
-        }
+            ?>
+            </td>
 
-        $html_heading .= '<th><span class="cflabel">';
-        $html_heading .= esc_html( translate( 'Source', 'disciple_tools' ) );
-        $html_heading .= '</span></th>';
+            </tr>
+        <?php } ?>
 
-        $html_heading .= '<th><span class="cflabel">';
-        $html_heading .= esc_html( translate( 'Assigned To', 'disciple_tools' ) );
-        $html_heading .= '</span></th>';
-
-        $html_heading .= '</tr>';
-        $html_heading .= '</thead>';
-
-        $html = '<table class="data-table">'.$html_heading.$html_body.'</table>';
+        </tbody>
 
 
-        $error_html = '';
+
+
+
+        </table>
+
+        <?php
         $total_data_rows = count( (array) $people );
 
         foreach ( $error_summary as $ch => $err ){
             $column_type = null;
             $channel_field = str_replace( $prefix, '', $ch );
-            $error_html .= '<div class="error-summary-title">Column ';     //str_replace($prefix,'',$ch)
-            //$error_html .= '-->'.$ch.'<--';
-
-            $error_html .= '<span class="error-field-name">';
-
+            $error_html = '';
             if ( isset( $cfs[$ch], $cfs[$ch]['name'] ) ) {
                 $error_html .= $cfs[$ch]['name'];
-                if ( isset( $cfs[$ch]['type'] ) ) { $column_type = $cfs[$ch]['type']; }
+                if ( isset( $cfs[$ch]['type'] ) ) {
+                    $column_type = $cfs[$ch]['type'];
+                }
             } else if ( isset( $channels[$channel_field], $channels[$channel_field]['label'] ) ) {
                 $error_html .= $channels[$channel_field]['label'];
 
-            } else { $error_html .= $ch; }
+            } else {
+                $error_html .= $ch;
+            }
+            ?>
+            <div class="error-summary-title">Column
 
-            $error_html .= '</span>';
+            <span class="error-field-name">
+                <?php echo esc_html( $error_html ); ?>
+            </span>
 
+            <?
+            $error_html = '';
             if ( $column_type != null && in_array( $column_type, [ 'key_select', 'multi_select' ] ) ) {
                 $error_html .= ' match allowed values';
             } else if ( $column_type == 'date' ) {
@@ -1922,22 +1940,22 @@ class DT_Import_Export_Tab_Contact {
             } else {
                 $error_html .= ' needs to contain valid format';
             }
+            ?>
+            <?php echo esc_html( $error_html ); ?>
 
-            $error_html .= '</div>';
-            //TODO Column Email needs to contain valid email address format
-            //$error_html .= '<div style="clear:both;"></div>';
+            </div>
+<!--            //TODO Column Email needs to contain valid email address format-->
+<!--            //$error_html .= '<div style="clear:both;"></div>';-->
 
-            $error_html .= '<div class="error-summary-details">';
-            $error_html .= $err['error-count'].' out of '.$total_data_rows.' rows contain invalid format.<br/>';
-            $error_html .= '</div>';
-            $error_html .= '<div style="clear:both;"></div>';
-        }
+            <div class="error-summary-details">
+            <?php echo esc_html( $err['error-count'] ); ?> out of <?php echo esc_html( $total_data_rows ); ?> rows contain invalid format.<br/>
+            </div>
+            <div style="clear:both;"></div>
+        <?php }
 
-        if ( count( $error_summary ) > 0 ) {
-            $error_html .= '<div class="error-summary-details">Please fix these issues before importing.</div>';
-        }
-        $html = $error_html.$html;
-        return $html;
+        if ( count( $error_summary ) > 0 ) : ?>
+            <div class="error-summary-details">Please fix these issues before importing.</div>
+        <?php endif;
     }
 
     public static function display_data_version_1( $people, $con_headers_info, $csv_headers ) {
@@ -2061,8 +2079,7 @@ class DT_Import_Export_Tab_Contact {
         $data['fields'] = Disciple_Tools_Contact_Post_Type::instance()->get_custom_fields_settings();
 
         if ( isset( $data['fields']['sources'] ) ) {
-            //$data['fields']['sources']['default'] = Disciple_Tools_Contacts::list_sources();
-            $my_list_sources = Disciple_Tools_Contacts::list_sources();
+            $my_list_sources = $data['fields']['sources']['default'];
             foreach ( $my_list_sources as $my_list_source_index => $my_list_source_label ) {
                 if ( !( isset( $my_list_source ) && strlen( $my_list_source ) > 0 ) ) {
                     $my_list_source_label = $my_list_source_index;
