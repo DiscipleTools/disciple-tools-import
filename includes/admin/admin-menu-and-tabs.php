@@ -233,12 +233,12 @@ class DT_Import_Export_Menu {
                         //$temp_contacts_data
                         $delimeter = ',';
                         if ( isset( $_POST["csv_delimeter_temp"] ) ) {
-                            $delimeter = sanitize_text_field( wp_unslash( $_POST['csv_delimeter_temp'] ) );
+                            $delimeter = sanitize_text_field( wp_unslash( self::dt_sanitize_post( $_POST['csv_delimeter_temp'] ) ) );
                         }
 
                         $multiseperator = ';';
                         if ( isset( $_POST["csv_multiseperator_temp"] ) ) {
-                            $multiseperator = sanitize_text_field( wp_unslash( $_POST['csv_multiseperator_temp'] ) );
+                            $multiseperator = sanitize_text_field( self::dt_sanitize_post( wp_unslash( $_POST['csv_multiseperator_temp'] ) ) );
                         }
 
                         $filepath = '';
