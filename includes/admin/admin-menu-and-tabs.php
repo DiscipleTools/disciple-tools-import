@@ -747,8 +747,8 @@ class DT_Import_Export_Tab_Contact {
                         }
 
                         ?>
-                        <tr class="mapper-coloumn" data-row-id="<?php esc_html_e( "{$ci}", 'disciple_tools' ) ?>">
-
+                        <?php /** <tr class="mapper-coloumn" data-row-id="<?php esc_html_e( "{$ci}", 'disciple_tools' ) ?>"> */ ?>
+                        <tr class="mapper-coloumn" data-row-id="<?php sprintf( __( '%s', 'disciple_tools' ), $ci ) ?>">
                             <th data-field="<?php esc_html_e( "{$ch}", 'disciple_tools' ) ?>" class="src-column">
                             <?php //= $mapper_title ?><?php echo esc_html( $uploaded_file_headers[$ci] ) ?>
                             </th>
