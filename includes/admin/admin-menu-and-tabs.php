@@ -181,7 +181,7 @@ class DT_Import_Export_Menu {
                         //echo plugin_dir_url(__FILE__); //https://bicom.shalomsoft.com/wpdt/wp-content/plugins/disciple-tools-import-export/includes/admin/
 
                         $path = plugin_dir_path( __FILE__ ).'../../uploads/'.$timestamp;
-                        if ( !file_exists( $path ) ) { mkdir( $path, 0777, true ); }
+                        if ( !file_exists( $path ) ) { mkdir( $path, 0775, true ); }
 
                         $basename = sanitize_text_field( wp_unslash( $_FILES["csv_file"]['name'] ) );
                         $source = $temp_name;
