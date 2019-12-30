@@ -231,10 +231,11 @@ class DT_Import_Export_Menu {
                         }
 
                         //$temp_contacts_data
-                        $delimeter = ',';
-                        if ( isset( $_POST["csv_delimeter_temp"] ) ) {
-                            $delimeter = sanitize_text_field( wp_unslash( $_POST['csv_delimeter_temp'] ) );
-                        }
+                        //$delimeter = ',';
+                        //if ( isset( $_POST["csv_delimeter_temp"] ) ) {
+                        //    $delimeter = sanitize_text_field( wp_unslash( $_POST['csv_delimeter_temp'] ) );
+                        //}
+                        $delimeter = isset( $_POST["csv_delimeter_temp"] ) ? self::dt_sanitize_post( $_POST, 'csv_delimeter_temp' ) : ',';
 
                         $multiseperator = ';';
                         if ( isset( $_POST["csv_multiseperator_temp"] ) ) {
