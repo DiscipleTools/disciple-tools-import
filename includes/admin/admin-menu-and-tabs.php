@@ -901,7 +901,7 @@ class DT_Import_Export_Tab_Contact {
                         </ul>
 
                         <?php else : ?>
-                        <span>Value: <strong><?php esc_html_e( "{$my_opt_field['default']}", 'disciple_tools' ) ?></strong></span><br/>
+                        <span>Value: <strong><?php echo esc_attr( $my_opt_field['default'] ) ?></strong></span><br/>
                         <?php endif; ?>
 
                     </div>
