@@ -748,8 +748,8 @@ class DT_Import_Export_Tab_Contact {
 
                         ?>
                         <?php /** <tr class="mapper-coloumn" data-row-id="<?php esc_html_e( "{$ci}", 'disciple_tools' ) ?>"> */ ?>
-                        <tr class="mapper-coloumn" data-row-id="<?php esc_html_e( $ci, 'disciple_tools' ) ?>">
-                            <th data-field="<?php esc_html_e( "{$ch}", 'disciple_tools' ) ?>" class="src-column">
+                        <tr class="mapper-coloumn" data-row-id="<?php echo esc_attr( $ci ) ?>">
+                            <th data-field="<?php echo esc_attr( $ch ) ?>" class="src-column">
                             <?php //= $mapper_title ?><?php echo esc_html( $uploaded_file_headers[$ci] ) ?>
                             </th>
 
@@ -764,23 +764,23 @@ class DT_Import_Export_Tab_Contact {
                                             ];
                                 echo self::get_dropdown_list_html( $ch, "csv_mapper_{$ci}", $con_headers_info, $ch, $dd_params, true ) ?>
                                 <?php /** <div id="helper-fields-<?php echo $ci ?>" class="helper-fields"<?php if ( $col_data_type!='key_select'): ?> style="display:none"<?php endif; ?>></div> */ ?>
-                                <div id="helper-fields-<?php esc_attr_e( $ci, 'disciple_tools' ) ?>" class="helper-fields" style="display:none"></div>
+                                <div id="helper-fields-<?php echo esc_attr( $ci ) ?>" class="helper-fields" style="display:none"></div>
 
                             </td>
 
 
                             <td class="mapper-column">
-                            <div id="unique-values-<?php esc_attr_e( $ci, 'disciple_tools' ) ?>"
+                            <div id="unique-values-<?php echo esc_attr( $ci ) ?>"
                                 class="unique-values"
-                                data-id="<?php esc_attr_e( $ci, 'disciple_tools' ) ?>"
-                                data-type="<?php esc_attr_e( $col_data_type, 'disciple_tools' ) ?>"
+                                data-id="<?php echo esc_attr( $ci ) ?>"
+                                data-type="<?php echo esc_attr( $col_data_type ) ?>"
                                 <?php /** <?php if ( $col_data_type!='key_select' ) : ?> style="display:none"<?php endif; ?>> */ ?>
                                 <?php if ( !( $col_data_type == 'key_select' || $col_data_type == 'multi_select' ) ) : ?> style="display:none"<?php endif; ?>>
 
                                 <div class="mapper-helper-text">
                                     <span class="mapper-helper-title">Map import values to DT values</span><br/>
                                     <span class="mapper-helper-description">
-                                        <span class="selected-mapper-column-name"><?php esc_html_e( "{$ch}", 'disciple_tools' ) ?><?php //echo $mapper_title ?></span>
+                                        <span class="selected-mapper-column-name"><?php echo esc_attr( $ch ) ?><?php //echo $mapper_title ?></span>
                                         only accepts specific values (as a Selection). 
                                         Please map following unique values from your data to existing values in DT.
                                         You can add new values into the DT system if you want by first ...</span>
@@ -794,7 +794,7 @@ class DT_Import_Export_Tab_Contact {
                                    <tr>
                                        <td>
                                             <?php if ( strlen( trim( $v ) ) > 0 ): ?>
-                                                <?php esc_html_e( "{$v}", 'disciple_tools' ) ?>
+                                                <?php echo esc_attr( $v ) ?>
                                             <?php else : ?>
                                                 <span class="empty">-blank/null-</span>
                                             <?php endif; ?>
