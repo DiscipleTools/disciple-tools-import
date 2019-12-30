@@ -803,17 +803,17 @@ class DT_Import_Export_Tab_Contact {
 
                                        <td>
 
-                                            <input name="VMD[<?php esc_attr_e( "{$ci}", 'disciple_tools' ) ?>][<?php esc_attr_e( "{$vi}", 'disciple_tools' ) ?>]" type="hidden" value="<?php esc_attr_e( "{$v}", 'disciple_tools' ) ?>" />
+                                            <input name="VMD[<?php echo esc_attr( $ci ) ?>][<?php echo esc_attr( $vi ) ?>]" type="hidden" value="<?php echo esc_attr( $v ) ?>" />
 
-                                            <select id="value-mapper-<?php esc_attr_e( "{$ci}", 'disciple_tools' ) ?>-<?php esc_attr_e( "{$vi}", 'disciple_tools' ) ?>"
-                                                    name="VM[<?php esc_attr_e( "{$ci}", 'disciple_tools' ) ?>][<?php esc_attr_e( "{$vi}", 'disciple_tools' ) ?>]"
-                                                    class="value-mapper-<?php esc_attr_e( "{$ci}", 'disciple_tools' ) ?>"
-                                                    data-value="<?php esc_attr_e( "{$v}", 'disciple_tools' ) ?>">
+                                            <select id="value-mapper-<?php echo esc_attr( $ci ) ?>-<?php echo esc_attr( $vi ) ?>"
+                                                    name="VM[<?php echo esc_attr( $ci ) ?>][<?php echo esc_attr( $vi ) ?>]"
+                                                    class="value-mapper-<?php echo esc_attr( $ci ) ?>"
+                                                    data-value="<?php echo esc_attr( $v ) ?>">
                                             <option>--Not Selected--</option>
                                             <?php /**/ ?>
                                             <?php if ( isset( $my_opt_fields['fields'][$ch]['default'] ) ): ?>
                                             <?php foreach ( $my_opt_fields['fields'][$ch]['default'] as $di => $dt ): ?>
-                                                <option value="<?php esc_attr_e( "{$di}", 'disciple_tools' ) ?>"<?php if ( $di == $v ): ?> selected="selected"<?php endif; ?>><?php esc_attr_e( "{$dt['label']}", 'disciple_tools' ) ?></option>
+                                                <option value="<?php echo esc_attr( $di ) ?>"<?php if ( $di == $v ): ?> selected="selected"<?php endif; ?>><?php echo esc_attr( $dt['label'] ) ?></option>
                                             <?php endforeach; ?>
                                             <?php endif; ?> 
                                             <?php /***/ ?>
@@ -883,9 +883,9 @@ class DT_Import_Export_Tab_Contact {
                     <?php foreach ( $my_opt_fields['fields'] as $my_opt_field_index => $my_opt_field ): ?>
                     <div id="helper-fields-<?php echo esc_html( $my_opt_field_index ) ?>-txt" data-type="<?php echo esc_html( $my_opt_field['type'] ) ?>">
 
-                        <span>Field: <strong><?php esc_html_e( "{$my_opt_field_index}", 'disciple_tools' ) ?></strong></span><br/>
-                        <span>Type: <strong><?php esc_html_e( "{$my_opt_field['type']}", 'disciple_tools' ) ?></strong></span><br/>
-                        <span>Description: <strong><?php esc_html_e( "{$my_opt_field['description']}", 'disciple_tools' ) ?></strong></span><br/>
+                        <span>Field: <strong><?php echo esc_attr( $my_opt_field_index ) ?></strong></span><br/>
+                        <span>Type: <strong><?php echo esc_attr( $my_opt_field['type'] ) ?></strong></span><br/>
+                        <span>Description: <strong><?php echo esc_attr( $my_opt_field['description'] ) ?></strong></span><br/>
 
                         <?php if ( $my_opt_field['type'] == 'key_select' || $my_opt_field['type'] == 'multi_select' ): ?>
 
@@ -894,8 +894,8 @@ class DT_Import_Export_Tab_Contact {
                         <?php asort( $my_opt_field['default'] ); ?>    
                         <?php foreach ( $my_opt_field['default'] as $di => $dt ): ?>
                         <li>
-                            <strong><span class="hlp-value"><?php esc_html_e( "{$di}", 'disciple_tools' ) ?></span></strong>:
-                            <span class="hlp-label"><?php esc_html_e( "{$dt['label']}", 'disciple_tools' ) ?></span>
+                            <strong><span class="hlp-value"><?php echo esc_attr( $di ) ?></span></strong>:
+                            <span class="hlp-label"><?php echo esc_attr( $dt['label'] ) ?></span>
                         </li>
                         <?php endforeach; ?>
                         </ul>
