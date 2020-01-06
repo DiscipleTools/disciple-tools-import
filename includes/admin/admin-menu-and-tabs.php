@@ -767,7 +767,7 @@ class DT_Import_Export_Tab_Contact {
                                             ];
 
                                 $dropdown_list_html = self::get_dropdown_list_html( esc_attr( $ch ), esc_attr( "csv_mapper_{$ci}" ), $con_headers_info, esc_attr( $ch ), $dd_params, true );
-                                echo dropdown_list_html;
+                                echo esc_attr( dropdown_list_html );
                                 ?>
                                 
                                 <?php /** <div id="helper-fields-<?php echo $ci ?>" class="helper-fields"<?php if ( $col_data_type!='key_select'): ?> style="display:none"<?php endif; ?>></div> */ ?>
