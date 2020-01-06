@@ -1883,7 +1883,7 @@ class DT_Import_Export_Tab_Contact {
                         ?>
                     </td> <?php
                 }
-            }
+}
             ?>
             <td>
                 <?php echo esc_html( $person_data['sources']["values"][0]["value"] ); ?>
