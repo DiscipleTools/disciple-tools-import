@@ -180,24 +180,25 @@ class DT_Import_Export_Menu {
                         //echo plugin_dir_path(__FILE__); ///home/bicomau/public_html/wpdt/wp-content/plugins/disciple-tools-import-export/includes/admin/
                         //echo plugin_dir_url(__FILE__); //https://bicom.shalomsoft.com/wpdt/wp-content/plugins/disciple-tools-import-export/includes/admin/
 
-                        $path = plugin_dir_path( __FILE__ ).'../../uploads';
-                        //$path = plugin_dir_path( __FILE__ ).'../../uploads/'.$timestamp;
-                        //if ( !file_exists( $path ) ) { mkdir( $path, 0775, true ); }
+                        
+                        $path = plugin_dir_path( __FILE__ ).'../../uploads/'.$timestamp;
+                        if ( !file_exists( $path ) ) { mkdir( $path, 0775, true ); }
 
-                        //$basename = sanitize_text_field( wp_unslash( $_FILES["csv_file"]['name'] ) );
-                        //$source = $temp_name;
-                        //$destination = "{$path}/{$basename}";
-                        //move_uploaded_file( $source, $destination );
+                        $basename = sanitize_text_field( wp_unslash( $_FILES["csv_file"]['name'] ) );
+                        $source = $temp_name;
+                        $destination = "{$path}/{$basename}";
+                        move_uploaded_file( $source, $destination );
                         //
+                        /**$path = plugin_dir_path( __FILE__ ).'../../uploads';
                         $filename   = uniqid() . "_" . $timestamp; // 5dab1961e93a7_1571494241
                         $extension  = pathinfo( $_FILES["csv_file"]["name"], PATHINFO_EXTENSION ); // csv
                         $basename   = $filename . '.' . $extension; // 5dab1961e93a7_1571494241.csv
                         //
                         $source = $_FILES["csv_file"]["tmp_name"];
                         $destination = "{$path}/{$basename}";
-                        if (!move_uploaded_file( $source, $destination ) ){
+                        if ( !move_uploaded_file( $source, $destination ) ){
                             throw new RuntimeException('Failed to move uploaded file.');
-                        }
+                        }*/
 
                         $file_source = null;
                         if ( isset( $_POST['csv_source'] ) ) {
