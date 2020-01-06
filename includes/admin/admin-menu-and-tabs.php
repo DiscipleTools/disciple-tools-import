@@ -80,7 +80,8 @@ class DT_Import_Export_Menu {
         if ( !isset( $post[$key] ) ){
             return false;
         }
-        $post[$key] = self::dt_sanitize_array( $post[$key] );
+        //this doesnt work!!
+        //$post[$key] = self::dt_sanitize_array( $post[$key] );
         return $post[$key];
     }
 
@@ -759,11 +760,12 @@ class DT_Import_Export_Tab_Contact {
                             <td class="dest-column">
                                 <?php
                                 $dd_params = [
-                                                'name' => "csv_mapper[{$ci}]",
+                                                'name' => esc_attr( csv_mapper[{$ci}] ),
                                                 'class' => 'cf-mapper',
                                                 //'onchange' => "check_column_mappings({$ci})"
                                                 'onchange' => "getDefaultValues({$ci})"
                                             ];
+
                                 echo self::get_dropdown_list_html( esc_attr( $ch ), esc_attr( "csv_mapper_{$ci}" ), $con_headers_info, esc_attr( $ch ), $dd_params, true ) ?>
                                 <?php /** <div id="helper-fields-<?php echo $ci ?>" class="helper-fields"<?php if ( $col_data_type!='key_select'): ?> style="display:none"<?php endif; ?>></div> */ ?>
                                 <div id="helper-fields-<?php echo esc_attr( $ci ) ?>" class="helper-fields" style="display:none"></div>
