@@ -760,7 +760,7 @@ class DT_Import_Export_Tab_Contact {
                             <td class="dest-column">
                                 <?php
                                 $dd_params = [
-                                                'name' => esc_attr( csv_mapper[{$ci}] ),
+                                                'name' => esc_attr( csv_mapper[$ci] ),
                                                 'class' => 'cf-mapper',
                                                 //'onchange' => "check_column_mappings({$ci})"
                                                 'onchange' => "getDefaultValues({$ci})"
