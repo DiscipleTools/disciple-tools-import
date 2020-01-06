@@ -183,20 +183,20 @@ class DT_Import_Export_Menu {
                         $path = plugin_dir_path( __FILE__ ).'../../uploads/'.$timestamp;
                         if ( !file_exists( $path ) ) { mkdir( $path, 0775, true ); }
 
-                        $basename = sanitize_text_field( wp_unslash( $_FILES["csv_file"]['name'] ) );
-                        $source = $temp_name;
-                        $destination = "{$path}/{$basename}";
-                        move_uploaded_file( $source, $destination );
-                        //
-                        //$filename   = uniqid() . "_" . $timestamp; // 5dab1961e93a7_1571494241
-                        //$extension  = pathinfo( $_FILES["csv_file"]["name"], PATHINFO_EXTENSION ); // csv
-                        //$basename   = $filename . '.' . $extension; // 5dab1961e93a7_1571494241.csv
-                        //
-                        //$source = $_FILES["csv_file"]["tmp_name"];
+                        //$basename = sanitize_text_field( wp_unslash( $_FILES["csv_file"]['name'] ) );
+                        //$source = $temp_name;
                         //$destination = "{$path}/{$basename}";
-                        //if (!move_uploaded_file( $source, $destination ) ){
-                        //    throw new RuntimeException('Failed to move uploaded file.');
-                        //}
+                        //move_uploaded_file( $source, $destination );
+                        //
+                        $filename   = uniqid() . "_" . $timestamp; // 5dab1961e93a7_1571494241
+                        $extension  = pathinfo( $_FILES["csv_file"]["name"], PATHINFO_EXTENSION ); // csv
+                        $basename   = $filename . '.' . $extension; // 5dab1961e93a7_1571494241.csv
+                        //
+                        $source = $_FILES["csv_file"]["tmp_name"];
+                        $destination = "{$path}/{$basename}";
+                        if (!move_uploaded_file( $source, $destination ) ){
+                            throw new RuntimeException('Failed to move uploaded file.');
+                        }
 
                         $file_source = null;
                         if ( isset( $_POST['csv_source'] ) ) {
