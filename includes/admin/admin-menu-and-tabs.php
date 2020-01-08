@@ -188,11 +188,11 @@ class DT_Import_Export_Menu {
                         //$basename = sanitize_text_field( wp_unslash( $_FILES["csv_file"]['name'] ) );
                         $source = $temp_name;
                         //$destination = "{$path}/{$basename}";
-                        
+
                         $filename   = uniqid() . "_" . $timestamp; // 5dab1961e93a7_1571494241
-                        $extension  = pathinfo( $_FILES["csv_file"]["name"], PATHINFO_EXTENSION ); // csv
+                        $extension  = pathinfo( sanitize_text_field( wp_unslash( $_FILES["csv_file"]["name"] ) ), PATHINFO_EXTENSION ); // csv
                         $destination = "{$path}/{$filename}.{$extension}";
-                        
+
                         move_uploaded_file( $source, $destination );
 
                         /**$path = plugin_dir_path( __FILE__ ).'../../uploads';
@@ -1570,7 +1570,7 @@ class DT_Import_Export_Tab_Contact {
         $multi_separator = ';';
         $people = [];
 
-        if( is_array( $csv_headers ) ) {
+        if ( is_array( $csv_headers ) ) {
             $chi = array_count_values( $csv_headers );
         } else {
             $chi = [];
