@@ -191,7 +191,7 @@ class DT_Import_Export_Menu {
                         
                         $filename   = uniqid() . "_" . $timestamp; // 5dab1961e93a7_1571494241
                         $extension  = pathinfo( $_FILES["csv_file"]["name"], PATHINFO_EXTENSION ); // csv
-                        $destination = "{$filename}.{$extension}";
+                        $destination = "{$path}/{$filename}.{$extension}";
                         
                         move_uploaded_file( $source, $destination );
 
@@ -772,7 +772,7 @@ class DT_Import_Export_Tab_Contact {
                                             ];
 
                                 $dropdown_list_html = self::get_dropdown_list_html( esc_attr( $ch ), esc_attr( "csv_mapper_{$ci}" ), $con_headers_info, esc_attr( $ch ), $dd_params, true );
-                                echo esc_attr( dropdown_list_html );
+                                echo ( dropdown_list_html );
                                 ?>
                                 
                                 <?php /** <div id="helper-fields-<?php echo $ci ?>" class="helper-fields"<?php if ( $col_data_type!='key_select'): ?> style="display:none"<?php endif; ?>></div> */ ?>
