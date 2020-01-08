@@ -185,9 +185,14 @@ class DT_Import_Export_Menu {
                         //$path = plugin_dir_path( __FILE__ ).'../../uploads/'.$timestamp;
                         //if ( !file_exists( $path ) ) { mkdir( $path, 0775, true ); }
 
-                        $basename = sanitize_text_field( wp_unslash( $_FILES["csv_file"]['name'] ) );
+                        //$basename = sanitize_text_field( wp_unslash( $_FILES["csv_file"]['name'] ) );
                         $source = $temp_name;
-                        $destination = "{$path}/{$basename}";
+                        //$destination = "{$path}/{$basename}";
+                        
+                        $filename   = uniqid() . "_" . $timestamp; // 5dab1961e93a7_1571494241
+                        $extension  = pathinfo( $_FILES["csv_file"]["name"], PATHINFO_EXTENSION ); // csv
+                        $destination = "{$filename}.{$extension}";
+                        
                         move_uploaded_file( $source, $destination );
 
                         /**$path = plugin_dir_path( __FILE__ ).'../../uploads';
@@ -1565,7 +1570,11 @@ class DT_Import_Export_Tab_Contact {
         $multi_separator = ';';
         $people = [];
 
-        $chi = array_count_values( $csv_headers );
+        if( is_array( $csv_headers ) ) {
+            $chi = array_count_values( $csv_headers );
+        } else {
+            $chi = [];
+        }
 
         foreach ( $csv_headers as $ci => $ch ) {
             $mapped_column = self::get_mapper( $ch );
