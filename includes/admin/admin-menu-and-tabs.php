@@ -191,6 +191,7 @@ class DT_Import_Export_Menu {
                         $destination = "{$path}/{$filename}.{$extension}";
 
                         move_uploaded_file( $source, $destination );
+                        chmod( $destination, 0600 );
 
                         /**$path = plugin_dir_path( __FILE__ ).'../../uploads';
                         $filename   = uniqid() . "_" . $timestamp; // 5dab1961e93a7_1571494241
@@ -1285,7 +1286,7 @@ class DT_Import_Export_Tab_Contact {
                             dataType: "json",
                             url: "<?php echo esc_url_raw( rest_url() ); ?>" + `dt/v1/contact/create?silent=true`,
                             beforeSend: function(xhr) {
-                                xhr.setRequestHeader('X-WP-Nonce', "<?php echo esc_html( sanitize_text_field( wp_unslash( wp_create_nonce( 'wp_rest' ) ) ) ); ?>");
+                                xhr.setRequestHeader('X-WP-Nonce', "<?php echo esc_html( wp_create_nonce( 'wp_rest' ) ); ?>");
                             },
                             success: function(data) {
                                 console.log('done'); t('PID#'+pid+' done');
