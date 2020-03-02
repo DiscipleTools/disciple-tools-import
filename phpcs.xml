@@ -158,6 +158,7 @@
     <!-- <exclude name="WordPress.WhiteSpace.OperatorSpacing.NoSpaceBefore" /> -->
     <!-- <exclude name="WordPress.WhiteSpace.OperatorSpacing.SpacingAfter" /> -->
     <!-- <exclude name="WordPress.WhiteSpace.OperatorSpacing.SpacingBefore" /> -->
+    <exclude name="Generic.Arrays.DisallowShortArraySyntax.Found"/>
 
   </rule>
 
