@@ -112,25 +112,23 @@ class DT_Import_Export_Menu {
 
             <?php
             foreach ( [
-                //'general' => ['tab' => 'general', 'label' => 'General'],
-                //'second' => ['tab' => 'second', 'label' => 'Second'],
                 'contact' => [
                     'tab' => 'contact',
                     'label' => 'Contact'
                 ],
-                'location' => [
-                    'tab' => 'location',
-                    'label' => 'Location'
-                ]
-            ] as $mytab):
-                $mytab_name = "{$mytab['tab']}";
-                $mytab_label = "{$mytab['label']}";
-                $mytab_link = "admin.php?page={$this->token}&tab={$mytab_name}";
+//                'location' => [
+//                    'tab' => 'location',
+//                    'label' => 'Location'
+//                ]
+            ] as $my_tab):
+                $my_tab_name = "{$my_tab['tab']}";
+                $my_tab_label = "{$my_tab['label']}";
+                $my_tab_link = "admin.php?page={$this->token}&tab={$my_tab_name}";
                 ?>
 
-                <a href="<?php echo esc_html( $mytab_link ) ?>"
-                   class="nav-tab <?php ( $tab == $mytab_name ) ? esc_attr_e( 'nav-tab-active', 'dt_import_export' ) : print ''; ?>">
-                <?php echo esc_attr( $mytab_label ) ?>
+                <a href="<?php echo esc_html( $my_tab_link ) ?>"
+                   class="nav-tab <?php ( $tab == $my_tab_name ) ? esc_attr_e( 'nav-tab-active', 'dt_import_export' ) : print ''; ?>">
+                <?php echo esc_attr( $my_tab_label ) ?>
                 </a>
 
             <?php endforeach; ?>
@@ -148,7 +146,6 @@ class DT_Import_Export_Menu {
 
             } else if ( $tab == 'contact' ) {
                 $object = new DT_Import_Export_Tab_Contact();
-                //$object->content();
 
                 if ( isset( $_POST['csv_import_nonce'] )
                             && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['csv_import_nonce'] ) ), 'csv_import' )
@@ -175,16 +172,8 @@ class DT_Import_Export_Menu {
 
 
                         //upload file to server
-                        //echo plugin_dir_path(__FILE__); ///home/bicomau/public_html/wpdt/wp-content/plugins/disciple-tools-import-export/includes/admin/
-                        //echo plugin_dir_url(__FILE__); //https://bicom.shalomsoft.com/wpdt/wp-content/plugins/disciple-tools-import-export/includes/admin/
-
                         $path = plugin_dir_path( __FILE__ ).'../../uploads';
-                        //$path = plugin_dir_path( __FILE__ ).'../../uploads/'.$timestamp;
-                        //if ( !file_exists( $path ) ) { mkdir( $path, 0775, true ); }
-
-                        //$basename = sanitize_text_field( wp_unslash( $_FILES["csv_file"]['name'] ) );
                         $source = $temp_name;
-                        //$destination = "{$path}/{$basename}";
 
                         $filename   = uniqid() . "_" . $timestamp; // 5dab1961e93a7_1571494241
                         $extension  = pathinfo( sanitize_text_field( wp_unslash( $_FILES["csv_file"]["name"] ) ), PATHINFO_EXTENSION ); // csv
@@ -192,17 +181,6 @@ class DT_Import_Export_Menu {
 
                         move_uploaded_file( $source, $destination );
                         chmod( $destination, 0600 );
-
-                        /**$path = plugin_dir_path( __FILE__ ).'../../uploads';
-                        $filename   = uniqid() . "_" . $timestamp; // 5dab1961e93a7_1571494241
-                        $extension  = pathinfo( $_FILES["csv_file"]["name"], PATHINFO_EXTENSION ); // csv
-                        $basename   = $filename . '.' . $extension; // 5dab1961e93a7_1571494241.csv
-                        //
-                        $source = $_FILES["csv_file"]["tmp_name"];
-                        $destination = "{$path}/{$basename}";
-                        if ( !move_uploaded_file( $source, $destination ) ){
-                            throw new RuntimeException('Failed to move uploaded file.');
-                        }*/
 
                         $file_source = null;
                         if ( isset( $_POST['csv_source'] ) ) {
@@ -214,6 +192,11 @@ class DT_Import_Export_Menu {
                             $file_assigned_to = sanitize_text_field( wp_unslash( $_POST['csv_assign'] ) );
                         }
 
+                        update_option( "dt_import_export_settings", [
+                            "destination" => $destination,
+                            "source" => $file_source,
+                            "assigned_to" => $file_assigned_to
+                        ] );
                         $object->mapping( $destination, $file_source, $file_assigned_to );
 
                     } /**end-of condition --isset( $_FILES["csv_file"] )-- */
@@ -268,7 +251,15 @@ class DT_Import_Export_Menu {
                             && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['csv_correct_nonce'] ) ), 'csv_correct' )
                             && $run ) {
 
-                    if ( isset( $_POST["csv_contacts"] ) ) {
+                    if ( isset( $_POST["go_back"] ) ){
+                        $import_settings = get_option( "dt_import_export_settings", [] );
+                        if ( isset( $import_settings["destination"], $import_settings["source"], $import_settings["assigned_to"] ) ){
+                            $object->mapping( $import_settings["destination"], $import_settings["source"], $import_settings["assigned_to"] );
+                        }
+                        else {
+                            $object->content();
+                        }
+                    } elseif ( isset( $_POST["csv_contacts"] ) ) {
                         $object->insert_contacts( unserialize( base64_decode( sanitize_text_field( wp_unslash( $_POST["csv_contacts"] ) ) ) ) );
                     }
                     exit;
@@ -683,11 +674,14 @@ class DT_Import_Export_Tab_Contact {
         <?php
     }
 
-    public function mapping( $filepath, $file_source = 'web', $file_assigned_to = '' ) {
 
-//echo "path:{$filepath}<br/>";
-//echo "source:{$file_source}<br/>";
-//echo "assignedTo:{$file_assigned_to}<br/>";
+    /**
+     * Tool to map fields to their correct field options
+     * @param $filepath
+     * @param string $file_source the source field for the contacts
+     * @param string $file_assigned_to the assigned to user for the contacts.
+     */
+    public function mapping( $filepath, $file_source = 'web', $file_assigned_to = '' ) {
 
         $data = $this->mapping_process( $filepath, $file_source, $file_assigned_to );
 
@@ -1195,28 +1189,25 @@ class DT_Import_Export_Tab_Contact {
             <tbody>
             <tr>
                 <td>
-<fieldset id="debug-data-<?php echo __LINE__ ?>" class="debug-data" style="display:none"><legend onclick="jQuery('#debug-data-<?php echo __LINE__ ?> section').toggle()">CSV DATA</legend><section><pre><?php print_r( $csv_data ) ?></pre></section></fieldset>
-<fieldset id="debug-data-<?php echo __LINE__ ?>" class="debug-data" style="display:none"><legend onclick="jQuery('#debug-data-<?php echo __LINE__ ?> section').toggle()">PPL</legend><section><pre><?php print_r( $people ) ?></pre></section></fieldset>
+                <fieldset id="debug-data-<?php echo __LINE__ ?>" class="debug-data" style="display:none"><legend onclick="jQuery('#debug-data-<?php echo __LINE__ ?> section').toggle()">CSV DATA</legend><section><pre><?php print_r( $csv_data ) ?></pre></section></fieldset>
+                <fieldset id="debug-data-<?php echo __LINE__ ?>" class="debug-data" style="display:none"><legend onclick="jQuery('#debug-data-<?php echo __LINE__ ?> section').toggle()">PPL</legend><section><pre><?php print_r( $people ) ?></pre></section></fieldset>
 
                 <?php self::display_data( $people );?>
 
 
                 <form method="post" enctype="multipart/form-data">
 
-                    <input type="hidden" name="csv_contacts" value="<?php echo esc_html( base64_encode( serialize( $people ) ) ); ?>">
-
                     <?php wp_nonce_field( 'csv_correct', 'csv_correct_nonce' ); ?>
 
-                    <a href="<?php echo esc_html( admin_url( 'admin.php?page=dt_utilities&tab=contact-import' ) ) ?>"
-                       class="button button-primary"> 
-                            <?php esc_html_e( "Back - Something is wrong!", 'disciple_tools' ) ?>
-                    </a>
+                    <input type="hidden" name="csv_contacts" value="<?php echo esc_html( base64_encode( serialize( $people ) ) ); ?>">
+
+                    <input type="submit" name="go_back" class="button button-primary" value="<?php esc_html_e( "Back - Something is wrong!", 'disciple_tools' ) ?>" />
 
                     <input type="submit" name="submit" 
                            id="submit" 
                            style="background-color:#4CAF50; color:white" 
                            class="button" 
-                           value=<?php esc_html_e( "Import", 'disciple_tools' ) ?>>
+                           value=<?php esc_html_e( "Import", 'disciple_tools' ) ?> />
                     
                 </form>
 
@@ -1303,7 +1294,7 @@ class DT_Import_Export_Tab_Contact {
 
                     // an all-done action
                     function doDone() {
-                        console.log('all done!'); t('all done');
+                        console.log('All Done!'); t('All Done');
                         jQuery("#back").show();
                     }
 
@@ -1341,7 +1332,7 @@ class DT_Import_Export_Tab_Contact {
 
                     <?php
                     $num = count( $contacts );
-                    echo esc_html( sprintf( __( "Creating %s Contacts DO NOT LEAVE THE PAGE UNTIL THE BACK BUTTON APPEARS", 'disciple_tools' ), $num ) );
+                    echo esc_html( sprintf( __( "Creating %s Contacts DO NOT LEAVE THE PAGE the \"All Done\" message appears", 'disciple_tools' ), $num ) );
                     ?>
 
                 </td>
