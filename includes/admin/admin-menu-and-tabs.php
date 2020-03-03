@@ -584,9 +584,9 @@ class DT_Import_Export_Tab_Contact {
                     <table class="mapper-table">
                     <thead>
                         <tr> 
-                            <th valign="top"> Source (Uploaded File) </th>
-                            <th valign="top"> Destination (DT) </th> 
-                            <th valign="top"> Unique Values/Mapper </th>
+                            <th style="vertical-align:top"> Source (Uploaded File) </th>
+                            <th style="vertical-align:top"> Destination (DT) </th>
+                            <th style="vertical-align:top"> Unique Values/Mapper </th>
                         </tr>
                     </thead>
 
@@ -609,13 +609,12 @@ class DT_Import_Export_Tab_Contact {
                             <td class="dest-column">
                                 <?php
                                 $dd_params = [
-                                                'name' => esc_attr( 'csv_mapper['.$ci.']' ),
-                                                'class' => 'cf-mapper',
-                                                //'onchange' => "check_column_mappings({$ci})"
-                                                'onchange' => "getDefaultValues({$ci})"
-                                            ];
+                                    'name' => esc_attr( 'csv_mapper['.$ci.']' ),
+                                    'class' => 'cf-mapper',
+                                    'onchange' => "getDefaultValues({$ci})"
+                                ];
 
-                                self::get_dropdown_list_html( esc_attr( $ch ), esc_attr( "csv_mapper_{$ci}" ), $con_headers_info, esc_attr( $ch ), $dd_params, true );
+                                self::get_dropdown_list_html( $ch, "csv_mapper_{$ci}", $dd_params );
                                 ?>
                                 
                                 <div id="helper-fields-<?php echo esc_attr( $ci ) ?>" class="helper-fields" style="display:none"></div>
@@ -820,7 +819,7 @@ class DT_Import_Export_Tab_Contact {
 
         //correct csv headers
         foreach ( $csv_headers as $ci => $ch ) {
-            $mapped_column = self::get_mapper( $ch );
+            $mapped_column = self::find_field_for_col_header( $ch );
             if ( $mapped_column != null && strlen( $mapped_column ) > 0 ) { $csv_headers[$ci] = $mapped_column; }
         }
 
@@ -985,9 +984,6 @@ class DT_Import_Export_Tab_Contact {
         ?>
         <!-- Box -->
         <table class="widefat striped">
-            <thead>
-            <th></th>
-            </thead>
             <tbody>
             <tr>
                 <td>
@@ -1035,15 +1031,14 @@ class DT_Import_Export_Tab_Contact {
                             beforeSend: function(xhr) {
                                 xhr.setRequestHeader('X-WP-Nonce', "<?php echo esc_html( wp_create_nonce( 'wp_rest' ) ); ?>");
                             },
-                            success: function(data) {
+                            success: function() {
                                 console.log('done'); t('PID#'+pid+' done');
-                                //jQuery('#contact-links').append('<li><a href="'+data.permalink+'" target="_blank">Contact #'+data.post_id+'</a></li>');
                                 done();
                             },
                             error: function(xhr) { // if error occured
                                 alert("Error occured.please try again");
                                 console.log("%o",xhr);
-                                t('PID#'+pid+' Error occured.please try again');
+                                t('PID#'+pid+' Error occurred. please try again');
                             }
                         });
                     }
@@ -1119,16 +1114,11 @@ class DT_Import_Export_Tab_Contact {
         return $data;
     }
 
-    public static function get_mapper( $name = '' ) {
-        return self::colheadcompare( $name );
-    }
 
-    public static function colheadcompare( $source_col_heading ) {
+
+    public static function find_field_for_col_header( $source_col_heading = '' ) {
         $column_name = null;
         $src = strtolower( trim( $source_col_heading ) );
-        //echo "souce-heading:{$src}<br/>";
-
-        // @NOTE: prefix "contact_"
         $prefix = 'contact_';
 
         if ( array_search( $src, self::$contact_name_headings ) > 0 ) {
@@ -1143,12 +1133,7 @@ class DT_Import_Export_Tab_Contact {
             $column_name = "{$prefix}address";
 
         } else {
-            //get custom contact fields added by user
-            //$custom_field_options = dt_get_option( "dt_field_customizations" );
-            //if ( isset( $custom_field_options['contacts'][$src] ) ) {
-            //    $column_name = $src;
-            //}
-            $fields = Disciple_Tools_Contacts::get_contact_fields();
+            $fields = Disciple_Tools_Contact_Post_Type::instance()->get_custom_fields_settings();
             if ( isset( $fields[$src] ) ) {
                 $column_name = $src;
             } else {
@@ -1181,7 +1166,7 @@ class DT_Import_Export_Tab_Contact {
         return $column_name;
     }
 
-    public static function get_dropdown_list_html( $field, $id = 'selector', $data = [], $selected = null, $html_options = [], $allow_all_types = true ) {
+    public static function get_dropdown_list_html( $field, $id = 'selector', $html_options = [] ) {
 
         if ( isset( $html_options['id'] ) ) { unset( $html_options['id'] ); }
 
@@ -1189,7 +1174,7 @@ class DT_Import_Export_Tab_Contact {
         $data = Disciple_Tools_Contacts::get_contact_fields();
 
         ?>
-        <select id="<?php echo esc_html( $id ); ?>" data-field="<?php echo esc_html( $field ); ?>"
+        <select id="<?php echo esc_html( $id ); ?>"
             <?php foreach ( $html_options as $opt => $values ) {
                 echo esc_html( $opt ) . ' ="' . esc_html( $values ) . '"';
             } ?>
@@ -1200,14 +1185,14 @@ class DT_Import_Export_Tab_Contact {
 
             <optgroup label="Standard Fields">
 
-                <option value="title" <?php selected( $selected == 'title' ) ?> >Contact Name</option>
+                <option value="title" <?php selected( $field == 'title' ) ?> >Contact Name</option>
 
                 <?php
                 foreach ( $channels as $label => $item ) {
                     $label = "contact_{$label}";
                     ?>
                     <option value="<?php echo esc_html( $label ); ?>"
-                        <?php selected( $selected != null && $selected == $label ) ?>
+                        <?php selected( $field != null && $field == $label ) ?>
                     ><?php echo esc_html( $item['label'] ); ?></option>
                 <?php } ?>
             </optgroup>
@@ -1223,7 +1208,7 @@ class DT_Import_Export_Tab_Contact {
             <optgroup label="Other Fields">
             <?php
             foreach ( $list_data as $key => $label ) { ?>
-                <option value="<?php echo esc_html( $key ); ?>" <?php selected( $selected != null && $selected == $key ) ?>><?php echo esc_html( $label ); ?></option>
+                <option value="<?php echo esc_html( $key ); ?>" <?php selected( $field != null && $field == $key ) ?>><?php echo esc_html( $label ); ?></option>
             <?php } ?>
             </optgroup>
         </select>
@@ -1627,7 +1612,6 @@ class DT_Import_Export_Tab_Contact {
     private static function validate_data( $field, $data ) {
         $err_count = 0;
         $multi_separator = ';';
-        //if ( $data!=null && strlen($data)>0 ) {
         $cfs = Disciple_Tools_Contact_Post_Type::instance()->get_custom_fields_settings();
 
         if ( isset( $cfs[$field] ) ) {
