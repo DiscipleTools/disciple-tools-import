@@ -177,11 +177,11 @@ class DT_Import_Export_Menu {
                         }
 
                         $import_settings = [
-                            "destination" => $destination,
                             "source" => $file_source,
                             "assigned_to" => $file_assigned_to,
                             "data" => $object->mapping_process( $destination, $file_source, $file_assigned_to ),
                         ];
+                        wp_delete_file( $destination );
                         set_transient( "dt_import_export_settings", $import_settings, 3600 * 24 );
                         $object->display_field_mapping_step();
 
@@ -665,11 +665,11 @@ class DT_Import_Export_Tab_Contact {
                                                     class="value-mapper-<?php echo esc_attr( $ci ) ?>"
                                                     data-value="<?php echo esc_attr( $v ) ?>">
                                             <option>--Not Selected--</option>
-                                            <?php if ( isset( $my_opt_fields['fields'][$ch]['default'] ) ): ?>
-                                                <?php foreach ( $my_opt_fields['fields'][$ch]['default'] as $option_key => $option_value ): ?>
+                                            <?php if ( isset( $my_opt_fields['fields'][$ch]['default'] ) && is_array( $my_opt_fields['fields'][$ch]['default'] ) ):
+                                                foreach ( $my_opt_fields['fields'][$ch]['default'] as $option_key => $option_value ): ?>
                                                 <option value="<?php echo esc_attr( $option_key ) ?>"<?php if ( $option_key == $v ): ?> selected="selected"<?php endif; ?>><?php echo esc_attr( $option_value['label'] ) ?></option>
-                                                <?php endforeach; ?>
-                                            <?php endif; ?> 
+                                                <?php endforeach;
+                                            endif; ?>
                                             </select>
                                         </td>
                                     </tr>
@@ -1225,7 +1225,6 @@ class DT_Import_Export_Tab_Contact {
                 }
             }
         }
-        //echo "destination-column-name:{$column_name}";
         return $column_name;
     }
 
@@ -1297,13 +1296,6 @@ class DT_Import_Export_Tab_Contact {
         } else {
             $header_occurrence_counts = [];
         }
-
-//        foreach ( $csv_headers as $ci => $ch ) {
-//            $mapped_column = self::get_mapper( $ch );
-//            if ( $mapped_column != null && strlen( $mapped_column ) > 0 ) {
-//                $csv_headers[$ci] = $mapped_column;
-//            }
-//        }
 
         //handle N columns to ONE column mapping
         //phone(primary)/phone(mobile) -> phone
