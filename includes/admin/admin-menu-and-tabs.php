@@ -618,7 +618,6 @@ class DT_Import_Export_Tab_Contact {
                                 self::get_dropdown_list_html( esc_attr( $ch ), esc_attr( "csv_mapper_{$ci}" ), $con_headers_info, esc_attr( $ch ), $dd_params, true );
                                 ?>
                                 
-                                <?php /** <div id="helper-fields-<?php echo $ci ?>" class="helper-fields"<?php if ( $col_data_type!='key_select'): ?> style="display:none"<?php endif; ?>></div> */ ?>
                                 <div id="helper-fields-<?php echo esc_attr( $ci ) ?>" class="helper-fields" style="display:none"></div>
 
                             </td>
@@ -702,39 +701,11 @@ class DT_Import_Export_Tab_Contact {
                     </table>
                     </div>
 
-                    <div class="helper-fields-txt" style="display:none">
-                    <?php foreach ( $my_opt_fields['fields'] as $my_opt_field_key => $my_opt_field ): ?>
-                        <div id="helper-fields-<?php echo esc_html( $my_opt_field_key ) ?>-txt" data-type="<?php echo esc_html( $my_opt_field['type'] ) ?>">
-
-                            <span>Field: <strong><?php echo esc_attr( $my_opt_field_key ) ?></strong></span><br/>
-                            <span>Type: <strong><?php echo esc_attr( $my_opt_field['type'] ) ?></strong></span><br/>
-                            <span>Description: <strong><?php echo esc_attr( $my_opt_field['description'] ?? "" ) ?></strong></span><br/>
-
-                            <?php if ( $my_opt_field['type'] == 'key_select' || $my_opt_field['type'] == 'multi_select' ): ?>
-
-                                <span>Value:</span><br/>
-                                <ul class="default-value-options">
-                                <?php asort( $my_opt_field['default'] ); ?>
-                                <?php foreach ( $my_opt_field['default'] as $option_key => $option_value ): ?>
-                                <li>
-                                    <strong><span class="hlp-value"><?php echo esc_attr( $option_key ) ?></span></strong>:
-                                    <span class="hlp-label"><?php echo esc_attr( $option_value['label'] ) ?></span>
-                                </li>
-                                <?php endforeach; ?>
-                                </ul>
-
-                                <?php else : ?>
-                                <span>Value: <strong><?php echo esc_attr( $my_opt_field['default'] ) ?></strong></span><br/>
-                            <?php endif; ?>
-
-                        </div>
-                    <?php endforeach; ?>
-                    </div>
-
                     </form>
 
                     <script type="text/javascript">
                         let jQuery = window.jQuery
+                        let cfs = <?php echo wp_json_encode( $my_opt_fields['fields'] ); ?>;
 
                         jQuery(document).ready(function(){
                             getAllDefaultValues();
@@ -765,41 +736,23 @@ class DT_Import_Export_Tab_Contact {
                         }
 
                         function getDefaultValues(id){                
+                            let selected = document.getElementById('csv_mapper_'+id);
+                            let selected_field_key = selected.options[selected.selectedIndex].value;
+                            let select_field = cfs[selected_field_key]
+                            let field_type = select_field ? select_field.type : null;
 
-                            let selected, selectedValue, dom, ty, hlp;
-                            selected = document.getElementById('csv_mapper_'+id);
-                            selectedValue = selected.options[selected.selectedIndex].value;
-
-                            jQuery('.helper-fields').hide().html('');
-                            //hlp = document.getElementById('helper-fields-'+selectedValue+'-txt').innerHTML;
-                            //document.getElementById('helper-fields-'+id).innerHTML = hlp;
-
-                            dom = jQuery('#helper-fields-'+selectedValue+'-txt');                
-                            ty = dom.attr('data-type');
-
-                            if(ty === 'key_select' || ty === 'multi_select'){
-                                hlp = dom.html();
-                                let unique_values = jQuery('#unique-values-'+id)
-                                unique_values.show();
-                                //jQuery('#unique-values-'+id).find('.selected-mapper-column-name').html( jQuery('#csv_mapper_'+id).val() );
-                                unique_values.find('.selected-mapper-column-name').html( jQuery('#csv_mapper_'+id+' option:selected').text() );
-                                jQuery('#helper-fields-'+id).html( hlp );
+                            if(field_type === 'key_select' || field_type === 'multi_select'){
                                 let value_mapper_select = jQuery('.value-mapper-'+id)
                                 value_mapper_select.html('')
                                 value_mapper_select.append('<option value="">--select-one--</option>');
-                                //h_sel = jQuery('.value-mapper-'+id).attr('data-value');
+
+                                let unique_values = jQuery('#unique-values-'+id)
+                                unique_values.show();
+                                unique_values.find('.selected-mapper-column-name').html( jQuery('#csv_mapper_'+id+' option:selected').text() );
 
                                 //default-value-options
-                                jQuery.each( dom.find('.default-value-options li'), function(){
-                                    let h_this, h_value, h_label, h_html;
-                                    h_this = jQuery(this);
-                                    h_value = h_this.find('.hlp-value').html();
-                                    h_label = h_this.find('.hlp-label').html();
-                                    if(!h_label.length>0){ h_label = h_value.toUpperCase(); }
-
-                                    h_html = '<option value="'+h_value+'"'; 
-                                    //if(h_sel==h_value){ h_html = h_html + ' selected="selected"'; }
-                                    h_html = h_html + '>'+h_label+'</option>';
+                                Object.keys(select_field.default).forEach(key=>{
+                                    let h_html = `<option value="${key}">${select_field.default[key].label}</option>`
                                     value_mapper_select.append(h_html);
                                 });
 
