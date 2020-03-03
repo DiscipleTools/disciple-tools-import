@@ -64,23 +64,11 @@ class DT_Import_Export_Menu {
      */
     public function extensions_menu() {}
 
-
-    private static function dt_sanitize_array( &$array ) {
-        foreach ( $array as &$value ) {
-            if ( !is_array( $value ) ) {
-                $value = sanitize_text_field( wp_unslash( $value ) );
-            } else {
-                self::dt_sanitize_array( $value );
-            }
-        }
-        return $array;
-    }
-
     private static function dt_sanitize_post_request_array_field( $post, $key ) {
         if ( !isset( $post[$key] ) ){
             return false;
         }
-        $post[$key] = self::dt_sanitize_array( $post[$key] );
+        $post[$key] = dt_import_sanitize_array( $post[$key] );
         return $post[$key];
     }
 
@@ -188,12 +176,14 @@ class DT_Import_Export_Menu {
                             $file_assigned_to = sanitize_text_field( wp_unslash( $_POST['csv_assign'] ) );
                         }
 
-                        update_option( "dt_import_export_settings", [
+                        $import_settings = [
                             "destination" => $destination,
                             "source" => $file_source,
-                            "assigned_to" => $file_assigned_to
-                        ] );
-                        $object->mapping( $destination, $file_source, $file_assigned_to );
+                            "assigned_to" => $file_assigned_to,
+                            "data" => $object->mapping_process( $destination, $file_source, $file_assigned_to ),
+                        ];
+                        set_transient( "dt_import_export_settings", $import_settings, 3600 * 24 );
+                        $object->display_field_mapping_step();
 
                     } /**end-of condition --isset( $_FILES["csv_file"] )-- */
 
@@ -201,46 +191,13 @@ class DT_Import_Export_Menu {
                             && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['csv_mappings_nonce'] ) ), 'csv_mappings' )
                             && $run ) {
 
-                    if ( isset( $_POST["csv_mapper"], $_POST["csv_data"] ) ) {
+                    if ( isset( $_POST["csv_mapper"] ) ) {
 
                         $mapping_data = self::dt_sanitize_post_request_array_field( $_POST, 'csv_mapper' );
                         $value_mapperi_data = isset( $_POST['VMD'] ) ? self::dt_sanitize_post_request_array_field( $_POST, 'VMD' ) : [];
                         $value_mapper_data = isset( $_POST['VM'] ) ? self::dt_sanitize_post_request_array_field( $_POST, 'VM' ) : [];
 
-                        $csv_data = unserialize( base64_decode( sanitize_text_field( wp_unslash( $_POST["csv_data"] ) ) ) );
-
-                        $csv_headers = '';
-                        if ( isset( $_POST["csv_headers"] ) ) {
-                            $csv_headers = unserialize( base64_decode( sanitize_text_field( wp_unslash( $_POST["csv_headers"] ) ) ) );
-                        }
-
-                        //$temp_contacts_data
-                        $delimiter = ',';
-                        if ( isset( $_POST["csv_delimiter_temp"] ) ) {
-                            $delimiter = sanitize_text_field( wp_unslash( $_POST['csv_delimiter_temp'] ) );
-                        }
-
-                        $multiseparator = ';';
-                        if ( isset( $_POST["csv_multiseparator_temp"] ) ) {
-                            $multiseparator = sanitize_text_field( wp_unslash( $_POST['csv_multiseparator_temp'] ) );
-                        }
-
-                        $filepath = '';
-                        if ( isset( $_POST["csv_file_path"] ) ) {
-                            $filepath = sanitize_text_field( wp_unslash( $_POST['csv_file_path'] ) );
-                        }
-
-                        $file_source = '';
-                        if ( isset( $_POST["csv_source_temp"] ) ) {
-                            $file_source = sanitize_text_field( wp_unslash( $_POST['csv_source_temp'] ) );
-                        }
-
-                        $file_assigned_to = '';
-                        if ( isset( $_POST["csv_assign_temp"] ) ) {
-                            $file_assigned_to = sanitize_text_field( wp_unslash( $_POST['csv_assign_temp'] ) );
-                        }
-
-                        $object->preview( $filepath, $csv_data, $csv_headers, $delimiter, $multiseparator, $file_source, $file_assigned_to, $mapping_data, $value_mapperi_data, $value_mapper_data );
+                        $object->preview( $mapping_data, $value_mapperi_data, $value_mapper_data );
 
                     }
                 } else if ( isset( $_POST['csv_correct_nonce'] )
@@ -248,15 +205,9 @@ class DT_Import_Export_Menu {
                             && $run ) {
 
                     if ( isset( $_POST["go_back"] ) ){
-                        $import_settings = get_option( "dt_import_export_settings", [] );
-                        if ( isset( $import_settings["destination"], $import_settings["source"], $import_settings["assigned_to"] ) ){
-                            $object->mapping( $import_settings["destination"], $import_settings["source"], $import_settings["assigned_to"] );
-                        }
-                        else {
-                            $object->content();
-                        }
-                    } elseif ( isset( $_POST["csv_contacts"] ) ) {
-                        $object->insert_contacts( unserialize( base64_decode( sanitize_text_field( wp_unslash( $_POST["csv_contacts"] ) ) ) ) );
+                        $object->display_field_mapping_step();
+                    } else {
+                        $object->insert_contacts();
                     }
                     exit;
 
@@ -596,23 +547,16 @@ class DT_Import_Export_Tab_Contact {
 
     /**
      * Tool to map fields to their correct field options
-     * @param $filepath
-     * @param string $file_source the source field for the contacts
-     * @param string $file_assigned_to the assigned to user for the contacts.
      */
-    public function mapping( $filepath, $file_source = 'web', $file_assigned_to = '' ) {
+    public function display_field_mapping_step() {
 
-        $data = $this->mapping_process( $filepath, $file_source, $file_assigned_to );
-
-        $delimiter = $data['delimiter'];
-        $multi_separator = $data['multi_separator'];
+        $import_settings = get_transient( "dt_import_export_settings" );
+        $data = $import_settings["data"];
 
         $csv_headers = $data['csv_headers'];
         $con_headers_info = $data['con_headers_info'];
         $uploaded_file_headers = $data['uploaded_file_headers'];
         $my_opt_fields = $data['my_opt_fields'];
-
-        $temp_contacts_data = $data['temp_contacts_data'];
         $unique = $data['unique'];
 
 
@@ -655,22 +599,10 @@ class DT_Import_Export_Tab_Contact {
 
                         $col_data_type = isset( $my_opt_fields['fields'][$ch]['type'] ) ? $my_opt_fields['fields'][$ch]['type'] : null;
 
-                        $mapper_title = '';
-                        if ( isset( $con_headers_info[$ch]['name'] ) ) {
-                            $mapper_title = $con_headers_info[$ch]['name'];
-                        } else if ( $ch == 'title') {
-                            //$mapper_title = 'Contact Name';
-                            $mapper_title = ucwords( $ch );
-                        } else {
-                            //$mapper_title = "<span style=\"color:red\" title=\"un-mapped data column\">{$ch}</span>";
-                            $mapper_title = "<span class=\"unmapped\" title=\"un-mapped data column\">{$ch}</span>";
-                        }
-
                         ?>
-                        <?php /** <tr class="mapper-coloumn" data-row-id="<?php esc_html_e( "{$ci}", 'disciple_tools' ) ?>"> */ ?>
                         <tr class="mapper-coloumn" data-row-id="<?php echo esc_attr( $ci ) ?>">
                             <th data-field="<?php echo esc_attr( $ch ) ?>" class="src-column">
-                            <?php //= $mapper_title ?><?php echo esc_html( $uploaded_file_headers[$ci] ) ?>
+                                <?php echo esc_html( $uploaded_file_headers[$ci] ) ?>
                             </th>
 
 
@@ -758,39 +690,13 @@ class DT_Import_Export_Tab_Contact {
                     <tfoot>
                         <tr><td></td>
                             <td colspan="2">
-
-
-                                <?php /** */ ?>
-                                <input type="hidden" name="csv_data" value="<?php echo esc_html( base64_encode( serialize( $temp_contacts_data ) ) ); ?>">
-                                <input type="hidden" name="csv_headers" value="<?php echo esc_html( base64_encode( serialize( $csv_headers ) ) ); ?>">
-                                <?php /** */ ?>
-
-                                <input type="hidden" name="csv_delimiter_temp" value='<?php echo esc_html( $delimiter ) ?>' />
-                                <input type="hidden" name="csv_multiseparator_temp" value='<?php echo esc_html( $multi_separator ) ?>' />
-                                <input type="hidden" name="csv_file_path" value='<?php echo esc_html( $filepath ) ?>' />
-                                <input type="hidden" name="csv_source_temp" value='<?php echo esc_html( $file_source ) ?>' />
-                                <input type="hidden" name="csv_assign_temp" value='<?php echo esc_html( $file_assigned_to ) ?>' />
-
-                                <?php wp_nonce_field( 'csv_mapping', 'csv_mapping_nonce' ); ?>
-
-                                <input type="submit" name="submit" id="submit" 
+                                <input type="submit" name="submit" id="submit"
                                        style="background-color:#4CAF50; color:white" 
                                        class="button" 
                                        value=<?php esc_html_e( "Next", 'disciple_tools' ) ?>>
-
                             </td>
                         </tr>
 
-
-                        <?php /** <tr>
-                            <td colspan="3">
-                                delimiter:<strong><?php echo $delimiter ?></strong><br/>
-                                MULTI-SEPARATOR:<strong><?php echo $multi_separator ?></strong><br/>
-                                FILE-PATH:<strong><?php echo $filepath ?></strong><br/>
-                                SOURCE:<strong><?php echo $file_source ?></strong><br/>
-                                ASSIGNED-TO:<strong><?php echo $file_assigned_to ?></strong><br/>
-                            </td>
-                        </tr> */ ?>
                     </tfoot>
 
                     </table>
@@ -970,11 +876,11 @@ class DT_Import_Export_Tab_Contact {
 
             $fields = [];
 
+            if ( $file_assigned_to != '') { $fields["assigned_to"] = (int) $file_assigned_to; }
+
+            $fields["sources"] = [ "values" => array( [ "value" => $file_source ] ) ];
+
             foreach ( $row as $index => $i ) {
-
-                if ( $file_assigned_to != '') { $fields["assigned_to"] = (int) $file_assigned_to; }
-
-                $fields["sources"] = [ "values" => array( [ "value" => $file_source ] ) ];
 
                 //cleanup
                 $i = str_replace( "\"", "", $i );
@@ -1036,10 +942,6 @@ class DT_Import_Export_Tab_Contact {
 
             asort( $unique[$ci] ); //sort-the-value(s)
 
-            //$ch = $csv_headers[$ci];
-            //if ( isset( $my_opt_fields['fields'][$ch]['type'] )
-            //         && $my_opt_fields['fields'][$ch]['type'] == 'multi_select' ) {
-            //$multi_separator = ';';
             foreach ( $unique[$ci] as $ui => $uv ) {
 
                 $pos = strpos( $uv, $multi_separator );
@@ -1056,7 +958,6 @@ class DT_Import_Export_Tab_Contact {
 
             $unique[$ci] = array_unique( $unique[$ci] );
             asort( $unique[$ci] ); //sort-the-value(s)
-            //}
         }
 
 
@@ -1073,23 +974,20 @@ class DT_Import_Export_Tab_Contact {
         ];
     }
 
-    public function preview_process( $csv_data = [], $csv_headers = [], $value_mapperi_data = [], $value_mapper_data = [], $file_assigned_to = '', $file_source = '', $delimiter = ',' ) {
-            return self::process_data( $csv_data, $csv_headers, $value_mapperi_data, $value_mapper_data, $file_assigned_to, $file_source, $delimiter );
-    }
-
-    public function preview( $filepath, $csv_data, $csv_headers, $delimiter = ',', $multiseparator = ';', $file_source = 'web', $file_assigned_to = '', $mapping_data = [], $value_mapperi_data = [], $value_mapper_data = [] ) {
-//        $con_headers_info = self::get_contact_header_info();
+    public function preview( $mapping_data = [], $value_mapperi_data = [], $value_mapper_data = [] ) {
         foreach ( (array) $mapping_data as $my_id => $my_data ){
             if ( $my_data == 'IGNORE' || $my_data == 'NONE'){
                 unset( $mapping_data[$my_id] );
             }
         }
 
-        $people = $this->preview_process( $csv_data, $mapping_data, $value_mapperi_data, $value_mapper_data, $file_assigned_to, $file_source, $delimiter );
+        $import_settings = get_transient( "dt_import_export_settings" );
+        $people = self::process_data( $import_settings, $mapping_data, $value_mapperi_data, $value_mapper_data );
+        $import_settings["people"] = $people;
+        set_transient( "dt_import_export_settings", $import_settings, 3600 * 24 );
 
         ?>
-        <!-- Box -->
-        <span onclick="jQuery('.debug-data').toggle()" style="float:right;color:#e14d43;font-weight:bold;text-transform:uppercase;font-size:10px;background:#fde8eb;padding:5px;border:1px dashed #f4bbc3;">Show/Hide Debug Data</span>
+
         <table class="widefat striped">
             <thead>
             <tr>
@@ -1099,8 +997,6 @@ class DT_Import_Export_Tab_Contact {
             <tbody>
             <tr>
                 <td>
-                <fieldset id="debug-data-<?php echo __LINE__ ?>" class="debug-data" style="display:none"><legend onclick="jQuery('#debug-data-<?php echo __LINE__ ?> section').toggle()">CSV DATA</legend><section><pre><?php print_r( $csv_data ) ?></pre></section></fieldset>
-                <fieldset id="debug-data-<?php echo __LINE__ ?>" class="debug-data" style="display:none"><legend onclick="jQuery('#debug-data-<?php echo __LINE__ ?> section').toggle()">PPL</legend><section><pre><?php print_r( $people ) ?></pre></section></fieldset>
 
                 <?php self::display_data( $people );?>
 
@@ -1108,8 +1004,6 @@ class DT_Import_Export_Tab_Contact {
                 <form method="post" enctype="multipart/form-data">
 
                     <?php wp_nonce_field( 'csv_correct', 'csv_correct_nonce' ); ?>
-
-                    <input type="hidden" name="csv_contacts" value="<?php echo esc_html( base64_encode( serialize( $people ) ) ); ?>">
 
                     <input type="submit" name="go_back" class="button button-primary" value="<?php esc_html_e( "Back - Something is wrong!", 'disciple_tools' ) ?>" />
 
@@ -1131,7 +1025,10 @@ class DT_Import_Export_Tab_Contact {
         <?php
     }
 
-    public function insert_contacts( $contacts ){
+    public function insert_contacts(){
+        $import_settings = get_transient( "dt_import_export_settings" );
+        $contacts = $import_settings["people"];
+        $contacts = dt_import_sanitize_array( $contacts );
         ?>
         <!-- Box -->
         <table class="widefat striped">
@@ -1218,12 +1115,10 @@ class DT_Import_Export_Tab_Contact {
                     </script>
 
                     <?php
-                    global $wpdb;
                     $js_contacts = [];
                     foreach ( $contacts as $num => $f ) {
                         $js_array = wp_json_encode( $f[0] );
                         $js_contacts[] = $js_array;
-                        $wpdb->queries = [];
                     }
                     ?>
                     <script type="text/javascript">
@@ -1232,7 +1127,7 @@ class DT_Import_Export_Tab_Contact {
                     t('started processing queue!');
 
                     // start processing queue!
-                    queue = <?php echo wp_json_encode( $js_contacts ); ?>;
+                    let queue = <?php echo wp_json_encode( $js_contacts ); ?>;
                     process(queue, 5, doEach, doDone);
                     </script>
 
@@ -1250,30 +1145,7 @@ class DT_Import_Export_Tab_Contact {
         <?php
     }
 
-    private function _get_file_headers( $filepath ){
-
-    }
-
     public function get_contact_header_info(){
-        //return Disciple_Tools_Contacts::get_contact_header_info();
-/** //global $wpdb;
-//$query = "SELECT
-//            `id`,
-//            `entity`,
-//            `name`,
-//            `label`,
-//            `sort_num`,
-//            `rv`,
-//            `rvs`,
-//            `mv`,
-//            `ty`,
-//            `tyl`,
-//            `tyf`
-//            FROM `wp_dt_headers`
-//            WHERE `entity` = 'contact'
-//          ORDER BY `sort_num`";
-//$results = $wpdb->get_results($query, ARRAY_A);
-//return $results; */
 
         $data = [];
         $channels = Disciple_Tools_Contact_Post_Type::instance()->get_channels_list();
@@ -1295,16 +1167,6 @@ class DT_Import_Export_Tab_Contact {
     }
 
     public static function get_mapper( $name = '' ) {
-        /** //$column_name = '';
-//global $wpdb;
-//$query = "SELECT wp_dt_headers.name
-//    FROM wp_dt_headers_aliases, wp_dt_headers
-//    WHERE wp_dt_headers_aliases.entity = 'contact'
-//    AND wp_dt_headers.entity = 'contact'
-//    AND wp_dt_headers_aliases.header_id = wp_dt_headers.id
-//    AND wp_dt_headers_aliases.alias = %s";
-//$column_name = $wpdb->get_var( $wpdb->prepare( $query, $name ) );
-//return $column_name; */
         return self::colheadcompare( $name );
     }
 
@@ -1417,37 +1279,36 @@ class DT_Import_Export_Tab_Contact {
     }
 
     /**
-     * @param array $data_rows
-     * @param array $csv_headers
+     * @param $import_settings
+     * @param array $mapping_data
      * @param array $value_mapperi_data
      * @param array $value_mapper_data
-     * @param string $assign
-     * @param string $source
-     * @param string $del
      * @return array
      */
-    public static function process_data( $data_rows, $csv_headers = [], $value_mapperi_data = [], $value_mapper_data = [], $assign = '', $source = '', $del = ',' ){
-
+    public static function process_data( $import_settings, $mapping_data = [], $value_mapperi_data = [], $value_mapper_data = [] ){
+        $csv_headers = $mapping_data;
+        $data_rows = $import_settings["data"]["temp_contacts_data"] ?? [];
+        $assign = $import_settings["assigned_to"] ?? "";
+        $source = $import_settings["source"] ?? "";
         $multi_separator = ';';
         $people = [];
-
         if ( is_array( $csv_headers ) ) {
-            $chi = array_count_values( $csv_headers );
+            $header_occurrence_counts = array_count_values( $csv_headers );
         } else {
-            $chi = [];
+            $header_occurrence_counts = [];
         }
 
-        foreach ( $csv_headers as $ci => $ch ) {
-            $mapped_column = self::get_mapper( $ch );
-            if ( $mapped_column != null && strlen( $mapped_column ) > 0 ) {
-                $csv_headers[$ci] = $mapped_column;
-            }
-        }
+//        foreach ( $csv_headers as $ci => $ch ) {
+//            $mapped_column = self::get_mapper( $ch );
+//            if ( $mapped_column != null && strlen( $mapped_column ) > 0 ) {
+//                $csv_headers[$ci] = $mapped_column;
+//            }
+//        }
 
         //handle N columns to ONE column mapping
         //phone(primary)/phone(mobile) -> phone
         $mids = [];
-        foreach ( $chi as $mch => $count ) {
+        foreach ( $header_occurrence_counts as $mch => $count ) {
             if ( $count > 1 ) {
                 $mids[$mch]['count'] = $count;
                 foreach ( $csv_headers as $ci => $ch ) {
@@ -1487,50 +1348,46 @@ class DT_Import_Export_Tab_Contact {
         $channels = Disciple_Tools_Contact_Post_Type::instance()->get_channels_list();
         $cfs = Disciple_Tools_Contact_Post_Type::instance()->get_custom_fields_settings();
 
+        $channel_keys = [];
+        foreach ( $channels as $channel_key => $val ) {
+            $channel_keys[] = "contact_" . $channel_key;
+        }
 
         foreach ( $data_rows as $ri => $row ) {
             $fields = [];
-            foreach ($row as $index => $i) {
+            if ( $assign != '' ) {
+                $fields["assigned_to"] = (int) $assign;
+            }
+            foreach ($row as $index => $row_value) {
 
-                if ( $assign != '') { $fields["assigned_to"] = (int) $assign; }
-                $fields["sources"] = [ "values" => array( [ "value" => $source ] ) ];
 
                 //cleanup
-                $i = str_replace( "\"", "", $i );
+                $row_value = str_replace( "\"", "", $row_value );
 
                 if ( isset( $csv_headers[$index] ) ) {
 
                     $ch = $csv_headers[$index];
 
                     $type = isset( $cfs[$ch]['type'] ) ? $cfs[$ch]['type'] : null;
-                    if ( $type == null ) { $type = isset( $channels[$ch] ) ? $channels[$ch] : null; }
-
-//echo "R{$ri}C{$index}|Ch:{$ch}|Type:{$type}<br/>";
+                    if ( $type == null && in_array( $ch, $channel_keys ) ) {
+                        $type = 'contact_method';
+                    }
 
                     if ( $ch == 'title' ) {
-                        $fields[$ch] = $i;
-
-                        //} else if ( $ch == 'gender' || $ch == 'cf_gender' ) {
-                        //
-                        //    $i = strtolower( $i );
-                        //    $i = substr( $i, 0, 1 );
-                        //    $gender = "not-set";
-                        //    if ($i == "m" ){ $gender = "male";
-                        //    } else if ($i == "f" ){ $gender = "female"; }
-                        //    $fields[$ch] = $gender;
+                        $fields[$ch] = $row_value;
 
                     } else if ( $type == 'key_select' ) {
 
                         if ( isset( $value_mapperi_data[$index] ) ) {
                             foreach ( $value_mapperi_data[$index] as $vmdi => $vmdv ) {
-                                if ( $vmdv == $i && isset( $value_mapper_data[$index][$vmdi] ) ) {
+                                if ( $vmdv == $row_value && isset( $value_mapper_data[$index][$vmdi] ) ) {
                                     $fields[$ch] = $value_mapper_data[$index][$vmdi];
                                 }
                             }
                         }
                     } else if ( $type == 'multi_select' ) {
 
-                        $multivalued = explode( $multi_separator, $i );
+                        $multivalued = explode( $multi_separator, $row_value );
                         foreach ( $multivalued as $mx ) {
 
                             $mx = trim( $mx );
@@ -1556,44 +1413,38 @@ class DT_Import_Export_Tab_Contact {
                     //    $fields[$ch] = $i; /**/
 
                     } else if ( $type == 'boolean' ) {
-                        $fields[$ch] = $i[0] === "1";
+                        $fields[$ch] = $row_value[0] === "1";
 
                     } else if ( $type == 'date' ) {
-                        $my_temp_time = strtotime( $i );
+                        $my_temp_time = strtotime( $row_value );
                         if ( $my_temp_time ) {
                             $fields[$ch] = gmdate( 'Y-m-d', $my_temp_time );
                         } else {
                             $fields[$ch] = '';
                         }
-
-
-//                    } else if ( $type == 'array' ) {//
-//                        foreach ( (array) $i as $av ) {
-//                            $fields[$ch][] = [ "value" => $av ];
-//                        }//
-//                    //} else if ( $type=='text' ) {
-//                    //} else if ( $type=='connection' ) {
-
-                    } else {
-
+                    } else if ( $type === "contact_method") {
                         //handle multivalued data
-                        $pos = strpos( $i, $multi_separator );
+                        $pos = strpos( $row_value, $multi_separator );
                         if ( $pos === false ) {
-                            $fields[$ch][] = [ "value" => $i ];
+                            $fields[$ch][] = [ "value" => $row_value ];
                         } else {
-                            $multivalued = explode( $multi_separator, $i );
+                            $multivalued = explode( $multi_separator, $row_value );
                             foreach ( $multivalued as $mx ) {
-                               //$fields[$ch][] = [ "value" => trim( $mx ) ];
                                 $fields[$ch]["values"][] = [ "value" => trim( $mx ) ];
                             }
                         }
+                    } else {
+                        //field not recognized.
+                        continue;
                     }
                 }
+            }
+            if ( !isset( $fields["sources"] ) ) {
+                $fields["sources"] = [ "values" => array( [ "value" => $source ] ) ];
             }
 
             //add person
             $people[] = array( $fields );
-            unset( $fields );
 
         }
 
@@ -1616,18 +1467,9 @@ class DT_Import_Export_Tab_Contact {
         $error_summary = [];
         if ( isset( $people[0][0] ) ) {
             $headings = array_keys( $people[0][0] );
-            //echo '<pre>'; print_r($headings); echo '</pre>';
-            //echo '<pre>'; print_r($people[0][0]); echo '</pre>';
-            if ( isset( $headings['sources'] ) ) { unset( $headings['sources'] ); }
             if ( isset( $headings['assigned_to'] ) ) { unset( $headings['assigned_to'] ); }
-            //if ( isset( $headings['title'] ) ) { unset($headings['title'] ); }
         }
         ?>
-        <fieldset class="debug-data" style="display:none"> <legend>Heading</legend>
-        <pre>
-        <?php print_r( $headings ) ?>
-        </pre>
-        </fieldset>
 
         <table class="data-table">
             <thead>
@@ -1643,7 +1485,7 @@ class DT_Import_Export_Tab_Contact {
                 <?php
                 foreach ( $headings as $hi => $heading ) {
 
-                    if ( $heading == 'title' || $heading == 'assigned_to' || $heading == 'sources' ) {
+                    if ( $heading == 'title' || $heading == 'assigned_to' ) {
                         continue;
                     } else {
                         $ch = str_replace( $prefix, '', $heading );
@@ -1667,9 +1509,6 @@ class DT_Import_Export_Tab_Contact {
                     }
                 }
                 ?>
-                <th><span class="cflabel">
-                <?php esc_html_e( 'Source', 'disciple_tools' ); ?>
-                </span></th>
 
                 <th><span class="cflabel">
                     <?php esc_html_e( 'Assigned To', 'disciple_tools' ); ?>
@@ -1700,7 +1539,7 @@ class DT_Import_Export_Tab_Contact {
                 //if ( isset( $person_data[$ch][0]["value"] ) ) {
                     //$html_body .= esc_html( $person_data[$ch][0]["value"] );
 
-                if ( $ch == 'title' || $ch == 'assigned_to' || $ch == 'sources' ) {
+                if ( $ch == 'title' || $ch == 'assigned_to' ) {
                     continue;
                 } else {
                     $errors = '';
@@ -1731,7 +1570,10 @@ class DT_Import_Export_Tab_Contact {
                             if ( isset( $person_data[$ch]["values"] ) && is_array( $person_data[$ch]["values"] ) ) {
                                 $values = [];
                                 foreach ( $person_data[$ch]["values"] as $mi => $v ) {
-                                    if ( isset( $v["value"] ) ) { $values[] = esc_html( $v["value"] ); }
+                                    if ( isset( $v["value"] ) ) {
+                                        $label = isset( $cfs[$ch]["default"][esc_html( $v["value"] )]["label"] ) ? $cfs[$ch]["default"][esc_html( $v["value"] )]["label"] : esc_html( $v["value"] );
+                                        $values[] = $label;
+                                    }
                                 }
                                 $value = implode( $multi_separator, (array) $values );
                             }
@@ -1755,10 +1597,6 @@ class DT_Import_Export_Tab_Contact {
                 }
             }
             ?>
-            <td>
-                <?php echo esc_html( $person_data['sources']["values"][0]["value"] ); ?>
-            </td>
-
 
             <td>
             <?php
@@ -1904,4 +1742,15 @@ class DT_Import_Export_Tab_Contact {
         }
         return $err_count;
     }
+}
+
+function dt_import_sanitize_array( &$array ) {
+    foreach ( $array as &$value ) {
+        if ( !is_array( $value ) ) {
+            $value = sanitize_text_field( wp_unslash( $value ) );
+        } else {
+            dt_import_sanitize_array( $value );
+        }
+    }
+    return $array;
 }
