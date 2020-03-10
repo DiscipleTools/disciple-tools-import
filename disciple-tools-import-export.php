@@ -38,7 +38,7 @@ $dt_import_export_required_dt_theme_version = '0.19.0';
  *
  * @since  0.1
  * @access public
- * @return object
+ * @return object|bool
  */
 function dt_import_export() {
     global $dt_import_export_required_dt_theme_version;
@@ -48,10 +48,13 @@ function dt_import_export() {
      * Check if the Disciple.Tools theme is loaded and is the latest required version
      */
     $is_theme_dt = strpos( $wp_theme->get_template(), "disciple-tools-theme" ) !== false || $wp_theme->name === "Disciple Tools";
-    if ( !$is_theme_dt || version_compare( $version, $dt_import_export_required_dt_theme_version, "<" ) ) {
+    if ( $is_theme_dt && version_compare( $version, $dt_import_export_required_dt_theme_version, "<" ) ) {
         add_action( 'admin_notices', 'dt_import_export_hook_admin_notice' );
         add_action( 'wp_ajax_dismissed_notice_handler', 'dt_hook_ajax_notice_handler' );
-        return new WP_Error( 'current_theme_not_dt', 'Disciple Tools Theme not active or not latest version.' );
+        return false;
+    }
+    if ( !$is_theme_dt ){
+        return false;
     }
     /**
      * Load useful function from the theme
@@ -63,7 +66,7 @@ function dt_import_export() {
      * Don't load the plugin on every rest request. Only those with the metrics namespace
      */
     $is_rest = dt_is_rest();
-    if ( !$is_rest || strpos( dt_get_url_path(), 'dt_import_export' ) != false ){
+    if ( !$is_rest || strpos( dt_get_url_path(), 'dt_import_export' ) !== false ){
         return DT_Import_Export::get_instance();
     }
 }
