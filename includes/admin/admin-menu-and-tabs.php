@@ -155,17 +155,6 @@ class DT_Import_Export_Menu {
                         }
 
 
-                        //upload file to server
-                        $path = plugin_dir_path( __FILE__ ).'../../uploads';
-                        $source = $temp_name;
-
-                        $filename   = uniqid() . "_" . $timestamp; // 5dab1961e93a7_1571494241
-                        $extension  = pathinfo( sanitize_text_field( wp_unslash( $_FILES["csv_file"]["name"] ) ), PATHINFO_EXTENSION ); // csv
-                        $destination = "{$path}/{$filename}.{$extension}";
-
-                        move_uploaded_file( $source, $destination );
-                        chmod( $destination, 0600 );
-
                         $file_source = null;
                         if ( isset( $_POST['csv_source'] ) ) {
                             $file_source = sanitize_text_field( wp_unslash( $_POST['csv_source'] ) );
@@ -179,9 +168,8 @@ class DT_Import_Export_Menu {
                         $import_settings = [
                             "source" => $file_source,
                             "assigned_to" => $file_assigned_to,
-                            "data" => $object->mapping_process( $destination, $file_source, $file_assigned_to ),
+                            "data" => $object->mapping_process( $temp_name, $file_source, $file_assigned_to ),
                         ];
-                        wp_delete_file( $destination );
                         set_transient( "dt_import_export_settings", $import_settings, 3600 * 24 );
                         $object->display_field_mapping_step();
 
