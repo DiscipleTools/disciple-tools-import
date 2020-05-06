@@ -429,8 +429,9 @@ class DT_Import_Export_Tab_Contact {
                                     </label><br>
                                     <select name="csv_source" id="csv_source">
                                         <?php
-                                        $site_custom_lists = dt_get_option( 'dt_site_custom_lists' );
-                                        foreach ( $site_custom_lists['sources'] as $key => $value ) {
+                                        $post_settings = apply_filters( "dt_get_post_type_settings", [], "contacts" );
+                                        $sources = isset( $post_settings["fields"]["sources"]["default"] ) ? $post_settings["fields"]["sources"]["default"] : [];
+                                        foreach ( $sources as $key => $value ) {
                                             if ( $value['enabled'] ) {
                                                 ?>
                                                 <option value=<?php echo esc_html( $key ); ?>><?php echo esc_html( $value['label'] ); ?></option>
