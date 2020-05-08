@@ -432,11 +432,9 @@ class DT_Import_Export_Tab_Contact {
                                         $post_settings = apply_filters( "dt_get_post_type_settings", [], "contacts" );
                                         $sources = isset( $post_settings["fields"]["sources"]["default"] ) ? $post_settings["fields"]["sources"]["default"] : [];
                                         foreach ( $sources as $key => $value ) {
-                                            if ( $value['enabled'] ) {
-                                                ?>
-                                                <option value=<?php echo esc_html( $key ); ?>><?php echo esc_html( $value['label'] ); ?></option>
-                                                <?php
-                                            }
+                                            ?>
+                                            <option value=<?php echo esc_html( $key ); ?>><?php echo esc_html( $value['label'] ); ?></option>
+                                            <?php
                                         }
                                         ?>
                                     </select>
