@@ -6,7 +6,7 @@
 
 class DT_Import_Export_Endpoints
 {
-    public $permissions = [ 'view_any_contacts', 'view_project_metrics' ];
+    public $permissions = [ 'dt_all_access_contacts', 'view_project_metrics' ];
 
     private static $_instance = null;
     public static function instance() {
