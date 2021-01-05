@@ -1091,9 +1091,10 @@ class DT_Import_Export_Tab_Contact {
         $data = [];
         $channels = DT_Posts::get_post_settings( "contacts" )["channels"];
 
-        foreach ( $channels as $key => $channel ) {
-            $data[$key] = [
-                'name' => $channel['name'],
+        foreach ( $channels as $label => $channel ) {
+            $label = "contact_{$label}";  // @NOTE: prefix "contact_"
+            $data[$label] = [
+                'name' => $channel['label'],
                 'type' => 'standard',
                 'defaults' => null
             ];
@@ -1132,7 +1133,7 @@ class DT_Import_Export_Tab_Contact {
                 $channels = DT_Posts::get_post_settings( "contacts" )["channels"];
                 if ( isset( $channels[$src] ) ) {
                     //$column_name = $src;
-                    $column_name = "{$src}";
+                    $column_name = "{$prefix}{$src}";
                 } else if ( isset( $channels[$prefix.$src] ) ) {
                     //$column_name = $src;
                     $column_name = "{$prefix}{$src}";
@@ -1183,11 +1184,12 @@ class DT_Import_Export_Tab_Contact {
                 <option value="title" <?php selected( $field == 'title' ) ?> >Contact Name</option>
 
                 <?php
-                foreach ( $channels as $channel_key => $item ) {
+                foreach ( $channels as $label => $item ) {
+                    $label = "contact_{$label}";
                     ?>
-                    <option value="<?php echo esc_html( $channel_key ); ?>"
-                        <?php selected( $field != null && $field == $channel_key ) ?>
-                    ><?php echo esc_html( $item['name'] ); ?></option>
+                    <option value="<?php echo esc_html( $label ); ?>"
+                        <?php selected( $field != null && $field == $label ) ?>
+                    ><?php echo esc_html( $item['label'] ); ?></option>
                 <?php } ?>
             </optgroup>
 
@@ -1405,7 +1407,7 @@ class DT_Import_Export_Tab_Contact {
                     if ( $heading == 'title' || $heading == 'assigned_to' ) {
                         continue;
                     } else {
-                        $ch = $heading;
+                        $ch = str_replace( $prefix, '', $heading );
                         $str = '';
                         if ( isset( $cfs[$ch], $cfs[$ch]['name'] ) ) {
                             $str = strval( $cfs[$ch]['name'] );
@@ -1627,9 +1629,11 @@ class DT_Import_Export_Tab_Contact {
                 }
             }
         } else {
+            $prefix = 'contact_';
+            $ch = str_replace( $prefix, '', $field );
             $channels = DT_Posts::get_post_settings( "contacts" )["channels"];
 
-            if ( isset( $channels[$field] ) ) {
+            if ( isset( $channels[$ch] ) ) {
                 $values = [];
                 if ( isset( $data['values'] ) ) {
                     foreach ( $data['values'] as $mx ) {
@@ -1646,7 +1650,7 @@ class DT_Import_Export_Tab_Contact {
                 }
 
                 foreach ( $values as $value ) {
-                    if ( $field == 'contact_email' ) {
+                    if ( $ch == 'email' ) {
                         if ( !filter_var( $value, FILTER_VALIDATE_EMAIL ) ) {
                             $err_count++;
                         }
