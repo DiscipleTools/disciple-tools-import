@@ -382,7 +382,7 @@ class DT_Import_Export_Tab_Contact {
             <tr>
                 <td>
 
-                    
+
                     <form method="post" enctype="multipart/form-data">
                         <?php wp_nonce_field( 'csv_import', 'csv_import_nonce' ); ?>
                         <table class="widefat striped">
@@ -475,8 +475,8 @@ class DT_Import_Export_Tab_Contact {
                             </tr>
                         </table>
                     </form>
-                    
-                    
+
+
                 </td>
             </tr>
             </tbody>
@@ -559,7 +559,7 @@ class DT_Import_Export_Tab_Contact {
             </thead>
 
             <tbody>
-                
+
             <tr>
                 <td>
                     <p><strong>Important!</strong> Data in Unmapped Columns will be skipped</p>
@@ -570,7 +570,7 @@ class DT_Import_Export_Tab_Contact {
                     <div class="mapper-table-container">
                     <table class="mapper-table">
                     <thead>
-                        <tr> 
+                        <tr>
                             <th style="vertical-align:top"> Source (Uploaded File) </th>
                             <th style="vertical-align:top"> Destination (DT) </th>
                             <th style="vertical-align:top"> Unique Values/Mapper </th>
@@ -603,7 +603,7 @@ class DT_Import_Export_Tab_Contact {
 
                                 self::get_dropdown_list_html( $ch, "csv_mapper_{$ci}", $dd_params );
                                 ?>
-                                
+
                                 <div id="helper-fields-<?php echo esc_attr( $ci ) ?>" class="helper-fields" style="display:none"></div>
 
                             </td>
@@ -621,7 +621,7 @@ class DT_Import_Export_Tab_Contact {
                                     <span class="mapper-helper-title">Map import values to DT values</span><br/>
                                     <span class="mapper-helper-description">
                                         <span class="selected-mapper-column-name"><?php echo esc_attr( $ch ) ?><?php //echo $mapper_title ?></span>
-                                        only accepts specific values (as a Selection). 
+                                        only accepts specific values (as a Selection).
                                         Please map following unique values from your data to existing values in DT.
                                         You can add new values into the DT system if you want by first ...</span>
                                 </div>
@@ -676,8 +676,8 @@ class DT_Import_Export_Tab_Contact {
                         <tr><td></td>
                             <td colspan="2">
                                 <input type="submit" name="submit" id="submit"
-                                       style="background-color:#4CAF50; color:white" 
-                                       class="button" 
+                                       style="background-color:#4CAF50; color:white"
+                                       class="button"
                                        value=<?php esc_html_e( "Next", 'disciple_tools' ) ?>>
                             </td>
                         </tr>
@@ -709,19 +709,19 @@ class DT_Import_Export_Tab_Contact {
                                     selected.selectedIndex = 'IGNORE';
                                     if(elements[i].value!=='IGNORE'){
                                         alert('Already Mapped!');
-                                    }                       
+                                    }
                                 }
                             }
-                        }            
+                        }
 
-                        function getAllDefaultValues(){                
+                        function getAllDefaultValues(){
                             jQuery('.mapper-table tbody > tr.mapper-coloumn').each(function(){
                                 let i = jQuery(this).attr('data-row-id');
                                 if(typeof i !== 'undefined'){ getDefaultValues(i); }
-                            });                
+                            });
                         }
 
-                        function getDefaultValues(id){                
+                        function getDefaultValues(id){
                             let selected = document.getElementById('csv_mapper_'+id);
                             let selected_field_key = selected.options[selected.selectedIndex].value;
                             let select_field = cfs[selected_field_key]
@@ -782,9 +782,11 @@ class DT_Import_Export_Tab_Contact {
         $file_data = fopen( $filepath, "r" );
 
         $data_rows = array();
-        while ( $row = fgetcsv( $file_data, 0, $delimiter, '"', '"' ) ) {
+        while ( $row = fgetcsv( $file_data, 0, $delimiter, '"', '"' ) ){
             $data_rows[] = $row;
         }
+
+        $field_options = DT_Posts::get_post_field_settings( "contacts" );
 
         $uploaded_file_headers = [];
 
@@ -847,7 +849,11 @@ class DT_Import_Export_Tab_Contact {
                     } else {
 
                         if ( $pos === false ) {
-                            $fields[$ch][] = [ "value" => $i ];
+                            if ( isset( $field_options[$ch] ) && in_array( $ch, [ "multi_select", "communication_channel", "key_select" ] ) ){
+                                $fields[$ch][] = [ "value" => $i ];
+                            } else {
+                                $fields[$ch] = $i;
+                            }
                         } else {
                             $multivalued = explode( $multi_separator, $i );
                             foreach ( $multivalued as $mx ) {
@@ -946,12 +952,12 @@ class DT_Import_Export_Tab_Contact {
 
                     <input type="submit" name="go_back" class="button button-primary" value="<?php esc_html_e( "Back - Something is wrong!", 'disciple_tools' ) ?>" />
 
-                    <input type="submit" name="submit" 
-                           id="submit" 
-                           style="background-color:#4CAF50; color:white" 
-                           class="button" 
+                    <input type="submit" name="submit"
+                           id="submit"
+                           style="background-color:#4CAF50; color:white"
+                           class="button"
                            value=<?php esc_html_e( "Import", 'disciple_tools' ) ?> />
-                    
+
                 </form>
 
 
@@ -1001,20 +1007,20 @@ class DT_Import_Export_Tab_Contact {
                                 // if counter is 0, process next batch
                                 --count || process(q, num, fn, done);
                                 pid++;
-                            });                    
+                            });
 
                         }
                     }
 
                     // a per-item action
-                    function doEach( item, done ) {                
+                    function doEach( item, done ) {
                         console.log('starting ...' ); //t('starting ...');
                         jQuery.ajax({
                             type: "POST",
                             data: item,
                             contentType: "application/json; charset=utf-8",
                             dataType: "json",
-                            url: "<?php echo esc_url_raw( rest_url() ); ?>" + `dt/v1/contact/create?silent=true`,
+                            url: "<?php echo esc_url_raw( rest_url() ); ?>" + `dt-posts/v2/contacts?silent=true`,
                             beforeSend: function(xhr) {
                                 xhr.setRequestHeader('X-WP-Nonce', "<?php echo esc_html( wp_create_nonce( 'wp_rest' ) ); ?>");
                             },
@@ -1041,7 +1047,7 @@ class DT_Import_Export_Tab_Contact {
                         el = document.getElementById("import-logs");
                         v = el.innerHTML;
                         v = v + '<br/>' + m;
-                        el.innerHTML = v;                
+                        el.innerHTML = v;
                     }
 
                     function reset(){
@@ -1083,7 +1089,7 @@ class DT_Import_Export_Tab_Contact {
     public function get_contact_header_info(){
 
         $data = [];
-        $channels = Disciple_Tools_Contact_Post_Type::instance()->get_channels_list();
+        $channels = DT_Posts::get_post_settings( "contacts" )["channels"];
 
         foreach ( $channels as $label => $channel ) {
             $label = "contact_{$label}";  // @NOTE: prefix "contact_"
@@ -1094,7 +1100,7 @@ class DT_Import_Export_Tab_Contact {
             ];
         }
 
-        $fields = Disciple_Tools_Contacts::get_contact_fields();
+        $fields = DT_Posts::get_post_field_settings( "contacts" );
         if ( isset( $fields ) ) {
             $data = array_merge( $data, $fields );
         }
@@ -1120,12 +1126,15 @@ class DT_Import_Export_Tab_Contact {
             $column_name = "{$prefix}address";
 
         } else {
-            $fields = Disciple_Tools_Contact_Post_Type::instance()->get_custom_fields_settings();
+            $fields = DT_Posts::get_post_field_settings( "contacts" );
             if ( isset( $fields[$src] ) ) {
                 $column_name = $src;
             } else {
-                $channels = Disciple_Tools_Contact_Post_Type::instance()->get_channels_list();
+                $channels = DT_Posts::get_post_settings( "contacts" )["channels"];
                 if ( isset( $channels[$src] ) ) {
+                    //$column_name = $src;
+                    $column_name = "{$prefix}{$src}";
+                } else if ( isset( $channels[$prefix.$src] ) ) {
                     //$column_name = $src;
                     $column_name = "{$prefix}{$src}";
                 }
@@ -1142,7 +1151,7 @@ class DT_Import_Export_Tab_Contact {
             }
 
             if ( $column_name == null ) {
-                $channels = Disciple_Tools_Contact_Post_Type::instance()->get_channels_list();
+                $channels = DT_Posts::get_post_settings( "contacts" )["channels"];
                 foreach ( $channels as $f => $field ) {
                     if ( isset( $field['name'] ) && strtolower( trim( $field['name'] ) ) == $src ) {
                         $column_name = $f;
@@ -1157,8 +1166,8 @@ class DT_Import_Export_Tab_Contact {
 
         if ( isset( $html_options['id'] ) ) { unset( $html_options['id'] ); }
 
-        $channels = Disciple_Tools_Contact_Post_Type::instance()->get_channels_list();
-        $data = Disciple_Tools_Contacts::get_contact_fields();
+        $channels = DT_Posts::get_post_settings( "contacts" )["channels"];
+        $data = DT_Posts::get_post_field_settings( "contacts" );
 
         ?>
         <select id="<?php echo esc_html( $id ); ?>"
@@ -1261,14 +1270,7 @@ class DT_Import_Export_Tab_Contact {
                 }
             }
         }
-
-        $channels = Disciple_Tools_Contact_Post_Type::instance()->get_channels_list();
-        $cfs = Disciple_Tools_Contact_Post_Type::instance()->get_custom_fields_settings();
-
-        $channel_keys = [];
-        foreach ( $channels as $channel_key => $val ) {
-            $channel_keys[] = "contact_" . $channel_key;
-        }
+        $cfs = DT_Posts::get_post_field_settings( "contacts" );
 
         foreach ( $data_rows as $ri => $row ) {
             $fields = [];
@@ -1284,11 +1286,7 @@ class DT_Import_Export_Tab_Contact {
                 if ( isset( $csv_headers[$index] ) ) {
 
                     $ch = $csv_headers[$index];
-
                     $type = isset( $cfs[$ch]['type'] ) ? $cfs[$ch]['type'] : null;
-                    if ( $type == null && in_array( $ch, $channel_keys ) ) {
-                        $type = 'contact_method';
-                    }
 
                     if ( $ch == 'title' ) {
                         $fields[$ch] = $row_value;
@@ -1297,8 +1295,8 @@ class DT_Import_Export_Tab_Contact {
 
                         if ( isset( $value_mapperi_data[$index] ) ) {
                             foreach ( $value_mapperi_data[$index] as $vmdi => $vmdv ) {
-                                if ( $vmdv == $row_value && isset( $value_mapper_data[$index][$vmdi] ) ) {
-                                    $fields[$ch] = $value_mapper_data[$index][$vmdi];
+                                if ( wp_specialchars_decode( $vmdv ) == $row_value && isset( $value_mapper_data[$index][$vmdi] ) ) {
+                                    $fields[$ch] = wp_specialchars_decode( $value_mapper_data[$index][$vmdi] );
                                 }
                             }
                         }
@@ -1339,7 +1337,7 @@ class DT_Import_Export_Tab_Contact {
                         } else {
                             $fields[$ch] = '';
                         }
-                    } else if ( $type === "contact_method") {
+                    } else if ( $type === "communication_channel") {
                         //handle multivalued data
                         $pos = strpos( $row_value, $multi_separator );
                         if ( $pos === false ) {
@@ -1350,6 +1348,10 @@ class DT_Import_Export_Tab_Contact {
                                 $fields[$ch]["values"][] = [ "value" => trim( $mx ) ];
                             }
                         }
+                    } else if ( $type === "user_select" ){
+                        $fields[$ch] = (int) $row_value[0];
+                    } else if ( $type === "text" ){
+                        $fields[$ch] = $row_value[0];
                     } else {
                         //field not recognized.
                         continue;
@@ -1377,8 +1379,8 @@ class DT_Import_Export_Tab_Contact {
         $multi_separator = ';';
 
         $prefix = 'contact_';
-        $channels = Disciple_Tools_Contact_Post_Type::instance()->get_channels_list();
-        $cfs = Disciple_Tools_Contact_Post_Type::instance()->get_custom_fields_settings();
+        $channels = DT_Posts::get_post_settings( "contacts" )["channels"];
+        $cfs = DT_Posts::get_post_field_settings( "contacts" );
 
         $rowindex = 0;
         $error_summary = [];
@@ -1410,8 +1412,8 @@ class DT_Import_Export_Tab_Contact {
                         if ( isset( $cfs[$ch], $cfs[$ch]['name'] ) ) {
                             $str = strval( $cfs[$ch]['name'] );
 
-                        } else if ( isset( $channels[$ch], $channels[$ch]['label'] ) ) {
-                            $str = strval( $channels[$ch]['label'] );
+                        } else if ( isset( $channels[$ch], $channels[$ch]['name'] ) ) {
+                            $str = strval( $channels[$ch]['name'] );
 
                         }
                         ?>
@@ -1591,15 +1593,15 @@ class DT_Import_Export_Tab_Contact {
 
     public static function get_all_default_values() {
         $data = array();
-        $data['channels'] = Disciple_Tools_Contact_Post_Type::instance()->get_channels_list();
-        $data['fields'] = Disciple_Tools_Contact_Post_Type::instance()->get_custom_fields_settings();
+        $data['channels'] = DT_Posts::get_post_settings( "contacts" )["channels"];
+        $data['fields'] = DT_Posts::get_post_field_settings( "contacts" );
         return $data;
     }
 
     private static function validate_data( $field, $data ) {
         $err_count = 0;
         $multi_separator = ';';
-        $cfs = Disciple_Tools_Contact_Post_Type::instance()->get_custom_fields_settings();
+        $cfs = DT_Posts::get_post_field_settings( "contacts" );
 
         if ( isset( $cfs[$field] ) ) {
 
@@ -1629,7 +1631,7 @@ class DT_Import_Export_Tab_Contact {
         } else {
             $prefix = 'contact_';
             $ch = str_replace( $prefix, '', $field );
-            $channels = Disciple_Tools_Contact_Post_Type::instance()->get_channels_list();
+            $channels = DT_Posts::get_post_settings( "contacts" )["channels"];
 
             if ( isset( $channels[$ch] ) ) {
                 $values = [];
