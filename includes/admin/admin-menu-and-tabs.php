@@ -429,7 +429,7 @@ class DT_Import_Export_Tab_Contact {
                                     </label><br>
                                     <select name="csv_source" id="csv_source">
                                         <?php
-                                        $post_settings = apply_filters( "dt_get_post_type_settings", [], "contacts" );
+                                        $post_settings = DT_Posts::get_post_settings( "contacts" );
                                         $sources = isset( $post_settings["fields"]["sources"]["default"] ) ? $post_settings["fields"]["sources"]["default"] : [];
                                         foreach ( $sources as $key => $value ) {
                                             ?>
