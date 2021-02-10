@@ -70,7 +70,7 @@ function dt_import_export() {
         return DT_Import_Export::get_instance();
     }
 }
-add_action( 'plugins_loaded', 'dt_import_export' );
+add_action( 'after_setup_theme', 'dt_import_export' );
 
 /**
  * Singleton class for setting up the plugin.
