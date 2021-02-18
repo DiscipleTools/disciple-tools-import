@@ -3,7 +3,7 @@
  * Plugin Name: Disciple Tools - Import
  * Plugin URI: https://github.com/DiscipleTools/disciple-tools-import
  * Description: Disciple Tools - Import description
- * Version:  0.2
+ * Version:  0.2.1
  * Author URI: https://github.com/DiscipleTools
  * GitHub Plugin URI: https://github.com/DiscipleTools/disciple-tools-import
  * Requires at least: 4.7.0
@@ -34,7 +34,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 $disciple_tools_import_required_dt_theme_version = '0.19.0';
 
 /**
- * Gets the instance of the `DT_Import` class.
+ * Gets the instance of the `Disciple_Tools_Import` class.
  *
  * @since  0.1
  * @access public
@@ -67,7 +67,7 @@ function disciple_tools_import() {
      */
     $is_rest = dt_is_rest();
     if ( !$is_rest || strpos( dt_get_url_path(), 'disciple_tools_import' ) !== false ){
-        return DT_Import::get_instance();
+        return Disciple_Tools_Import::get_instance();
     }
 }
 add_action( 'after_setup_theme', 'disciple_tools_import' );
@@ -78,7 +78,7 @@ add_action( 'after_setup_theme', 'disciple_tools_import' );
  * @since  0.1
  * @access public
  */
-class DT_Import {
+class Disciple_Tools_Import {
 
     /**
      * Declares public variables
@@ -160,7 +160,7 @@ class DT_Import {
 
         // sample rest api class
         require_once( 'includes/rest-api.php' );
-        DT_Import_Endpoints::instance();
+        Disciple_Tools_Import_Endpoints::instance();
     }
 
     /**
@@ -287,8 +287,8 @@ class DT_Import {
 // end main plugin class
 
 // Register activation hook.
-register_activation_hook( __FILE__, [ 'DT_Import', 'activation' ] );
-register_deactivation_hook( __FILE__, [ 'DT_Import', 'deactivation' ] );
+register_activation_hook( __FILE__, [ 'Disciple_Tools_Import', 'activation' ] );
+register_deactivation_hook( __FILE__, [ 'Disciple_Tools_Import', 'deactivation' ] );
 
 function disciple_tools_import_hook_admin_notice() {
     global $disciple_tools_import_required_dt_theme_version;

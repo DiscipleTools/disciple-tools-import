@@ -4,7 +4,7 @@
  */
 
 
-class DT_Import_Endpoints
+class Disciple_Tools_Import_Endpoints
 {
     public $permissions = [ 'dt_all_access_contacts', 'view_project_metrics' ];
 

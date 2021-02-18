@@ -1,8 +1,8 @@
 <?php
 /**
- * DT_Import_Menu class for the admin page
+ * Disciple_Tools_Import_Menu class for the admin page
  *
- * @class       DT_Import_Menu
+ * @class       Disciple_Tools_Import_Menu
  * @version     0.1.0
  * @since       0.1.0
  */
@@ -14,25 +14,25 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Initialize menu class
  */
-DT_Import_Menu::instance();
+Disciple_Tools_Import_Menu::instance();
 
 /**
- * Class DT_Import_Menu
+ * Class Disciple_Tools_Import_Menu
  */
-class DT_Import_Menu {
+class Disciple_Tools_Import_Menu {
 
     public $token = 'disciple_tools_import';
 
     private static $_instance = null;
 
     /**
-     * DT_Import_Menu Instance
+     * Disciple_Tools_Import_Menu Instance
      *
-     * Ensures only one instance of DT_Import_Menu is loaded or can be loaded.
+     * Ensures only one instance of Disciple_Tools_Import_Menu is loaded or can be loaded.
      *
      * @since 0.1.0
      * @static
-     * @return DT_Import_Menu instance
+     * @return Disciple_Tools_Import_Menu instance
      */
     public static function instance() {
         if ( is_null( self::$_instance ) ) {
@@ -125,10 +125,10 @@ class DT_Import_Menu {
             <?php
 
             if ( $tab == 'general' ) {
-                $object = new DT_Import_Tab_General();
+                $object = new Disciple_Tools_Import_Tab_General();
                 $object->content();
             }  else if ( $tab == 'contact' ) {
-                $object = new DT_Import_Tab_Contact();
+                $object = new Disciple_Tools_Import_Tab_Contact();
 
                 if ( isset( $_POST['csv_import_nonce'] )
                             && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['csv_import_nonce'] ) ), 'csv_import' )
@@ -211,9 +211,9 @@ class DT_Import_Menu {
 }
 
 /**
- * Class DT_Import_Tab_General
+ * Class Disciple_Tools_Import_Tab_General
  */
-class DT_Import_Tab_General
+class Disciple_Tools_Import_Tab_General
 {
     public function content() {
         ?>
@@ -290,9 +290,9 @@ class DT_Import_Tab_General
 
 
 /**
- * Class DT_Import_Tab_General
+ * Class Disciple_Tools_Import_Tab_General
  */
-class DT_Import_Tab_Contact {
+class Disciple_Tools_Import_Tab_Contact {
 
     public static $contact_phone_headings;
     public static $contact_address_headings;
