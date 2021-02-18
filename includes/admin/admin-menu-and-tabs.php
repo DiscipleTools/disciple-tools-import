@@ -1,8 +1,8 @@
 <?php
 /**
- * DT_Import_Export_Menu class for the admin page
+ * DT_Import_Menu class for the admin page
  *
- * @class       DT_Import_Export_Menu
+ * @class       DT_Import_Menu
  * @version     0.1.0
  * @since       0.1.0
  */
@@ -14,25 +14,25 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Initialize menu class
  */
-DT_Import_Export_Menu::instance();
+DT_Import_Menu::instance();
 
 /**
- * Class DT_Import_Export_Menu
+ * Class DT_Import_Menu
  */
-class DT_Import_Export_Menu {
+class DT_Import_Menu {
 
-    public $token = 'dt_import_export';
+    public $token = 'disciple_tools_import';
 
     private static $_instance = null;
 
     /**
-     * DT_Import_Export_Menu Instance
+     * DT_Import_Menu Instance
      *
-     * Ensures only one instance of DT_Import_Export_Menu is loaded or can be loaded.
+     * Ensures only one instance of DT_Import_Menu is loaded or can be loaded.
      *
      * @since 0.1.0
      * @static
-     * @return DT_Import_Export_Menu instance
+     * @return DT_Import_Menu instance
      */
     public static function instance() {
         if ( is_null( self::$_instance ) ) {
@@ -55,7 +55,7 @@ class DT_Import_Export_Menu {
      * @since 0.1
      */
     public function register_menu() {
-        add_submenu_page( 'dt_extensions', __( 'Import and Export', 'dt_import_export' ), __( 'Import and Export', 'dt_import_export' ), 'manage_dt', $this->token, [ $this, 'content' ] );
+        add_submenu_page( 'dt_extensions', __( 'Import', 'disciple_tools_import' ), __( 'Import', 'disciple_tools_import' ), 'manage_dt', $this->token, [ $this, 'content' ] );
     }
 
     /**
@@ -67,7 +67,7 @@ class DT_Import_Export_Menu {
         if ( !isset( $post[$key] ) ){
             return false;
         }
-        $post[$key] = dt_import_sanitize_array( $post[$key] );
+        $post[$key] = disciple_tools_import_sanitize_array( $post[$key] );
         return $post[$key];
     }
 
@@ -94,7 +94,7 @@ class DT_Import_Export_Menu {
 
         ?>
         <div class="wrap">
-            <h2><?php esc_attr_e( 'Import and Export', 'dt_import_export' ) ?></h2>
+            <h2><?php esc_attr_e( 'Import', 'disciple_tools_import' ) ?></h2>
             <h2 class="nav-tab-wrapper">
 
             <?php
@@ -114,7 +114,7 @@ class DT_Import_Export_Menu {
                 ?>
 
                 <a href="<?php echo esc_html( $my_tab_link ) ?>"
-                   class="nav-tab <?php ( $tab == $my_tab_name ) ? esc_attr_e( 'nav-tab-active', 'dt_import_export' ) : print ''; ?>">
+                   class="nav-tab <?php ( $tab == $my_tab_name ) ? esc_attr_e( 'nav-tab-active', 'disciple_tools_import' ) : print ''; ?>">
                 <?php echo esc_attr( $my_tab_label ) ?>
                 </a>
 
@@ -125,10 +125,10 @@ class DT_Import_Export_Menu {
             <?php
 
             if ( $tab == 'general' ) {
-                $object = new DT_Import_Export_Tab_General();
+                $object = new DT_Import_Tab_General();
                 $object->content();
             }  else if ( $tab == 'contact' ) {
-                $object = new DT_Import_Export_Tab_Contact();
+                $object = new DT_Import_Tab_Contact();
 
                 if ( isset( $_POST['csv_import_nonce'] )
                             && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['csv_import_nonce'] ) ), 'csv_import' )
@@ -169,7 +169,7 @@ class DT_Import_Export_Menu {
                             "assigned_to" => $file_assigned_to,
                             "data" => $object->mapping_process( $temp_name, $file_source, $file_assigned_to ),
                         ];
-                        set_transient( "dt_import_export_settings", $import_settings, 3600 * 24 );
+                        set_transient( "disciple_tools_import_settings", $import_settings, 3600 * 24 );
                         $object->display_field_mapping_step();
 
                     } /**end-of condition --isset( $_FILES["csv_file"] )-- */
@@ -211,9 +211,9 @@ class DT_Import_Export_Menu {
 }
 
 /**
- * Class DT_Import_Export_Tab_General
+ * Class DT_Import_Tab_General
  */
-class DT_Import_Export_Tab_General
+class DT_Import_Tab_General
 {
     public function content() {
         ?>
@@ -290,9 +290,9 @@ class DT_Import_Export_Tab_General
 
 
 /**
- * Class DT_Import_Export_Tab_General
+ * Class DT_Import_Tab_General
  */
-class DT_Import_Export_Tab_Contact {
+class DT_Import_Tab_Contact {
 
     public static $contact_phone_headings;
     public static $contact_address_headings;
@@ -536,7 +536,7 @@ class DT_Import_Export_Tab_Contact {
      */
     public function display_field_mapping_step() {
 
-        $import_settings = get_transient( "dt_import_export_settings" );
+        $import_settings = get_transient( "disciple_tools_import_settings" );
         $data = $import_settings["data"];
 
         $csv_headers = $data['csv_headers'];
@@ -925,10 +925,10 @@ class DT_Import_Export_Tab_Contact {
             }
         }
 
-        $import_settings = get_transient( "dt_import_export_settings" );
+        $import_settings = get_transient( "disciple_tools_import_settings" );
         $people = self::process_data( $import_settings, $mapping_data, $value_mapperi_data, $value_mapper_data );
         $import_settings["people"] = $people;
-        set_transient( "dt_import_export_settings", $import_settings, 3600 * 24 );
+        set_transient( "disciple_tools_import_settings", $import_settings, 3600 * 24 );
 
         ?>
 
@@ -970,9 +970,9 @@ class DT_Import_Export_Tab_Contact {
     }
 
     public function insert_contacts(){
-        $import_settings = get_transient( "dt_import_export_settings" );
+        $import_settings = get_transient( "disciple_tools_import_settings" );
         $contacts = $import_settings["people"];
-        $contacts = dt_import_sanitize_array( $contacts );
+        $contacts = disciple_tools_import_sanitize_array( $contacts );
         ?>
         <!-- Box -->
         <table class="widefat striped">
@@ -1661,12 +1661,12 @@ class DT_Import_Export_Tab_Contact {
     }
 }
 
-function dt_import_sanitize_array( &$array ) {
+function disciple_tools_import_sanitize_array( &$array ) {
     foreach ( $array as &$value ) {
         if ( !is_array( $value ) ) {
             $value = sanitize_text_field( wp_unslash( $value ) );
         } else {
-            dt_import_sanitize_array( $value );
+            disciple_tools_import_sanitize_array( $value );
         }
     }
     return $array;

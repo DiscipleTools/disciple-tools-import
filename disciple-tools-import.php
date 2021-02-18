@@ -1,11 +1,11 @@
 <?php
 /**
- * Plugin Name: Disciple Tools - Import and Export
- * Plugin URI: https://github.com/DiscipleTools/disciple-tools-import-export
+ * Plugin Name: Disciple Tools - Import
+ * Plugin URI: https://github.com/DiscipleTools/disciple-tools-import
  * Description: Disciple Tools - Import description
- * Version:  0.1.0
+ * Version:  0.2
  * Author URI: https://github.com/DiscipleTools
- * GitHub Plugin URI: https://github.com/DiscipleTools/disciple-tools-import-export
+ * GitHub Plugin URI: https://github.com/DiscipleTools/disciple-tools-import
  * Requires at least: 4.7.0
  * (Requires 4.7+ because of the integration of the REST API at 4.7 and the security requirements of this milestone version.)
  * Tested up to: 5.1
@@ -31,25 +31,25 @@
 if ( ! defined( 'ABSPATH' ) ) {
     exit; // Exit if accessed directly
 }
-$dt_import_export_required_dt_theme_version = '0.19.0';
+$disciple_tools_import_required_dt_theme_version = '0.19.0';
 
 /**
- * Gets the instance of the `DT_Import_Export` class.
+ * Gets the instance of the `DT_Import` class.
  *
  * @since  0.1
  * @access public
  * @return object|bool
  */
-function dt_import_export() {
-    global $dt_import_export_required_dt_theme_version;
+function disciple_tools_import() {
+    global $disciple_tools_import_required_dt_theme_version;
     $wp_theme = wp_get_theme();
     $version = $wp_theme->version;
     /*
      * Check if the Disciple.Tools theme is loaded and is the latest required version
      */
     $is_theme_dt = strpos( $wp_theme->get_template(), "disciple-tools-theme" ) !== false || $wp_theme->name === "Disciple Tools";
-    if ( $is_theme_dt && version_compare( $version, $dt_import_export_required_dt_theme_version, "<" ) ) {
-        add_action( 'admin_notices', 'dt_import_export_hook_admin_notice' );
+    if ( $is_theme_dt && version_compare( $version, $disciple_tools_import_required_dt_theme_version, "<" ) ) {
+        add_action( 'admin_notices', 'disciple_tools_import_hook_admin_notice' );
         add_action( 'wp_ajax_dismissed_notice_handler', 'dt_hook_ajax_notice_handler' );
         return false;
     }
@@ -66,11 +66,11 @@ function dt_import_export() {
      * Don't load the plugin on every rest request. Only those with the metrics namespace
      */
     $is_rest = dt_is_rest();
-    if ( !$is_rest || strpos( dt_get_url_path(), 'dt_import_export' ) !== false ){
-        return DT_Import_Export::get_instance();
+    if ( !$is_rest || strpos( dt_get_url_path(), 'disciple_tools_import' ) !== false ){
+        return DT_Import::get_instance();
     }
 }
-add_action( 'after_setup_theme', 'dt_import_export' );
+add_action( 'after_setup_theme', 'disciple_tools_import' );
 
 /**
  * Singleton class for setting up the plugin.
@@ -78,7 +78,7 @@ add_action( 'after_setup_theme', 'dt_import_export' );
  * @since  0.1
  * @access public
  */
-class DT_Import_Export {
+class DT_Import {
 
     /**
      * Declares public variables
@@ -106,7 +106,7 @@ class DT_Import_Export {
         static $instance = null;
 
         if ( is_null( $instance ) ) {
-            $instance = new dt_import_export();
+            $instance = new disciple_tools_import();
             $instance->setup();
             $instance->includes();
             $instance->setup_actions();
@@ -155,12 +155,12 @@ class DT_Import_Export {
         $this->img_uri      = trailingslashit( $this->dir_uri . 'img' );
 
         // Admin and settings variables
-        $this->token             = 'dt_import_export';
+        $this->token             = 'disciple_tools_import';
         $this->version             = '0.1';
 
         // sample rest api class
         require_once( 'includes/rest-api.php' );
-        DT_Import_Export_Endpoints::instance();
+        DT_Import_Endpoints::instance();
     }
 
     /**
@@ -223,7 +223,7 @@ class DT_Import_Export {
      * @return void
      */
     public static function deactivation() {
-        delete_option( 'dismissed-dt-import-export' );
+        delete_option( 'dismissed-dt-import' );
     }
 
     /**
@@ -234,7 +234,7 @@ class DT_Import_Export {
      * @return void
      */
     public function i18n() {
-        load_plugin_textdomain( 'dt_import_export', false, trailingslashit( dirname( plugin_basename( __FILE__ ) ) ). 'languages' );
+        load_plugin_textdomain( 'disciple_tools_import', false, trailingslashit( dirname( plugin_basename( __FILE__ ) ) ). 'languages' );
     }
 
     /**
@@ -245,7 +245,7 @@ class DT_Import_Export {
      * @return string
      */
     public function __toString() {
-        return 'dt_import_export';
+        return 'disciple_tools_import';
     }
 
     /**
@@ -256,7 +256,7 @@ class DT_Import_Export {
      * @return void
      */
     public function __clone() {
-        _doing_it_wrong( __FUNCTION__, esc_html__( 'Whoah, partner!', 'dt_import_export' ), '0.1' );
+        _doing_it_wrong( __FUNCTION__, esc_html__( 'Whoah, partner!', 'disciple_tools_import' ), '0.1' );
     }
 
     /**
@@ -267,7 +267,7 @@ class DT_Import_Export {
      * @return void
      */
     public function __wakeup() {
-        _doing_it_wrong( __FUNCTION__, esc_html__( 'Whoah, partner!', 'dt_import_export' ), '0.1' );
+        _doing_it_wrong( __FUNCTION__, esc_html__( 'Whoah, partner!', 'disciple_tools_import' ), '0.1' );
     }
 
     /**
@@ -279,7 +279,7 @@ class DT_Import_Export {
      */
     public function __call( $method = '', $args = array() ) {
         // @codingStandardsIgnoreLine
-        _doing_it_wrong( "dt_import_export::{$method}", esc_html__( 'Method does not exist.', 'dt_import_export' ), '0.1' );
+        _doing_it_wrong( "disciple_tools_import::{$method}", esc_html__( 'Method does not exist.', 'disciple_tools_import' ), '0.1' );
         unset( $method, $args );
         return null;
     }
@@ -287,30 +287,30 @@ class DT_Import_Export {
 // end main plugin class
 
 // Register activation hook.
-register_activation_hook( __FILE__, [ 'DT_Import_Export', 'activation' ] );
-register_deactivation_hook( __FILE__, [ 'DT_Import_Export', 'deactivation' ] );
+register_activation_hook( __FILE__, [ 'DT_Import', 'activation' ] );
+register_deactivation_hook( __FILE__, [ 'DT_Import', 'deactivation' ] );
 
-function dt_import_export_hook_admin_notice() {
-    global $dt_import_export_required_dt_theme_version;
+function disciple_tools_import_hook_admin_notice() {
+    global $disciple_tools_import_required_dt_theme_version;
     $wp_theme = wp_get_theme();
     $current_version = $wp_theme->version;
-    $message = __( "'Disciple Tools - Starter Plugin' plugin requires 'Disciple Tools' theme to work. Please activate 'Disciple Tools' theme or make sure it is latest version.", "dt_import_export" );
+    $message = __( "'Disciple Tools - Starter Plugin' plugin requires 'Disciple Tools' theme to work. Please activate 'Disciple Tools' theme or make sure it is latest version.", "disciple_tools_import" );
     if ( $wp_theme->get_template() === "disciple-tools-theme" ){
-        $message .= sprintf( esc_html__( 'Current Disciple Tools version: %1$s, required version: %2$s', 'dt_import_export' ), esc_html( $current_version ), esc_html( $dt_import_export_required_dt_theme_version ) );
+        $message .= sprintf( esc_html__( 'Current Disciple Tools version: %1$s, required version: %2$s', 'disciple_tools_import' ), esc_html( $current_version ), esc_html( $disciple_tools_import_required_dt_theme_version ) );
     }
     // Check if it's been dismissed...
-    if ( ! get_option( 'dismissed-dt-import-export', false ) ) { ?>
-        <div class="notice notice-error notice-dt-import-export is-dismissible" data-notice="dt-import-export">
+    if ( ! get_option( 'dismissed-dt-import', false ) ) { ?>
+        <div class="notice notice-error notice-dt-import is-dismissible" data-notice="dt-import">
             <p><?php echo esc_html( $message );?></p>
         </div>
         <script>
             jQuery(function($) {
-                $( document ).on( 'click', '.notice-dt-import-export .notice-dismiss', function () {
+                $( document ).on( 'click', '.notice-dt-import .notice-dismiss', function () {
                     $.ajax( ajaxurl, {
                         type: 'POST',
                         data: {
                             action: 'dismissed_notice_handler',
-                            type: 'dt-import-export',
+                            type: 'dt-import',
                             security: '<?php echo esc_html( wp_create_nonce( 'wp_rest_dismiss' ) ) ?>'
                         }
                     })
@@ -333,3 +333,31 @@ function dt_import_export_hook_admin_notice() {
 //    }
 //}
 
+/**
+ * Check for plugin updates even when the active theme is not Disciple.Tools
+ *
+ * Below is the publicly hosted .json file that carries the version information. This file can be hosted
+ * anywhere as long as it is publicly accessible. You can download the version file listed below and use it as
+ * a template.
+ * Also, see the instructions for version updating to understand the steps involved.
+ * @see https://github.com/DiscipleTools/disciple-tools-version-control/wiki/How-to-Update-the-Starter-Plugin
+ */
+add_action( 'plugins_loaded', function (){
+    if ( is_admin() || wp_doing_cron() ){
+        if ( ! class_exists( 'Puc_v4_Factory' ) ) {
+            // find the Disciple.Tools theme and load the plugin update checker.
+            foreach ( wp_get_themes() as $theme ){
+                if ( $theme->get( 'TextDomain' ) === "disciple_tools" && file_exists( $theme->get_stylesheet_directory() . '/dt-core/libraries/plugin-update-checker/plugin-update-checker.php' ) ){
+                    require( $theme->get_stylesheet_directory() . '/dt-core/libraries/plugin-update-checker/plugin-update-checker.php' );
+                }
+            }
+        }
+        if ( class_exists( 'Puc_v4_Factory' ) ){
+            Puc_v4_Factory::buildUpdateChecker(
+                'https://raw.githubusercontent.com/DiscipleTools/disciple-tools-import/master/version-control.json',
+                __FILE__,
+                'disciple-tools-import'
+            );
+        }
+    }
+} );
