@@ -139,11 +139,11 @@ class Disciple_Tools_Import_Menu {
                             && $run ) {
 
                     if ( isset( $_FILES["csv_file"]["name"] ) ) {
-                        $_FILES["csv_file"]["tmp_name"] = wp_normalize_path( $_FILES["csv_file"]["tmp_name"] );
-                        $_FILES["csv_file"]["name"]     = wp_normalize_path( $_FILES["csv_file"]["name"] );
+                        $csv_file_tmp_name = wp_normalize_path( $_FILES["csv_file"]["tmp_name"] );
+                        $csv_file_name     = wp_normalize_path( $_FILES["csv_file"]["name"] );
 
-                        $temp_name  = isset( $_FILES["csv_file"]["tmp_name"] ) ? sanitize_text_field( wp_unslash( $_FILES["csv_file"]["tmp_name"] ) ) : '';
-                        $file_parts = explode( ".", sanitize_text_field( wp_unslash( $_FILES["csv_file"]["name"] ) ) )[ count( explode( ".", sanitize_text_field( wp_unslash( $_FILES["csv_file"]["name"] ) ) ) ) - 1 ];
+                        $temp_name  = isset( $_FILES["csv_file"]["tmp_name"] ) ? sanitize_text_field( wp_unslash( $csv_file_tmp_name ) ) : '';
+                        $file_parts = explode( ".", sanitize_text_field( wp_unslash( $csv_file_name ) ) )[ count( explode( ".", sanitize_text_field( wp_unslash( $csv_file_name ) ) ) ) - 1 ];
                         if ( isset( $_FILES["csv_file"]["error"] ) && $_FILES["csv_file"]["error"] > 0 ) {
                             esc_html_e( "ERROR UPLOADING FILE", 'disciple_tools' );
                             $object->go_back();
@@ -215,11 +215,11 @@ class Disciple_Tools_Import_Menu {
                      && $run ) {
 
                     if ( isset( $_FILES["csv_file"]["name"] ) ) {
-                        $_FILES["csv_file"]["name"]     = wp_normalize_path( $_FILES["csv_file"]["name"] );
-                        $_FILES["csv_file"]["tmp_name"] = wp_normalize_path( $_FILES["csv_file"]["tmp_name"] );
+                        $csv_file_name     = wp_normalize_path( $_FILES["csv_file"]["name"] );
+                        $csv_file_tmp_name = wp_normalize_path( $_FILES["csv_file"]["tmp_name"] );
 
-                        $temp_name = isset( $_FILES["csv_file"]["tmp_name"] ) ? sanitize_text_field( $_FILES["csv_file"]["tmp_name"] ) : '';
-                        $file_parts = explode( ".", sanitize_text_field( wp_unslash( $_FILES["csv_file"]["name"] ) ) )[ count( explode( ".", sanitize_text_field( wp_unslash( $_FILES["csv_file"]["name"] ) ) ) ) - 1 ];
+                        $temp_name = isset( $_FILES["csv_file"]["tmp_name"] ) ? sanitize_text_field( $csv_file_tmp_name ) : '';
+                        $file_parts = explode( ".", sanitize_text_field( wp_unslash( $csv_file_name ) ) )[ count( explode( ".", sanitize_text_field( wp_unslash( $csv_file_name ) ) ) ) - 1 ];
                         if ( isset( $_FILES["csv_file"]["error"] ) && $_FILES["csv_file"]["error"] > 0 ) {
                             esc_html_e( "ERROR UPLOADING FILE", 'disciple_tools' );
                             $object->go_back();
@@ -1294,8 +1294,8 @@ class Disciple_Tools_Import_Tab_Group
                         $fields[ $ch ] = $row_value[0];
                     } else if ( $type === "number" ) {
                         $fields[ $ch ] = (int) $row_value;
-                    } else if ( $type === "location_meta" ) {
-                        $fields[ $ch ] = $row_value;
+                    } else if ( $type === "location_meta" || $type === "location" ) {
+                        $fields[ $ch ]["values"][] = [ "value" => trim( $row_value ) ];
                     } else {
                         //field not recognized.
                         continue;
@@ -1389,6 +1389,7 @@ class Disciple_Tools_Import_Tab_Group
                     <?php foreach ( $headings as $hi => $ch ) {
 
                         $type = isset( $cfs[$ch]['type'] ) ? $cfs[$ch]['type'] : null;
+
                         if ( $type == null ){ $type = isset( $channels[$ch] ) ? $channels[$ch] : null; }
 
                         if ( $ch == 'title' || $ch == 'assigned_to' ) {
@@ -1419,16 +1420,18 @@ class Disciple_Tools_Import_Tab_Group
 
                                 } else if ( ( $type == 'multi_select' ) ) {
 
-                                    if ( isset( $group_data[$ch]["values"] ) && is_array( $group_data[$ch]["values"] ) ) {
+                                    if ( isset( $group_data[ $ch ]["values"] ) && is_array( $group_data[ $ch ]["values"] ) ) {
                                         $values = [];
-                                        foreach ( $group_data[$ch]["values"] as $mi => $v ) {
+                                        foreach ( $group_data[ $ch ]["values"] as $mi => $v ) {
                                             if ( isset( $v["value"] ) ) {
-                                                $label = isset( $cfs[$ch]["default"][esc_html( $v["value"] )]["label"] ) ? $cfs[$ch]["default"][esc_html( $v["value"] )]["label"] : esc_html( $v["value"] );
+                                                $label    = isset( $cfs[ $ch ]["default"][ esc_html( $v["value"] ) ]["label"] ) ? $cfs[ $ch ]["default"][ esc_html( $v["value"] ) ]["label"] : esc_html( $v["value"] );
                                                 $values[] = $label;
                                             }
                                         }
                                         $value = implode( $multi_separator, (array) $values );
                                     }
+                                } else if ( ( $type == 'number' ) ) {
+                                    echo esc_html( $group_data[ $ch ] );
                                 } else if ( isset( $group_data[$ch] ) ) {
                                     $values = [];
                                     if ( isset( $group_data[$ch]["values"] ) && is_array( $group_data[$ch]["values"] ) ) {
