@@ -139,8 +139,11 @@ class Disciple_Tools_Import_Menu {
                             && $run ) {
 
                     if ( isset( $_FILES["csv_file"]["name"] ) ) {
-                        $temp_name = isset( $_FILES["csv_file"]["tmp_name"] ) ? sanitize_text_field( wp_unslash( wp_normalize_path( $_FILES["csv_file"]["tmp_name"] ) ) ) : '';
-                        $file_parts = explode( ".", sanitize_text_field( wp_unslash( wp_normalize_path( $_FILES["csv_file"]["name"] ) ) ) )[ count( explode( ".", sanitize_text_field( wp_unslash( wp_normalize_path( $_FILES["csv_file"]["name"] ) ) ) ) ) - 1 ];
+                        $_FILES["csv_file"]["tmp_name"] = wp_normalize_path( $_FILES["csv_file"]["tmp_name"] );
+                        $_FILES["csv_file"]["name"]     = wp_normalize_path( $_FILES["csv_file"]["name"] );
+
+                        $temp_name  = isset( $_FILES["csv_file"]["tmp_name"] ) ? sanitize_text_field( wp_unslash( $_FILES["csv_file"]["tmp_name"] ) ) : '';
+                        $file_parts = explode( ".", sanitize_text_field( wp_unslash( $_FILES["csv_file"]["name"] ) ) )[ count( explode( ".", sanitize_text_field( wp_unslash( $_FILES["csv_file"]["name"] ) ) ) ) - 1 ];
                         if ( isset( $_FILES["csv_file"]["error"] ) && $_FILES["csv_file"]["error"] > 0 ) {
                             esc_html_e( "ERROR UPLOADING FILE", 'disciple_tools' );
                             $object->go_back();
@@ -212,8 +215,11 @@ class Disciple_Tools_Import_Menu {
                      && $run ) {
 
                     if ( isset( $_FILES["csv_file"]["name"] ) ) {
+                        $_FILES["csv_file"]["name"]     = wp_normalize_path( $_FILES["csv_file"]["name"] );
+                        $_FILES["csv_file"]["tmp_name"] = wp_normalize_path( $_FILES["csv_file"]["tmp_name"] );
+
                         $temp_name = isset( $_FILES["csv_file"]["tmp_name"] ) ? sanitize_text_field( $_FILES["csv_file"]["tmp_name"] ) : '';
-                        $file_parts = explode( ".", sanitize_text_field( wp_unslash( wp_normalize_path( $_FILES["csv_file"]["name"] ) ) ) )[ count( explode( ".", sanitize_text_field( wp_unslash( wp_normalize_path( $_FILES["csv_file"]["name"] ) ) ) ) ) - 1 ];
+                        $file_parts = explode( ".", sanitize_text_field( wp_unslash( $_FILES["csv_file"]["name"] ) ) )[ count( explode( ".", sanitize_text_field( wp_unslash( $_FILES["csv_file"]["name"] ) ) ) ) - 1 ];
                         if ( isset( $_FILES["csv_file"]["error"] ) && $_FILES["csv_file"]["error"] > 0 ) {
                             esc_html_e( "ERROR UPLOADING FILE", 'disciple_tools' );
                             $object->go_back();
@@ -386,6 +392,28 @@ class Disciple_Tools_Import_Tab_Group
                             </tr>
                             <tr>
                                 <td>
+                                    <label for="csv_assign">
+                                        <?php esc_html_e( "Which user do you want these assigned to?", 'disciple_tools' ) ?>
+                                    </label><br>
+                                    <select name="csv_assign" id="csv_assign">
+                                        <option value=""></option>
+                                        <?php
+                                        $args = [
+                                            'role__not_in' => [ 'registered' ],
+                                            'fields'       => [ 'ID', 'display_name' ],
+                                            'order'        => 'ASC',
+                                        ];
+                                        $users = get_users( $args );
+                                        foreach ( $users as $user ) { ?>
+                                            <option
+                                                value=<?php echo esc_html( $user->ID ); ?>><?php echo esc_html( $user->display_name ); ?></option>
+                                        <?php } ?>
+                                    </select>
+
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
                                     <p class="submit">
                                         <input type="submit"
                                                name="submit"
@@ -462,7 +490,6 @@ class Disciple_Tools_Import_Tab_Group
         $data = $import_settings["data"];
 
         $csv_headers = $data['csv_headers'];
-        $group_headers_info = $data['group_headers_info'];
         $uploaded_file_headers = $data['uploaded_file_headers'];
         $my_opt_fields = $data['my_opt_fields'];
         $unique = $data['unique'];
@@ -886,7 +913,6 @@ class Disciple_Tools_Import_Tab_Group
         $import_settings = get_transient( "disciple_tools_import_settings" );
         $groups = $import_settings["groups"];
         $groups = disciple_tools_import_sanitize_array( $groups );
-
         ?>
         <!-- Box -->
         <table class="widefat striped">
@@ -1264,8 +1290,12 @@ class Disciple_Tools_Import_Tab_Group
                         }
                     } else if ( $type === "user_select" ){
                         $fields[$ch] = (int) $row_value[0];
-                    } else if ( $type === "text" ){
-                        $fields[$ch] = $row_value[0];
+                    } else if ( $type === "text" ) {
+                        $fields[ $ch ] = $row_value[0];
+                    } else if ( $type === "number" ) {
+                        $fields[ $ch ] = (int) $row_value;
+                    } else if ( $type === "location_meta" ) {
+                        $fields[ $ch ] = $row_value;
                     } else {
                         //field not recognized.
                         continue;
@@ -1343,17 +1373,17 @@ class Disciple_Tools_Import_Tab_Group
             </tr>
             </thead>
             <tbody>
-            <?php foreach ( $groups as $pid => $ppl_data ) {
+            <?php foreach ( $groups as $pid => $grp_data ) {
                 $rowindex++;
-                $person_data = $ppl_data[0]; ?>
+                $group_data = $grp_data[0]; ?>
 
 
-                <tr id="person-data-item-<?php echo esc_html( $pid ) ?>" class="person-data-item">
+                <tr id="group-data-item-<?php echo esc_html( $pid ) ?>" class="group-data-item">
 
-                    <td data-col-id=0><?php echo esc_html( $rowindex ); ?></td>
+                    <td data-col-id="0"><?php echo esc_html( $rowindex ); ?></td>
 
-                    <td data-col-id=1 data-key="title">
-                        <?php echo esc_html( $person_data['title'] ); ?>
+                    <td data-col-id="1" data-key="title">
+                        <?php echo esc_html( $group_data['title'] ); ?>
                     </td>
 
                     <?php foreach ( $headings as $hi => $ch ) {
@@ -1366,8 +1396,8 @@ class Disciple_Tools_Import_Tab_Group
                         } else {
                             $errors = '';
 
-                            if ( $person_data[$ch] != null || strlen( trim( $person_data[$ch] ) ) > 0 ) {
-                                $errors = self::validate_data( $ch, $person_data[$ch] );
+                            if ( $group_data[$ch] != null || strlen( trim( $group_data[$ch] ) ) > 0 ) {
+                                $errors = self::validate_data( $ch, $group_data[$ch] );
                                 if ( $errors > 0 ) {
                                     if ( isset( $error_summary[$ch] ) ) {
                                         $error_summary[$ch]['error-count'] = intval( $error_summary[$ch]['error-count'] ) + 1;
@@ -1385,13 +1415,13 @@ class Disciple_Tools_Import_Tab_Group
                                      || $type == 'date'
                                      || $type == 'boolean' ) {
 
-                                    $value = $person_data[$ch];
+                                    $value = $group_data[$ch];
 
                                 } else if ( ( $type == 'multi_select' ) ) {
 
-                                    if ( isset( $person_data[$ch]["values"] ) && is_array( $person_data[$ch]["values"] ) ) {
+                                    if ( isset( $group_data[$ch]["values"] ) && is_array( $group_data[$ch]["values"] ) ) {
                                         $values = [];
-                                        foreach ( $person_data[$ch]["values"] as $mi => $v ) {
+                                        foreach ( $group_data[$ch]["values"] as $mi => $v ) {
                                             if ( isset( $v["value"] ) ) {
                                                 $label = isset( $cfs[$ch]["default"][esc_html( $v["value"] )]["label"] ) ? $cfs[$ch]["default"][esc_html( $v["value"] )]["label"] : esc_html( $v["value"] );
                                                 $values[] = $label;
@@ -1399,14 +1429,14 @@ class Disciple_Tools_Import_Tab_Group
                                         }
                                         $value = implode( $multi_separator, (array) $values );
                                     }
-                                } else if ( isset( $person_data[$ch] ) ) {
+                                } else if ( isset( $group_data[$ch] ) ) {
                                     $values = [];
-                                    if ( isset( $person_data[$ch]["values"] ) && is_array( $person_data[$ch]["values"] ) ) {
-                                        foreach ( $person_data[$ch]["values"] as $mi => $v ) {
+                                    if ( isset( $group_data[$ch]["values"] ) && is_array( $group_data[$ch]["values"] ) ) {
+                                        foreach ( $group_data[$ch]["values"] as $mi => $v ) {
                                             if ( isset( $v["value"] ) ) { $values[] = esc_html( $v["value"] ); }
                                         }
                                     } else {
-                                        foreach ( $person_data[$ch] as $mi => $v ) {
+                                        foreach ( $group_data[$ch] as $mi => $v ) {
                                             if ( isset( $v["value"] ) ){ $values[] = esc_html( $v["value"] ); }
                                         }
                                     }
