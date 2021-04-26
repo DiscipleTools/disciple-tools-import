@@ -141,15 +141,13 @@ class Disciple_Tools_Import_Menu {
                     $csv_file_tmp_name = '';
 
                     if ( isset( $_FILES["csv_file"]["tmp_name"] ) ) {
-                        // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated
-                        $csv_file_tmp_name = wp_normalize_path( $_FILES["csv_file"]["tmp_name"] ); // phpcs:ignore WordPress.Security.EscapeOutput
-                        // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated
+                        $csv_file_tmp_name = wp_normalize_path( $_FILES["csv_file"]["tmp_name"] ); // phpcs:ignore WordPress.Security.EscapeOutput,WordPress.Security.ValidatedSanitizedInput -- $FILES has unslash a bit further down.
                     }
 
                     if ( isset( $_FILES["csv_file"]["name"] ) ) {
                         // phpcs:ignore WordPress.Security.EscapeOutput
                         // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated
-                        $csv_file_name = wp_normalize_path( $_FILES["csv_file"]["name"] );
+                        $csv_file_name = wp_normalize_path( $_FILES["csv_file"]["name"] ); // phpcs:ignore WordPress.Security.EscapeOutput,WordPress.Security.ValidatedSanitizedInput -- $FILES has unslash a bit further down.
                         $temp_name     = isset( $_FILES["csv_file"]["tmp_name"] ) ? sanitize_text_field( wp_unslash( $csv_file_tmp_name ) ) : '';
                         $file_parts    = explode( ".", sanitize_text_field( wp_unslash( $csv_file_name ) ) )[ count( explode( ".", sanitize_text_field( wp_unslash( $csv_file_name ) ) ) ) - 1 ];
                         // phpcs:ignore WordPress.Security.EscapeOutput
@@ -227,15 +225,12 @@ class Disciple_Tools_Import_Menu {
                     $csv_file_tmp_name = '';
 
                     if ( isset( $_FILES["csv_file"]["tmp_name"] ) ) {
-                        // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated
-                        $csv_file_tmp_name = wp_normalize_path( $_FILES["csv_file"]["tmp_name"] );
-                        // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated
+                        $csv_file_tmp_name = wp_normalize_path( $_FILES["csv_file"]["tmp_name"] ); // phpcs:ignore WordPress.Security.EscapeOutput,WordPress.Security.ValidatedSanitizedInput -- $FILES has unslash a bit further down.
                     }
 
                     if ( isset( $_FILES["csv_file"]["name"] ) ) {
                         // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated
-                        $csv_file_name     = wp_normalize_path( $_FILES["csv_file"]["name"] );
-
+                        $csv_file_name     = wp_normalize_path( $_FILES["csv_file"]["name"] ); // phpcs:ignore WordPress.Security.EscapeOutput,WordPress.Security.ValidatedSanitizedInput -- $FILES has unslash a bit further down.
 
                         $temp_name = isset( $_FILES["csv_file"]["tmp_name"] ) ? sanitize_text_field( $csv_file_tmp_name ) : '';
                         $file_parts = explode( ".", sanitize_text_field( wp_unslash( $csv_file_name ) ) )[ count( explode( ".", sanitize_text_field( wp_unslash( $csv_file_name ) ) ) ) - 1 ];
