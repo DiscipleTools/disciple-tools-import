@@ -138,12 +138,22 @@ class Disciple_Tools_Import_Menu {
                             && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['csv_import_nonce'] ) ), 'csv_import' )
                             && $run ) {
 
-                    if ( isset( $_FILES["csv_file"]["name"] ) ) {
-                        $csv_file_tmp_name = wp_normalize_path( $_FILES["csv_file"]["tmp_name"] );
-                        $csv_file_name     = wp_normalize_path( $_FILES["csv_file"]["name"] );
+                    $csv_file_tmp_name = '';
 
-                        $temp_name  = isset( $_FILES["csv_file"]["tmp_name"] ) ? sanitize_text_field( wp_unslash( $csv_file_tmp_name ) ) : '';
-                        $file_parts = explode( ".", sanitize_text_field( wp_unslash( $csv_file_name ) ) )[ count( explode( ".", sanitize_text_field( wp_unslash( $csv_file_name ) ) ) ) - 1 ];
+                    if ( isset( $_FILES["csv_file"]["tmp_name"] ) ) {
+                        // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated
+                        $csv_file_tmp_name = wp_normalize_path( $_FILES["csv_file"]["tmp_name"] ); // phpcs:ignore WordPress.Security.EscapeOutput
+                        // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated
+                    }
+
+                    if ( isset( $_FILES["csv_file"]["name"] ) ) {
+                        // phpcs:ignore WordPress.Security.EscapeOutput
+                        // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated
+                        $csv_file_name = wp_normalize_path( $_FILES["csv_file"]["name"] );
+                        $temp_name     = isset( $_FILES["csv_file"]["tmp_name"] ) ? sanitize_text_field( wp_unslash( $csv_file_tmp_name ) ) : '';
+                        $file_parts    = explode( ".", sanitize_text_field( wp_unslash( $csv_file_name ) ) )[ count( explode( ".", sanitize_text_field( wp_unslash( $csv_file_name ) ) ) ) - 1 ];
+                        // phpcs:ignore WordPress.Security.EscapeOutput
+                        // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated
                         if ( isset( $_FILES["csv_file"]["error"] ) && $_FILES["csv_file"]["error"] > 0 ) {
                             esc_html_e( "ERROR UPLOADING FILE", 'disciple_tools' );
                             $object->go_back();
@@ -214,12 +224,22 @@ class Disciple_Tools_Import_Menu {
                      && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['csv_import_nonce'] ) ), 'csv_import' )
                      && $run ) {
 
-                    if ( isset( $_FILES["csv_file"]["name"] ) ) {
-                        $csv_file_name     = wp_normalize_path( $_FILES["csv_file"]["name"] );
+                    $csv_file_tmp_name = '';
+
+                    if ( isset( $_FILES["csv_file"]["tmp_name"] ) ) {
+                        // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated
                         $csv_file_tmp_name = wp_normalize_path( $_FILES["csv_file"]["tmp_name"] );
+                        // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated
+                    }
+
+                    if ( isset( $_FILES["csv_file"]["name"] ) ) {
+                        // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated
+                        $csv_file_name     = wp_normalize_path( $_FILES["csv_file"]["name"] );
+
 
                         $temp_name = isset( $_FILES["csv_file"]["tmp_name"] ) ? sanitize_text_field( $csv_file_tmp_name ) : '';
                         $file_parts = explode( ".", sanitize_text_field( wp_unslash( $csv_file_name ) ) )[ count( explode( ".", sanitize_text_field( wp_unslash( $csv_file_name ) ) ) ) - 1 ];
+                        // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated
                         if ( isset( $_FILES["csv_file"]["error"] ) && $_FILES["csv_file"]["error"] > 0 ) {
                             esc_html_e( "ERROR UPLOADING FILE", 'disciple_tools' );
                             $object->go_back();
