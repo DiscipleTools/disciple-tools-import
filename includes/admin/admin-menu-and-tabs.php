@@ -836,7 +836,7 @@ class Disciple_Tools_Import_Tab_Contact {
 
                         $i = strtolower( $i );
                         $i = substr( $i, 0, 1 );
-                        $gender = "not-set";
+                        $gender = "none";
                         if ( $i == "m" ){ $gender = "male";
                         } else if ( $i == "f" ){ $gender = "female"; }
                         $fields['cf_gender'] = $gender;
