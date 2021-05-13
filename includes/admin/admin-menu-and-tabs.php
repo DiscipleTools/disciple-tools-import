@@ -80,11 +80,6 @@ class Disciple_Tools_Import_Menu {
         if ( !current_user_can( 'manage_dt' ) ) { // manage dt is a permission that is specific to Disciple Tools and allows admins, strategists and dispatchers into the wp-admin
             wp_die( esc_attr__( 'You do not have sufficient permissions to access this page.' ) );
         }
-        if ( isset( $_GET["tab"] ) ) {
-            $tab = sanitize_key( wp_unslash( $_GET["tab"] ) );
-        } else {
-            $tab = 'contact';
-        }
 
         $run = true;
         if ( !is_admin() ) {
@@ -98,203 +93,37 @@ class Disciple_Tools_Import_Menu {
             <h2 class="nav-tab-wrapper">
 
             <?php
-            foreach ( [
-                'contact' => [
-                    'tab'   => 'contact',
-                    'label' => 'Contact'
-                ],
-                'group'   => [
-                    'tab'   => 'group',
-                    'label' => 'Group',
-                ],
-//                'location' => [
-//                    'tab' => 'location',
-//                    'label' => 'Location'
-//                ]
-            ] as $my_tab):
-                $my_tab_name = "{$my_tab['tab']}";
-                $my_tab_label = "{$my_tab['label']}";
-                $my_tab_link = "admin.php?page={$this->token}&tab={$my_tab_name}";
-                ?>
+            $post_types = DT_Posts::get_post_types();
+            $active_post_type_object = null;
 
+            if ( isset( $_GET["tab"] ) ) {
+                $tab = sanitize_key( wp_unslash( $_GET["tab"] ) );
+            } else {
+                $tab = $post_types[0];
+            }
+
+            foreach ( $post_types as $post_type ):
+                $import_object = new DT_Import( $post_type );
+                $my_tab_name = $import_object->get_post_name();
+                $my_tab_label = $import_object->get_post_label();
+                $my_tab_link = "admin.php?page={$this->token}&tab={$my_tab_name}";
+
+                if ( $tab == $my_tab_name):
+                    $active_post_type_object = $import_object;
+                endif;
+            ?>
                 <a href="<?php echo esc_html( $my_tab_link ) ?>"
                    class="nav-tab <?php ( $tab == $my_tab_name ) ? esc_attr_e( 'nav-tab-active', 'disciple_tools_import' ) : print ''; ?>">
-                <?php echo esc_attr( $my_tab_label ) ?>
+                    <?php echo esc_attr( $my_tab_label ) ?>
                 </a>
-
-            <?php endforeach; ?>
+            <?php
+            endforeach;
+            ?>
 
             </h2>
 
             <?php
-
-            if ( $tab == 'general' ) {
-                $object = new Disciple_Tools_Import_Tab_General();
-                $object->content();
-            }  else if ( $tab == 'contact' ) {
-                $object = new Disciple_Tools_Import_Tab_Contact();
-
-                if ( isset( $_POST['csv_import_nonce'] )
-                            && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['csv_import_nonce'] ) ), 'csv_import' )
-                            && $run ) {
-
-                    $csv_file_tmp_name = '';
-
-                    if ( isset( $_FILES["csv_file"]["tmp_name"] ) ) {
-                        $csv_file_tmp_name = wp_normalize_path( $_FILES["csv_file"]["tmp_name"] ); // phpcs:ignore WordPress.Security.EscapeOutput,WordPress.Security.ValidatedSanitizedInput -- $FILES has unslash a bit further down.
-                    }
-
-                    if ( isset( $_FILES["csv_file"]["name"] ) ) {
-                        // phpcs:ignore WordPress.Security.EscapeOutput
-                        // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated
-                        $csv_file_name = wp_normalize_path( $_FILES["csv_file"]["name"] ); // phpcs:ignore WordPress.Security.EscapeOutput,WordPress.Security.ValidatedSanitizedInput -- $FILES has unslash a bit further down.
-                        $temp_name     = isset( $_FILES["csv_file"]["tmp_name"] ) ? sanitize_text_field( wp_unslash( $csv_file_tmp_name ) ) : '';
-                        $file_parts    = explode( ".", sanitize_text_field( wp_unslash( $csv_file_name ) ) )[ count( explode( ".", sanitize_text_field( wp_unslash( $csv_file_name ) ) ) ) - 1 ];
-                        // phpcs:ignore WordPress.Security.EscapeOutput
-                        // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated
-                        if ( isset( $_FILES["csv_file"]["error"] ) && $_FILES["csv_file"]["error"] > 0 ) {
-                            esc_html_e( "ERROR UPLOADING FILE", 'disciple_tools' );
-                            $object->go_back();
-                            exit;
-
-                        } else if ( $file_parts != 'csv' ) {
-                            esc_html_e( "NOT CSV", 'disciple_tools' );
-                            $object->go_back();
-                            exit;
-
-                        } else if ( mb_detect_encoding( file_get_contents( $temp_name, false, null, 0, 100 ), 'UTF-8', true ) === false ) {
-                            esc_html_e( "FILE IS NOT UTF-8", 'disciple_tools' );
-                            $object->go_back();
-                            exit;
-                        }
-
-
-                        $file_source = null;
-                        if ( isset( $_POST['csv_source'] ) ) {
-                            $file_source = sanitize_text_field( wp_unslash( $_POST['csv_source'] ) );
-                        }
-
-                        $file_assigned_to = null;
-                        if ( isset( $_POST['csv_assign'] ) ) {
-                            $file_assigned_to = sanitize_text_field( wp_unslash( $_POST['csv_assign'] ) );
-                        }
-
-                        $import_settings = [
-                            "source" => $file_source,
-                            "assigned_to" => $file_assigned_to,
-                            "data" => $object->mapping_process( $temp_name, $file_source, $file_assigned_to ),
-                        ];
-                        set_transient( "disciple_tools_import_settings", $import_settings, 3600 * 24 );
-                        $object->display_field_mapping_step();
-
-                    } /**end-of condition --isset( $_FILES["csv_file"] )-- */
-
-                } else if ( isset( $_POST['csv_mappings_nonce'] )
-                            && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['csv_mappings_nonce'] ) ), 'csv_mappings' )
-                            && $run ) {
-
-                    if ( isset( $_POST["csv_mapper"] ) ) {
-
-                        $mapping_data = self::dt_sanitize_post_request_array_field( $_POST, 'csv_mapper' );
-                        $value_mapperi_data = isset( $_POST['VMD'] ) ? self::dt_sanitize_post_request_array_field( $_POST, 'VMD' ) : [];
-                        $value_mapper_data = isset( $_POST['VM'] ) ? self::dt_sanitize_post_request_array_field( $_POST, 'VM' ) : [];
-
-                        $object->preview( $mapping_data, $value_mapperi_data, $value_mapper_data );
-
-                    }
-                } else if ( isset( $_POST['csv_correct_nonce'] )
-                            && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['csv_correct_nonce'] ) ), 'csv_correct' )
-                            && $run ) {
-
-                    if ( isset( $_POST["go_back"] ) ){
-                        $object->display_field_mapping_step();
-                    } else {
-                        $object->insert_contacts();
-                    }
-                    exit;
-
-                } else {
-                    $object->content();
-                }
-            } else if ( $tab == 'group' ) {
-                $object = new Disciple_Tools_Import_Tab_Group();
-                if ( isset( $_POST['csv_import_nonce'] )
-                     && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['csv_import_nonce'] ) ), 'csv_import' )
-                     && $run ) {
-
-                    $csv_file_tmp_name = '';
-
-                    if ( isset( $_FILES["csv_file"]["tmp_name"] ) ) {
-                        $csv_file_tmp_name = wp_normalize_path( $_FILES["csv_file"]["tmp_name"] ); // phpcs:ignore WordPress.Security.EscapeOutput,WordPress.Security.ValidatedSanitizedInput -- $FILES has unslash a bit further down.
-                    }
-
-                    if ( isset( $_FILES["csv_file"]["name"] ) ) {
-                        // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated
-                        $csv_file_name     = wp_normalize_path( $_FILES["csv_file"]["name"] ); // phpcs:ignore WordPress.Security.EscapeOutput,WordPress.Security.ValidatedSanitizedInput -- $FILES has unslash a bit further down.
-
-                        $temp_name = isset( $_FILES["csv_file"]["tmp_name"] ) ? sanitize_text_field( $csv_file_tmp_name ) : '';
-                        $file_parts = explode( ".", sanitize_text_field( wp_unslash( $csv_file_name ) ) )[ count( explode( ".", sanitize_text_field( wp_unslash( $csv_file_name ) ) ) ) - 1 ];
-                        // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated
-                        if ( isset( $_FILES["csv_file"]["error"] ) && $_FILES["csv_file"]["error"] > 0 ) {
-                            esc_html_e( "ERROR UPLOADING FILE", 'disciple_tools' );
-                            $object->go_back();
-                            exit;
-
-                        } else if ( $file_parts != 'csv' ) {
-                            esc_html_e( "NOT CSV", 'disciple_tools' );
-                            $object->go_back();
-                            exit;
-
-                        } else if ( mb_detect_encoding( file_get_contents( $temp_name, false, null, 0, 100 ), 'UTF-8', true ) === false ) {
-                            esc_html_e( "FILE IS NOT UTF-8", 'disciple_tools' );
-                            $object->go_back();
-                            exit;
-                        }
-
-
-                        $file_assigned_to = null;
-                        if ( isset( $_POST['csv_assign'] ) ) {
-                            $file_assigned_to = sanitize_text_field( wp_unslash( $_POST['csv_assign'] ) );
-                        }
-
-                        $import_settings = [
-                            "assigned_to" => $file_assigned_to,
-                            "data" => $object->mapping_process( $temp_name, $file_assigned_to ),
-                        ];
-
-                        set_transient( "disciple_tools_import_settings", $import_settings, 3600 * 24 );
-                        $object->display_field_mapping_step();
-
-                    } /**end-of condition --isset( $_FILES["csv_file"] )-- */
-
-                } else if ( isset( $_POST['csv_mappings_nonce'] )
-                            && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['csv_mappings_nonce'] ) ), 'csv_mappings' )
-                            && $run ) {
-
-                    if ( isset( $_POST["csv_mapper"] ) ) {
-
-                        $mapping_data = self::dt_sanitize_post_request_array_field( $_POST, 'csv_mapper' );
-                        $value_mapperi_data = isset( $_POST['VMD'] ) ? self::dt_sanitize_post_request_array_field( $_POST, 'VMD' ) : [];
-                        $value_mapper_data = isset( $_POST['VM'] ) ? self::dt_sanitize_post_request_array_field( $_POST, 'VM' ) : [];
-
-                        $object->preview( $mapping_data, $value_mapperi_data, $value_mapper_data );
-
-                    }
-                } else if ( isset( $_POST['csv_correct_nonce'] )
-                            && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['csv_correct_nonce'] ) ), 'csv_correct' )
-                            && $run ) {
-
-                    if ( isset( $_POST["go_back"] ) ){
-                        $object->display_field_mapping_step();
-                    } else {
-                        $object->insert_groups();
-                    }
-                    exit;
-
-                } else {
-                    $object->content();
-                }
-            }
+            $active_post_type_object->content();
             ?>
 
         </div><!-- End wrap -->
