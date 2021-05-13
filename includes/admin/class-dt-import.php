@@ -431,7 +431,7 @@ class DT_Import {
     }
 
     public function import_form() {
-    ?>
+        ?>
         <!-- Box -->
         <!-- Box -->
         <table class="widefat striped">
@@ -460,7 +460,7 @@ class DT_Import {
                                 <tr>
                                     <td>
                                         <label for="csv_source">
-                                            <?php esc_html_e( "Where did these {$this->post_label_plural} come from? Add a source.", 'disciple_tools' ) ?>
+                                            <?php esc_attr_e( "Where did these $this->post_label_plural come from? Add a source.", 'disciple_tools' ) ?>
                                         </label><br>
                                         <select name="csv_source" id="csv_source">
                                             <?php
@@ -474,7 +474,7 @@ class DT_Import {
                                         </select>
                                     </td>
                                 </tr>
-                            <?php
+                                <?php
                             endif;
                             ?>
                             <tr>
@@ -520,7 +520,7 @@ class DT_Import {
         </table>
         <br>
         <!-- End Box -->
-    <?php
+        <?php
     }
 
     private function right_column() {
@@ -736,13 +736,13 @@ class DT_Import {
         }
 
         // save $unique value so we can access it again when hitting back button.
-        set_transient('disciple_tools_unique_data', $unique, 3600 * 24 );
+        set_transient( 'disciple_tools_unique_data', $unique, 3600 * 24 );
 
         // save $uploaded_file_headers so we can access it again when hitting back button.
-        set_transient('disciple_tools_uploaded_file_headers', $uploaded_file_headers, 3600 * 24 );
+        set_transient( 'disciple_tools_uploaded_file_headers', $uploaded_file_headers, 3600 * 24 );
 
         // save $temp_data so we can access it agaian when hitting back button
-        set_transient('disciple_tools_temp_data', $temp_data, 3600 * 24 );
+        set_transient( 'disciple_tools_temp_data', $temp_data, 3600 * 24 );
 
         return [
             'data'                  => $data,
@@ -887,7 +887,7 @@ class DT_Import {
 
                         // a per-item action
                         function doEach( item, done ) {
-                            let rest_route_post_type = "<?php echo strtolower( $this->post_label_plural ); ?>";
+                            let rest_route_post_type = "<?php echo esc_attr_e( strtolower( $this->post_label_plural ) ); ?>";
                             let rest_url = "<?php echo esc_url_raw( rest_url() ); ?>dt-posts/v2/" + rest_route_post_type + "?silent=true";
 
                             console.log('starting ...' ); //t('starting ...');
@@ -952,7 +952,7 @@ class DT_Import {
 
                     <?php
                     $num = count( $js_data );
-                    echo esc_html( sprintf( __( "Creating %s %s DO NOT LEAVE THE PAGE until the \"All Done\" message appears", 'disciple_tools' ), $num, $this->post_label_plural ) );
+                    echo esc_html( sprintf( __( "Creating %1$s %2$s DO NOT LEAVE THE PAGE until the \"All Done\" message appears", 'disciple_tools' ), $num, $this->post_label_plural ) );
                     ?>
 
                 </td>
@@ -1035,7 +1035,10 @@ class DT_Import {
 
             <optgroup label="Standard Fields">
 
-                <option value="title" <?php selected( $field == 'title' ) ?> ><?php echo $this->post_label_singular; ?> Name</option>
+                <option
+                    value="title" <?php selected( $field == 'title' ) ?> ><?php esc_attr_e( $this->post_label_singular, 'disciple_tools' ); ?>
+                    Name
+                </option>
 
                 <?php
                 foreach ( $channels as $label => $item ) {
@@ -1225,7 +1228,7 @@ class DT_Import {
         return $data;
     }
 
-    public function display_data( $data  ) {
+    public function display_data( $data ) {
         $headings        = [];
         $multi_separator = $this->multi_separator;
         $prefix          = sprintf( '%s_', strtolower( $this->post_label_singular ) );
@@ -1247,7 +1250,7 @@ class DT_Import {
 
                 <th data-col-id=1>
                     <span class="cflabel">
-                    <?php echo $this->post_label_plural; ?>
+                    <?php esc_attr_e( $this->post_label_plural, 'disciple_tools' ); ?>
                     </span>
                 </th>
 

@@ -108,15 +108,15 @@ class Disciple_Tools_Import_Menu {
                 $my_tab_label = $import_object->get_post_label();
                 $my_tab_link = "admin.php?page={$this->token}&tab={$my_tab_name}";
 
-                if ( $tab == $my_tab_name):
+                if ( $tab == $my_tab_name ):
                     $active_post_type_object = $import_object;
                 endif;
-            ?>
+                ?>
                 <a href="<?php echo esc_html( $my_tab_link ) ?>"
                    class="nav-tab <?php ( $tab == $my_tab_name ) ? esc_attr_e( 'nav-tab-active', 'disciple_tools_import' ) : print ''; ?>">
                     <?php echo esc_attr( $my_tab_label ) ?>
                 </a>
-            <?php
+                <?php
             endforeach;
             ?>
 
