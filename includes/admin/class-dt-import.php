@@ -462,7 +462,7 @@ class DT_Import {
                                         <label for="csv_source">
                                             <?php
                                             $post_label_plural = $this->post_label_plural;
-                                            esc_attr_e( "Where did these $post_label_plural come from? Add a source.", 'disciple_tools' );
+                                            printf( "Where did these %s come from? Add a source.", esc_attr( $post_label_plural ) );
                                             ?>
                                         </label><br>
                                         <select name="csv_source" id="csv_source">
@@ -958,7 +958,7 @@ class DT_Import {
 
                     <?php
                     $num = count( $js_data );
-                    esc_html_e( "Creating $num $this->post_label_plural DO NOT LEAVE THE PAGE until the \"All Done\" message appears", 'disciple_tools' );
+                    printf( 'Creating %s %s DO NOT LEAVE THE PAGE until the "All Done" message appears.', esc_attr( $num ), esc_attr( $this->post_label_plural ) );
                     ?>
 
                 </td>
@@ -1042,7 +1042,7 @@ class DT_Import {
             <optgroup label="Standard Fields">
 
                 <option
-                    value="title" <?php selected( $field == 'title' ) ?> ><?php esc_attr_e( $this->post_label_singular, 'disciple_tools' ); ?>
+                    value="title" <?php selected( $field == 'title' ) ?> ><?php esc_attr( $this->post_label_singular ); ?>
                     Name
                 </option>
 
@@ -1256,7 +1256,7 @@ class DT_Import {
 
                 <th data-col-id=1>
                     <span class="cflabel">
-                    <?php esc_attr_e( $this->post_label_plural, 'disciple_tools' ); ?>
+                    <?php esc_attr( $this->post_label_plural ); ?>
                     </span>
                 </th>
 
