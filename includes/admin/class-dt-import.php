@@ -460,7 +460,10 @@ class DT_Import {
                                 <tr>
                                     <td>
                                         <label for="csv_source">
-                                            <?php esc_attr_e( "Where did these $this->post_label_plural come from? Add a source.", 'disciple_tools' ) ?>
+                                            <?php
+                                            $post_label_plural = $this->post_label_plural;
+                                            esc_attr_e( "Where did these $post_label_plural come from? Add a source.", 'disciple_tools' );
+                                            ?>
                                         </label><br>
                                         <select name="csv_source" id="csv_source">
                                             <?php
@@ -887,7 +890,10 @@ class DT_Import {
 
                         // a per-item action
                         function doEach( item, done ) {
-                            let rest_route_post_type = "<?php echo esc_attr_e( strtolower( $this->post_label_plural ) ); ?>";
+                            <?php
+                            $lowercase_post_type = strtolower( $this->post_label_plural );
+                            ?>
+                            let rest_route_post_type = "<?php echo esc_attr( $lowercase_post_type ); ?>";
                             let rest_url = "<?php echo esc_url_raw( rest_url() ); ?>dt-posts/v2/" + rest_route_post_type + "?silent=true";
 
                             console.log('starting ...' ); //t('starting ...');
@@ -952,7 +958,7 @@ class DT_Import {
 
                     <?php
                     $num = count( $js_data );
-                    echo esc_html( sprintf( __( "Creating %1$s %2$s DO NOT LEAVE THE PAGE until the \"All Done\" message appears", 'disciple_tools' ), $num, $this->post_label_plural ) );
+                    esc_html_e( "Creating $num $this->post_label_plural DO NOT LEAVE THE PAGE until the \"All Done\" message appears", 'disciple_tools' );
                     ?>
 
                 </td>
