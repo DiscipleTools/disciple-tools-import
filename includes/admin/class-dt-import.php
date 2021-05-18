@@ -503,7 +503,7 @@ class DT_Import {
 
                                     </td>
                                 </tr>
-                            <?php
+                                <?php
                             endif;
                             ?>
                             <tr>
