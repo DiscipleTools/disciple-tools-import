@@ -479,29 +479,33 @@ class DT_Import {
                                 </tr>
                                 <?php
                             endif;
-                            ?>
-                            <tr>
-                                <td>
-                                    <label for="csv_assign">
-                                        <?php esc_html_e( "Which user do you want these assigned to?", 'disciple_tools' ) ?>
-                                    </label><br>
-                                    <select name="csv_assign" id="csv_assign">
-                                        <option value=""></option>
-                                        <?php
-                                        $args = [
-                                            'role__not_in' => [ 'registered' ],
-                                            'fields'       => [ 'ID', 'display_name' ],
-                                            'order'        => 'ASC',
-                                        ];
-                                        $users = get_users( $args );
-                                        foreach ( $users as $user ) { ?>
-                                            <option
-                                                value=<?php echo esc_html( $user->ID ); ?>><?php echo esc_html( $user->display_name ); ?></option>
-                                        <?php } ?>
-                                    </select>
+                            if ( isset( $this->post_settings['fields']['assigned_to'] ) ):
+                                ?>
+                                <tr>
+                                    <td>
+                                        <label for="csv_assign">
+                                            <?php esc_html_e( "Which user do you want these assigned to?", 'disciple_tools' ) ?>
+                                        </label><br>
+                                        <select name="csv_assign" id="csv_assign">
+                                            <option value=""></option>
+                                            <?php
+                                            $args  = [
+                                                'role__not_in' => [ 'registered' ],
+                                                'fields'       => [ 'ID', 'display_name' ],
+                                                'order'        => 'ASC',
+                                            ];
+                                            $users = get_users( $args );
+                                            foreach ( $users as $user ) { ?>
+                                                <option
+                                                    value=<?php echo esc_html( $user->ID ); ?>><?php echo esc_html( $user->display_name ); ?></option>
+                                            <?php } ?>
+                                        </select>
 
-                                </td>
-                            </tr>
+                                    </td>
+                                </tr>
+                            <?php
+                            endif;
+                            ?>
                             <tr>
                                 <td>
                                     <p class="submit">
