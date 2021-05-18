@@ -132,6 +132,7 @@ class Disciple_Tools_Import {
      * @return void
      */
     private function includes() {
+        require_once( 'includes/admin/class-dt-import.php' );
         require_once( 'includes/admin/admin-menu-and-tabs.php' );
     }
 
