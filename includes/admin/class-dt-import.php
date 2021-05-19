@@ -623,6 +623,10 @@ class DT_Import {
 
         $data_rows = array();
         while ( $row = fgetcsv( $file_data, 0, $delimiter, '"', '"' ) ){
+            // skip row if empty
+            if ( empty( array_filter( $row ) ) ){
+                continue;
+            }
             $data_rows[] = $row;
         }
 
