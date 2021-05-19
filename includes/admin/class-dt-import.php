@@ -1160,7 +1160,7 @@ class DT_Import {
 
                     if ( $ch == 'title' ) {
                         $fields[ $ch ] = $row_value;
-                    } else if ( in_array($ch, self::$contact_address_headings ) ) {
+                    } else if ( in_array( $ch, self::$contact_address_headings ) ) {
                         $fields[ $ch ] = $row_value;
                     } else if ( $type == 'key_select' ) {
 
