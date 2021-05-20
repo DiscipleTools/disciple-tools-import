@@ -623,6 +623,10 @@ class DT_Import {
 
         $data_rows = array();
         while ( $row = fgetcsv( $file_data, 0, $delimiter, '"', '"' ) ){
+            // skip row if empty
+            if ( empty( array_filter( $row ) ) ){
+                continue;
+            }
             $data_rows[] = $row;
         }
 
@@ -1170,16 +1174,35 @@ class DT_Import {
                         }
                     } else if ( $type == 'key_select' ) {
 
-                        if ( isset( $value_mapperi_data[$index] ) ) {
-                            foreach ( $value_mapperi_data[$index] as $vmdi => $vmdv ) {
-                                if ( wp_specialchars_decode( $vmdv ) == $row_value && isset( $value_mapper_data[$index][$vmdi] ) ) {
-                                    $fields[$ch] = wp_specialchars_decode( $value_mapper_data[$index][$vmdi] );
+                        if ( isset( $value_mapperi_data[ $index ] ) ) {
+                            foreach ( $value_mapperi_data[ $index ] as $vmdi => $vmdv ) {
+                                if ( wp_specialchars_decode( $vmdv ) == $row_value && isset( $value_mapper_data[ $index ][ $vmdi ] ) ) {
+                                    $fields[ $ch ] = wp_specialchars_decode( $value_mapper_data[ $index ][ $vmdi ] );
                                 }
                             }
+                        }
+                    } else if ( $type == 'tags' ) {
+                        $multivalued = explode( $multi_separator, $row_value );
+
+                        foreach ( $multivalued as $mx ) {
+
+                            $mx = trim( $mx );
+
+                            if ( isset( $value_mapperi_data[$index] ) ) {
+
+                                foreach ( $value_mapperi_data[$index] as $vmdi => $vmdv ) {
+                                    if ( $vmdv == $mx && isset( $value_mapper_data[$index][$vmdi] ) ) {
+                                        $mx = $vmdv;
+                                    }
+                                }
+                            }
+
+                            $fields[$ch]["values"][] = [ "value" => $mx ];
                         }
                     } else if ( $type == 'multi_select' ) {
 
                         $multivalued = explode( $multi_separator, $row_value );
+
                         foreach ( $multivalued as $mx ) {
 
                             $mx = trim( $mx );
@@ -1189,6 +1212,7 @@ class DT_Import {
                                 foreach ( $value_mapperi_data[$index] as $vmdi => $vmdv ) {
                                     if ( $vmdv == $mx && isset( $value_mapper_data[$index][$vmdi] ) ) {
                                         $mx = $value_mapper_data[$index][$vmdi];
+
                                     }
                                 }
 
@@ -1198,6 +1222,7 @@ class DT_Import {
                             }
 
                             $fields[$ch]["values"][] = [ "value" => $mx ];
+
                         }
 
                         //
@@ -1355,7 +1380,7 @@ class DT_Import {
 
                                     $value = $import_data[$ch];
 
-                                } else if ( ( $type == 'multi_select' ) || in_array( $ch, self::$contact_address_headings ) ) {
+                                } else if ( ( $type == 'multi_select' ) || in_array( $ch, self::$contact_address_headings ) || ( $type == 'tags' ) ) {
 
                                     if ( isset( $import_data[ $ch ]["values"] ) && is_array( $import_data[ $ch ]["values"] ) ) {
                                         $values = [];
