@@ -546,10 +546,10 @@ class DT_Import {
                     <p><?php esc_html_e( 'Example CSV\'s:', 'disciple_tools' ); ?></p>
                     <ul>
                         <li>
-                            <a href="<?php echo plugin_dir_url( __DIR__ ); ?>../assets/example_contacts.csv"><?php esc_html_e( 'Contacts', 'disciple_tools' ); ?></a>
+                            <a href="<?php echo esc_attr( plugin_dir_url( __DIR__ ) ); ?>../assets/example_contacts.csv"><?php esc_html_e( 'Contacts', 'disciple_tools' ); ?></a>
                         </li>
                         <li>
-                            <a href="<?php echo plugin_dir_url( __DIR__ ); ?>../assets/example_groups.csv"><?php esc_html_e( 'Groups', 'disciple_tools' ); ?></a>
+                            <a href="<?php echo esc_attr( plugin_dir_url( __DIR__ ) ); ?>../assets/example_groups.csv"><?php esc_html_e( 'Groups', 'disciple_tools' ); ?></a>
                         </li>
                     </ul>
                 </td>
