@@ -1161,7 +1161,13 @@ class DT_Import {
                     if ( $ch == 'title' ) {
                         $fields[ $ch ] = $row_value;
                     } else if ( in_array( $ch, self::$contact_address_headings ) ) {
-                        $fields[ $ch ] = $row_value;
+                        $multivalued = explode( $multi_separator, $row_value );
+                        foreach ( $multivalued as $mx ) {
+
+                            $mx = trim( $mx );
+
+                            $fields[ $ch ]["values"][] = [ "value" => $mx ];
+                        }
                     } else if ( $type == 'key_select' ) {
 
                         if ( isset( $value_mapperi_data[$index] ) ) {
@@ -1349,7 +1355,7 @@ class DT_Import {
 
                                     $value = $import_data[$ch];
 
-                                } else if ( ( $type == 'multi_select' ) ) {
+                                } else if ( ( $type == 'multi_select' ) || in_array( $ch, self::$contact_address_headings ) ) {
 
                                     if ( isset( $import_data[ $ch ]["values"] ) && is_array( $import_data[ $ch ]["values"] ) ) {
                                         $values = [];
@@ -1361,9 +1367,8 @@ class DT_Import {
                                         }
                                         $value = implode( $multi_separator, (array) $values );
                                     }
+
                                 } else if ( ( $type == 'number' ) ) {
-                                    echo esc_html( $import_data[ $ch ] );
-                                } else if ( in_array( $ch, self::$contact_address_headings ) ) {
                                     echo esc_html( $import_data[ $ch ] );
                                 } else if ( isset( $import_data[$ch] ) ) {
                                     $values = [];
