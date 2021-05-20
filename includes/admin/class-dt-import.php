@@ -1001,7 +1001,7 @@ class DT_Import {
             $column_name = "{$prefix}email";
 
         } else if ( array_search( $src, self::$contact_address_headings ) > 0 ) {
-            $column_name = "{$prefix}address";
+            $column_name = "contact_address";
 
         } else {
             $fields = $this->post_field_settings;
@@ -1065,7 +1065,11 @@ class DT_Import {
 
                 <?php
                 foreach ( $channels as $label => $item ) {
-                    $label = sprintf( "%s_%s", strtolower( $this->post_label_singular ), $label );
+                    if ( 'address' == $label ) {
+                        $label = 'contact_address';
+                    } else {
+                        $label = sprintf( "%s_%s", strtolower( $this->post_label_singular ), $label );
+                    }
                     ?>
                     <option value="<?php echo esc_html( $label ); ?>"
                         <?php selected( $field != null && $field == $label ) ?>
@@ -1085,6 +1089,9 @@ class DT_Import {
                 <?php
                 $data_field = sprintf( '%s_%s', strtolower( $this->post_label_singular ), $field );
                 foreach ( $list_data as $key => $label ) {
+                    if ( $key === 'contact_address' ) {
+                        continue;
+                    }
                     ?>
                     <option value="<?php echo esc_html( $key ); ?>" <?php selected( $field != null && $field == $key || $data_field != null && $data_field == $key ) ?>><?php echo esc_html( $label ); ?></option>
                 <?php } ?>
@@ -1165,8 +1172,15 @@ class DT_Import {
                     $type = isset( $cfs[$ch]['type'] ) ? $cfs[$ch]['type'] : null;
 
                     if ( $ch == 'title' ) {
-                        $fields[$ch] = $row_value;
+                        $fields[ $ch ] = $row_value;
+                    } else if ( in_array( $ch, self::$contact_address_headings ) ) {
+                        $multivalued = explode( $multi_separator, $row_value );
+                        foreach ( $multivalued as $mx ) {
 
+                            $mx = trim( $mx );
+
+                            $fields[ $ch ]["values"][] = [ "value" => $mx ];
+                        }
                     } else if ( $type == 'key_select' ) {
 
                         if ( isset( $value_mapperi_data[ $index ] ) ) {
@@ -1375,7 +1389,7 @@ class DT_Import {
 
                                     $value = $import_data[$ch];
 
-                                } else if ( ( $type == 'multi_select' ) || ( $type == 'tags' ) ) {
+                                } else if ( ( $type == 'multi_select' ) || in_array( $ch, self::$contact_address_headings ) || ( $type == 'tags' ) ) {
 
                                     if ( isset( $import_data[ $ch ]["values"] ) && is_array( $import_data[ $ch ]["values"] ) ) {
                                         $values = [];
