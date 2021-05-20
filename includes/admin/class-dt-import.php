@@ -1392,7 +1392,6 @@ class DT_Import {
                                         }
                                         $value = implode( $multi_separator, (array) $values );
                                     }
-
                                 } else if ( ( $type == 'number' ) ) {
                                     echo esc_html( $import_data[ $ch ] );
                                 } else if ( isset( $import_data[$ch] ) ) {
