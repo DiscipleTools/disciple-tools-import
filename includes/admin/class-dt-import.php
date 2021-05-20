@@ -923,8 +923,8 @@ class DT_Import {
                                 beforeSend: function(xhr) {
                                     xhr.setRequestHeader('X-WP-Nonce', "<?php echo esc_html( wp_create_nonce( 'wp_rest' ) ); ?>");
                                 },
-                                success: function() {
-                                    console.log('done'); t('PID#'+pid+' done');
+                                success: function(record) {
+                                    t(`PID# pid done. <a href="${record.permalink}" target="_blank">See record</a>`);
                                     done();
                                 },
                                 error: function(xhr) { // if error occured
