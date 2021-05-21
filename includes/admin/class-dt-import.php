@@ -877,7 +877,7 @@ class DT_Import {
                     <div id="data-links">&nbsp;</div>
 
                     <script type="text/javascript">
-                        let pid = 1000;
+                        let pid = 1;
                         function process( q, num, fn, done ) {
                             // remove a batch of items from the queue
                             let items = q.splice(0, num),
@@ -924,7 +924,7 @@ class DT_Import {
                                     xhr.setRequestHeader('X-WP-Nonce', "<?php echo esc_html( wp_create_nonce( 'wp_rest' ) ); ?>");
                                 },
                                 success: function(record) {
-                                    t(`PID# pid done. <a href="${record.permalink}" target="_blank">See record</a>`);
+                                    t(`PID# ${pid} done. <a href="${record.permalink}" target="_blank">See record</a>`);
                                     done();
                                 },
                                 error: function(xhr) { // if error occured
