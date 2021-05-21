@@ -94,6 +94,7 @@ class Disciple_Tools_Import_Menu {
 
             <?php
             $post_types = DT_Posts::get_post_types();
+            $post_types = array_values( array_diff( $post_types, [ "peoplegroups" ] ) ); //skip people groups for now.
             $active_post_type_object = null;
 
             if ( isset( $_GET["tab"] ) ) {
