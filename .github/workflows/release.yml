@@ -23,7 +23,7 @@ jobs:
     - name: Build project
       run: |
         mkdir disciple-tools-import |
-        cp -r disciple-tools-import.php LICENSE includes assets languages disciple-tools-import/ |
+        cp -r disciple-tools-import.php LICENSE includes assets languages version-control.json disciple-tools-import/ |
         zip -r disciple-tools-import.zip disciple-tools-import
     - name: Create Release
       id: create_release
