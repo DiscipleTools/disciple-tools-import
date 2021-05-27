@@ -655,6 +655,11 @@ class DT_Import {
             $csv_headers = $headers_info_keys;
         }
 
+        foreach ( $data_rows as $ri => $row ) {
+            foreach ( $row as $index => $cell ) {
+                $data_rows[$ri][$index] = utf8_encode( $cell );
+            }
+        }
         $temp_data = $data_rows;
 
         //correct csv headers
@@ -1239,7 +1244,7 @@ class DT_Import {
                         //    $fields[$ch] = $i; /**/
 
                     } else if ( $type == 'boolean' ) {
-                        $fields[$ch] = $row_value[0] === "1";
+                        $fields[$ch] = in_array( $row_value, [ "True", "true", "1" ], true );
 
                     } else if ( $type == 'date' ) {
                         $my_temp_time = strtotime( $row_value );
