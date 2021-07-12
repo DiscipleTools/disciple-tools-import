@@ -23,7 +23,7 @@
     "high": "https://raw.githubusercontent.com/DiscipleTools/disciple-tools-version-control/master/images/dt-placeholder-1544x500.jpg"
   },
   "sections": {
-    "description": "Kick start your Disciple.Tools plugin project with this template! This plugin is a collection of our best practices and code bases for creating Disciple.Tools plugins. ",
+    "description": "Easily import your contact or group data into Disciple.Tools from a CSV file.",
     "installation": "(Required) You must have Disciple.Tools Theme installed before using this plugin. Once Disciple.Tools is installed, you can use the normal Plugin system to install the plugin.",
     "changelog": ""
   }
