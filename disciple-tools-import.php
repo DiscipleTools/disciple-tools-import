@@ -66,9 +66,12 @@ function disciple_tools_import() {
      * Don't load the plugin on every rest request. Only those with the metrics namespace
      */
     $is_rest = dt_is_rest();
+    /*
     if ( !$is_rest || strpos( dt_get_url_path(), 'disciple_tools_import' ) !== false ){
         return Disciple_Tools_Import::get_instance();
     }
+    */
+    return Disciple_Tools_Import::get_instance();
 }
 add_action( 'after_setup_theme', 'disciple_tools_import' );
 

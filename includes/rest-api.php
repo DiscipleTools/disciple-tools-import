@@ -41,6 +41,9 @@ class Disciple_Tools_Import_Endpoints
      */
     public function add_api_routes() {
 
+        // NOTE : To confirm with Trip
+        $namespace = 'dt_import/v1';
+
         $public_namespace = 'dt-public/v1';
         $private_namespace = 'dt/v1';
 
@@ -62,6 +65,16 @@ class Disciple_Tools_Import_Endpoints
                 ],
             ]
         );
+
+        register_rest_route(
+            $namespace, '/add_location_grid_meta', [
+                [
+                    'methods'               => WP_REST_Server::CREATABLE,
+                    'callback'              => [ $this, 'private_endpoint'],
+                    'permission_callback'   => '__return_true',
+                ]
+            ]
+        );
     }
 
     public function public_endpoint( WP_REST_Request $request ) {
@@ -77,13 +90,127 @@ class Disciple_Tools_Import_Endpoints
     }
 
     public function private_endpoint( WP_REST_Request $request ) {
+        // check permission
         if ( !$this->has_permission() ){
             return new WP_Error( "private_endpoint", "Missing Permissions", [ 'status' => 400 ] );
         }
 
-        // run your function here
+        $params = $request->get_params();
+        $params = dt_recursive_sanitize_array( $params );
 
-        return true;
+        $geocoderFunctions = [
+        ];
+
+        try {
+            // check if geocoder apis exist
+            if ( DT_Mapbox_API::get_key() || Disciple_Tools_Google_Geocode_API::get_key() ) {
+
+                // validating address params if coordinates or just address
+                $API_class = $params['geocoder'] === 'Google'
+                    ? 'Disciple_Tools_Google_Geocode_API'
+                    : 'DT_Mapbox_API';
+
+                $address = $params['lookup'] === 'coordinates'
+                    ? explode(",", preg_replace('/\s/', '', $params['address']))
+                    : $params['address'];
+
+                $result = $params['lookup'] === 'coordinates'
+                    ? (
+                        $params['geocoder'] === 'Google'
+                            ? $API_class::query_google_api_reverse($address[0] . ',' . $address[1])
+                            : $API_class::reverse_lookup($address[1], $address[0])
+                    ) : (
+                        $params['geocoder'] === 'Google'
+                            ? $API_class::query_google_api($address, 'core')
+                            : $API_class::forward_lookup($address)
+                    );
+
+                $lng = $params['lookup'] === 'coordinates'
+                    ? $address[1]
+                    : (
+                        $params['geocoder'] === 'Google'
+                            ? $result['lng']
+                            : $API_class::parse_raw_result($result, 'lng', true)
+                    );
+                
+                $lat = $params['lookup'] === 'coordinates'
+                    ? $address[0]
+                    : (
+                        $params['geocoder'] === 'Google'
+                            ? $result['lat']
+                            : $API_class::parse_raw_result( $result, 'lat', true )
+                    );
+                
+                // reformatting $address
+                $address = $params['lookup'] === 'coordinates'
+                    ? (
+                        $params['geocoder'] === 'Google'
+                            ? $API_class::parse_raw_result($result, 'formatted_address')
+                            : $API_class::parse_raw_result($result, 'full_location_name', true)
+                    )
+                    : $params['address'];
+
+                // if (DT_Mapbox_API::get_key()) { // if mapbox api
+                    // $result = DT_Mapbox_API::forward_lookup( $params['address'] );
+
+                    // setting coordinates
+                    // $lng = DT_Mapbox_API::parse_raw_result( $result, 'lng', true );
+                    // $lat = DT_Mapbox_API::parse_raw_result( $result, 'lat', true );
+                // } else { // if google map api
+                    // $result = Disciple_Tools_Google_Geocode_API::query_google_api($params['address'], 'coordinates_only');
+
+                    // $lng = $result['lng'];
+                    // $lat = $result['lat'];
+                // }
+
+                if ( false !== $result ) {
+                    // setting location grid meta
+                    $geocoder = new Location_Grid_Geocoder();
+                    $grid_row = $geocoder->get_grid_id_by_lnglat( $lng, $lat );
+                            
+                    $location_meta_grid = [
+                        'post_id'   => $params['id'],
+                        'post_type' => $params['post_type'],
+                        'grid_id'   => $grid_row['grid_id'],
+                        'lng'       => $lng,
+                        'lat'       => $lat,
+                        'level'     => '',
+                        'label'     => $address
+                    ];
+
+                    // validating and adding to location grid meta
+                    Location_Grid_Meta::validate_location_grid_meta( $location_meta_grid );
+                    Location_Grid_Meta::add_location_grid_meta( $params['id'], $location_meta_grid );
+                }
+
+                return json_encode(array(
+                    'address' => $address,
+                    'lookup' => $params['lookup'],
+                    'result' => $result,
+                    'lng' => $lng,
+                    'lat' => $lat
+                ));
+
+                // returning value
+                /*
+                return json_encode(array(
+                    'message' => 'Success Adding Location Grid Meta.',
+                    'params' => $params,
+                    'result' => $result,
+                ));
+                */
+            } else {
+                // returning info : no geocoders apis available.
+                return json_encode(array(
+                    'message' => 'No geocoder APIs available.'
+                ));
+            }
+        } catch(Exception $e) {
+            return json_encode(array(
+                'message' => 'Error Adding Location Grid Meta.',
+                'error' => $e
+            ));
+        }
     }
 
     /**
@@ -124,5 +251,10 @@ class Disciple_Tools_Import_Endpoints
         $params['site_post_id'] = $keys[$decrypted_key]['post_id'];
 
         return $params;
+    }
+
+    private function validateLatLong($address) {
+        $split_address = explode(" ", $address);
+        return preg_match('/^[-]?(([0-8]?[0-9])\.(\d+))|(90(\.0+)?),[-]?((((1[0-7][0-9])|([0-9]?[0-9]))\.(\d+))|180(\.0+)?)$/', $split_address[0].','.$split_address[1]);
     }
 }
