@@ -164,13 +164,20 @@ class DT_Import {
                     $file_assigned_to = sanitize_text_field( wp_unslash( $_POST['csv_assign'] ) );
                 }
 
+                $selected_geocode_api = 'none';
+                if ( isset( $_POST['selected_geocode_api'])) {
+                    $selected_geocode_api = sanitize_text_field( wp_unslash( $_POST['selected_geocode_api']));
+                }
+
                 $import_settings = [
-                    "source"      => $file_source,
-                    "assigned_to" => $file_assigned_to,
-                    "data"        => $this->mapping_process( $temp_name, $file_source, $file_assigned_to ),
+                    "source"                => $file_source,
+                    "assigned_to"           => $file_assigned_to,
+                    "data"                  => $this->mapping_process( $temp_name, $file_source, $file_assigned_to, $selected_geocode_api),
+                    "selected_geocode_api"  => $selected_geocode_api
                 ];
 
                 set_transient( "disciple_tools_import_settings", $import_settings, 3600 * 24 );
+                set_transient('selected_geocode_api', $selected_geocode_api, HOUR_IN_SECONDS);
                 $this->display_field_mapping_step();
 
             } /**end-of condition --isset( $_FILES["csv_file"] )-- */
@@ -245,7 +252,6 @@ class DT_Import {
                                 </tr>
                                 </thead>
 
-
                                 <tbody>
                                 <?php
                                 //correct csv headers
@@ -285,12 +291,12 @@ class DT_Import {
                                                 <div class="mapper-helper-text">
                                                     <span class="mapper-helper-title">Map import values to DT values</span><br/>
                                                     <span class="mapper-helper-description">
-                                        <span class="selected-mapper-column-name"><?php echo esc_attr( $ch ) ?><?php //echo $mapper_title ?></span>
-                                        only accepts specific values (as a Selection).
-                                        Please map following unique values from your data to existing values in DT.
-                                        You can add new values into the DT system if you want by first ...</span>
+                                                    <span class="selected-mapper-column-name"><?php echo esc_attr( $ch ) ?><?php //echo $mapper_title ?></span>
+                                                    only accepts specific values (as a Selection).
+                                                    Please map following unique values from your data to existing values in DT.
+                                                    You can add new values into the DT system if you want by first ...</span>
                                                 </div>
-
+                        
                                                 <?php if ( isset( $unique[$ci] ) ): ?>
                                                     <table>
 
@@ -312,8 +318,10 @@ class DT_Import {
 
                                                                     <select id="value-mapper-<?php echo esc_attr( $ci ) ?>-<?php echo esc_attr( $vi ) ?>"
                                                                             name="VM[<?php echo esc_attr( $ci ) ?>][<?php echo esc_attr( $vi ) ?>]"
-                                                                            class="value-mapper-<?php echo esc_attr( $ci ) ?>"
-                                                                            data-value="<?php echo esc_attr( $v ) ?>">
+                                                                            class="value-mappers value-mapper-<?php echo esc_attr( $ci ) ?>"
+                                                                            data-value="<?php echo esc_attr( $v ) ?>"
+                                                                            data-subid="<?php echo esc_attr( $vi ) ?>"
+                                                                            >
                                                                         <option>--Not Selected--</option>
                                                                         <?php if ( isset( $my_opt_fields['fields'][$ch]['default'] ) && is_array( $my_opt_fields['fields'][$ch]['default'] ) ):
                                                                             foreach ( $my_opt_fields['fields'][$ch]['default'] as $option_key => $option_value ): ?>
@@ -416,6 +424,21 @@ class DT_Import {
                                     });
                                 });
 
+                                jQuery('.value-mappers').each(function(){
+                                    console.group('value mappers')
+
+                                    console.log(jQuery(this).data('value'));
+                                    let h_sel = jQuery(this).data('value');
+
+                                    jQuery(this).find('option').each(function() {
+                                        if(h_sel === jQuery(this).text()){
+                                            jQuery(this).attr('selected','selected');
+                                        }
+                                    });
+
+                                    console.groupEnd()
+                                });
+
                             } else {
                                 jQuery('#unique-values-'+id).hide();
                             }
@@ -431,6 +454,16 @@ class DT_Import {
     }
 
     public function import_form() {
+            $geocode_apis_are_available = false;
+            $available_geocode_apis = [];
+            if (Disciple_Tools_Google_Geocode_API::get_key()) {
+                array_push($available_geocode_apis, 'Google');
+                $geocode_apis_are_available = true;
+            }
+            if (DT_Mapbox_API::get_key()) {
+                array_push($available_geocode_apis, 'Mapbox');
+                $geocode_apis_are_available = true;
+            }
         ?>
         <!-- Box -->
         <!-- Box -->
@@ -443,8 +476,6 @@ class DT_Import {
             <tbody>
             <tr>
                 <td>
-
-
                     <form method="post" enctype="multipart/form-data">
                         <?php wp_nonce_field( 'csv_import', 'csv_import_nonce' ); ?>
                         <table class="widefat striped">
@@ -505,6 +536,28 @@ class DT_Import {
                                 </tr>
                                 <?php
                             endif;
+                            if ($geocode_apis_are_available) {
+                                ?>
+                                <tr>
+                                    <td>
+                                        <label for="selected__geocode_api">
+                                            <?php esc_html_e( "Use the following Geocode API", 'disciple_tools'); ?>
+                                        </label>
+                                        <br>
+                                        <select name="selected_geocode_api" id="selected_geocode_api">
+                                            <?php
+                                                foreach ($available_geocode_apis as $api) {
+                                            ?>
+                                                <option value="<?php echo $api ?>"><?php echo $api; ?></option>
+                                            <?php
+                                                }
+                                            ?>
+                                                <option value="none">None</option>
+                                        </select>
+                                    </td>
+                                </tr>
+                                <?php
+                            }
                             ?>
                             <tr>
                                 <td>
@@ -519,8 +572,6 @@ class DT_Import {
                             </tr>
                         </table>
                     </form>
-
-
                 </td>
             </tr>
             </tbody>
@@ -837,7 +888,6 @@ class DT_Import {
             <tbody>
             <tr>
                 <td>
-
                     <?php $this->display_data( $data );?>
 
 
@@ -867,22 +917,64 @@ class DT_Import {
 
     public function insert_data() {
         $import_settings = get_transient( "disciple_tools_import_settings" );
+        $selected_geocode_api = get_transient('selected_geocode_api');
         $data_keys       = array_filter( array_keys( $import_settings ), 'is_numeric' );
         foreach ( $data_keys as $data_key ) {
             $data[] = $import_settings[ $data_key ];
         }
         $data = disciple_tools_import_sanitize_array( $data );
+
+        $js_data = [];
+        foreach ($data as $num => $f) {
+            $js_array = (isset($f[0])) ? wp_json_encode($f[0]) : [];
+            if (false !== $js_array && !empty($f)) {
+                $js_data[] = $js_array;
+            }
+        }
         ?>
         <!-- Box -->
         <table class="widefat striped">
             <tbody>
             <tr>
                 <td>
-                    <div id="import-logs">&nbsp;</div>
+                    <div
+                        id="import-logs"
+                        style="max-height: 150px; overflow: hidden; overflow-y: auto;"
+                    ></div>
                     <div id="data-links">&nbsp;</div>
 
+                    <!-- Notices -->
+                    <div id="notice_Creating" class="notice notice-warning">
+                        <div style="height: 50px; line-height: 50px;">
+                            <span>
+                                <?php
+                                $num = count($js_data);
+                                printf('Creating %s %s DO NOT LEAVE THE PAGE until the "All Done" message appears.', esc_attr($num), esc_attr($this->post_label_plural));
+                                ?>
+                            </span>
+                        </div>
+                    </div>
+
+                    <div id="notice_Created" class="notice notice-success">
+                        <div style="height: 50px; line-height: 50px;">
+                            <span>
+                                <?php
+                                $num = count($js_data);
+                                printf('Created all %s %s.', esc_attr($num), esc_attr($this->post_label_plural));
+                                ?>
+                            </span>
+                        </div>
+                    </div>
+                    <!-- e.o Notices -->
+
+                    <!-- Scripts -->
                     <script type="text/javascript">
                         let pid = 1;
+                        let completed = false;
+                        const creating = document.getElementById('notice_Creating');
+                        const created = document.getElementById('notice_Created');
+
+                        // import process
                         function process( q, num, fn, done ) {
                             // remove a batch of items from the queue
                             let items = q.splice(0, num),
@@ -911,113 +1003,163 @@ class DT_Import {
                         }
 
                         // a per-item action
-                        function doEach( item, done ) {
+                        function doEach(item, done) {
                             <?php
-                            $lowercase_post_type = strtolower( $this->post_label_plural );
+                            $lowercase_post_type = strtolower($this->post_label_plural);
                             ?>
-                            let rest_route_post_type = "<?php echo esc_attr( $lowercase_post_type ); ?>";
-                            let rest_url = "<?php echo esc_url_raw( rest_url() ); ?>dt-posts/v2/" + rest_route_post_type + "?silent=true";
+                            let rest_route_post_type = "<?php echo esc_attr($lowercase_post_type); ?>";
+                            let rest_url = "<?php echo esc_url_raw(rest_url()); ?>dt-posts/v2/" + rest_route_post_type + "?silent=true";
+                            const url_add_location_grid_meta = "<?php echo esc_url_raw(rest_url()); ?>dt_import/v1/add_location_grid_meta";
 
-                            console.log('starting ...' ); //t('starting ...');
-                            jQuery.ajax({
-                                type: "POST",
-                                data: item,
-                                contentType: "application/json; charset=utf-8",
-                                dataType: "json",
-                                url: rest_url,
-                                beforeSend: function(xhr) {
-                                    xhr.setRequestHeader('X-WP-Nonce', "<?php echo esc_html( wp_create_nonce( 'wp_rest' ) ); ?>");
-                                },
-                                success: function(record) {
-                                    t(`PID# ${pid} done. <a href="${record.permalink}" target="_blank">See record</a>`);
-                                    done();
-                                },
-                                error: function(xhr) { // if error occured
-                                    alert("Error occured.please try again");
-                                    console.log("%o",xhr);
-                                    t('PID#'+pid+' Error occurred. please try again');
-                                }
-                            });
+                            // sect : modifying item
+                            // removing contact_address from item to avoid address duplication
+                            const modifiedItem = JSON.parse(item);
+                            const location = modifiedItem.contact_address.values[0].value;
+                            delete(modifiedItem.contact_address);
+                            const modifiedItemString = JSON.stringify(modifiedItem);
+                            // e.o. sect : modifying item
+
+                            const geocoderType = '<?php echo $selected_geocode_api; ?>'
+
+                            console.log('starting ...'); //t('starting ...');
+
+                            // if geocode api is not selected 'none'
+                            if(geocoderType !== 'none') {
+
+                                // checking address if coordinates
+                                const trimmedLocation = location.replace(/\s+/g, '');
+                                const splitLocation = trimmedLocation.split(',');
+                                // const latRegex = new RegExp('/^(\+|-)?(?:90(?:(?:\.0{1,6})?)|(?:[0-9]|[1-8][0-9])(?:(?:\.[0-9]{1,6})?))$/');
+                                // const lngRegex = new RegExp('/^(\+|-)?(?:180(?:(?:\.0{1,6})?)|(?:[0-9]|[1-9][0-9]|1[0-7][0-9])(?:(?:\.[0-9]{1,6})?))$/');
+                                const latRegex = /^(-?[1-8]?\d(?:\.\d{1,18})?|90(?:\.0{1,18})?)$/;
+                                const lngRegex = /^(-?(?:1[0-7]|[1-9])?\d(?:\.\d{1,18})?|180(?:\.0{1,18})?)$/;
+
+                                jQuery.ajax({
+                                    type: "POST",
+                                    data: modifiedItemString,
+                                    contentType: "application/json; charset=utf-8",
+                                    dataType: "json",
+                                    url: rest_url,
+                                    beforeSend: function(xhr) {
+                                        xhr.setRequestHeader('X-WP-Nonce', "<?php echo esc_html(wp_create_nonce('wp_rest')); ?>");
+                                    },
+                                    success: function(record) {
+                                        // adding location grid meta
+                                        const payload = {
+                                            id: record.ID,
+                                            post_type: record.post_type,
+                                            geocoder: geocoderType,
+                                            lookup: latRegex.test(parseFloat(splitLocation[0])) && lngRegex.test(parseFloat(splitLocation[1])) ? 'coordinates' : 'address',
+                                            address: location
+                                        }
+
+                                        console.log(record)
+                                        jQuery.ajax({
+                                            type: 'POST',
+                                            data: JSON.stringify(payload),
+                                            contentType: 'application/json; charset=utf-8',
+                                            dataType: 'json',
+                                            url: url_add_location_grid_meta,
+                                            beforeSend: function(xhr) {
+                                                xhr.setRequestHeader('X-WP-Nonce', "<?php echo esc_html(wp_create_nonce('wp_rest')); ?>");
+                                            },
+                                            success: function(data) {
+                                                console.group(pid + ' added.')
+                                                console.log(JSON.parse(data));
+                                                t(`PID# ${pid} done. <a href="${record.permalink}" target="_blank">See record</a>`);
+                                                console.groupEnd()
+                                                done();
+                                            },
+                                            error: function(err) {
+                                                alert('Error occured. Please try again.');
+                                                console.error(err);
+                                                t('PID#' + pid + ' Error occurred. please try again');
+                                            }
+                                        });
+                                    },
+                                    error: function(xhr) { // if error occured
+                                        alert("Error occured.please try again");
+                                        console.log("%o", xhr);
+                                        t('PID#' + pid + ' Error occurred. please try again');
+                                    }
+                                });
+                            }
                         }
 
                         // an all-done action
                         function doDone() {
-                            console.log('All Done!'); t('All Done');
+                            console.log('All Done!');
+                            completed = true;
+                            t('All Done');
                             jQuery("#back").show();
                         }
 
-                        function t(m){
+                        // log renderer
+                        function t(m) {
                             let el, v;
                             el = document.getElementById("import-logs");
                             v = el.innerHTML;
                             v = v + '<br/>' + m;
                             el.innerHTML = v;
+                            el.scrollTop = el.scrollHeight;
+
+                            showNotice();
                         }
 
-                        function reset(){
+                        function reset() {
                             document.getElementById("import-logs").value = '';
                         }
-                    </script>
 
-                    <?php
-                    $js_data = [];
-                    foreach ( $data as $num => $f ) {
-                        $js_array = ( isset( $f[0] ) ) ? wp_json_encode( $f[0] ) : [];
-                        if ( false !== $js_array && !empty( $f ) ) {
-                            $js_data[] = $js_array;
+                        function showNotice() {
+                            if(completed) {
+                                creating.style.display = 'none';
+                                created.style.display = 'block';
+                            } else {
+                                creating.style.display = 'block';
+                                created.style.display = 'none';
+                            }
                         }
-                    }
-                    ?>
-                    <script type="text/javascript">
 
                         reset();
-                        t('started processing queue!');
+                        t('Started processing queue!');
 
                         // start processing queue!
-                        let queue = <?php echo wp_json_encode( $js_data ); ?>;
+                        let queue = <?php echo wp_json_encode($js_data); ?>;
                         process(queue, 5, doEach, doDone);
-                    </script>
-
-                    <?php
-                    $num = count( $js_data );
-                    printf( 'Creating %s %s DO NOT LEAVE THE PAGE until the "All Done" message appears.', esc_attr( $num ), esc_attr( $this->post_label_plural ) );
-                    ?>
-
-                </td>
-            </tr>
+                    </script> <!-- e.o Scripts -->
+                    </td>
+                </tr>
             </tbody>
         </table>
         <br>
         <!-- End Box -->
-        <?php
+    <?php
     }
 
-    public function find_field_for_col_header( $source_col_heading = '' ) {
+    public function find_field_for_col_header($source_col_heading = '')
+    {
         $column_name = null;
-        $src = strtolower( trim( $source_col_heading ) );
-        $prefix = sprintf( '%s_', strtolower( $this->post_label_singular ) );
+        $src = strtolower(trim($source_col_heading));
+        $prefix = sprintf('%s_', strtolower($this->post_label_singular));
 
-        if ( array_search( $src, self::$contact_name_headings ) > 0 ) {
+        if (array_search($src, self::$contact_name_headings) > 0) {
             $column_name = 'title';
-        } else if ( array_search( $src, self::$contact_phone_headings ) > 0 ) {
+        } else if (array_search($src, self::$contact_phone_headings) > 0) {
             $column_name = "{$prefix}phone";
-
-        } else if ( array_search( $src, self::$contact_email_headings ) > 0 ) {
+        } else if (array_search($src, self::$contact_email_headings) > 0) {
             $column_name = "{$prefix}email";
-
-        } else if ( array_search( $src, self::$contact_address_headings ) > 0 ) {
+        } else if (array_search($src, self::$contact_address_headings) > 0) {
             $column_name = "contact_address";
-
         } else {
             $fields = $this->post_field_settings;
-            if ( isset( $fields[$src] ) ) {
+            if (isset($fields[$src])) {
                 $column_name = $src;
             } else {
                 $channels = $this->post_settings["channels"];
-                if ( isset( $channels[$src] ) ) {
+                if (isset($channels[$src])) {
                     //$column_name = $src;
                     $column_name = "{$prefix}{$src}";
-                } else if ( isset( $channels[$prefix.$src] ) ) {
+                } else if (isset($channels[$prefix . $src])) {
                     //$column_name = $src;
                     $column_name = "{$prefix}{$src}";
                 }
@@ -1025,18 +1167,18 @@ class DT_Import {
 
             //try to match the field label
             //assigned_to => ['name'=>"Assigned To"]
-            if ( $column_name == null ) {
-                foreach ( $fields as $f => $field ) {
-                    if ( isset( $field['name'] ) && strtolower( trim( $field['name'] ) ) == $src ) {
+            if ($column_name == null) {
+                foreach ($fields as $f => $field) {
+                    if (isset($field['name']) && strtolower(trim($field['name'])) == $src) {
                         $column_name = $f;
                     }
                 }
             }
 
-            if ( $column_name == null ) {
+            if ($column_name == null) {
                 $channels = $this->post_settings["channels"];
-                foreach ( $channels as $f => $field ) {
-                    if ( isset( $field['name'] ) && strtolower( trim( $field['name'] ) ) == $src ) {
+                foreach ($channels as $f => $field) {
+                    if (isset($field['name']) && strtolower(trim($field['name'])) == $src) {
                         $column_name = $f;
                     }
                 }
@@ -1045,67 +1187,66 @@ class DT_Import {
         return $column_name;
     }
 
-    public function get_dropdown_list_html( $field, $id = 'selector', $html_options = [] ) {
+    public function get_dropdown_list_html($field, $id = 'selector', $html_options = [])
+    {
 
-        if ( isset( $html_options['id'] ) ) { unset( $html_options['id'] ); }
+        if (isset($html_options['id'])) {
+            unset($html_options['id']);
+        }
 
         $channels = $this->post_settings['channels'];
         $data     = $this->post_field_settings;
-        ?>
-        <select id="<?php echo esc_html( $id ); ?>"
-            <?php foreach ( $html_options as $opt => $values ) {
-                echo esc_html( $opt ) . ' ="' . esc_html( $values ) . '"';
-            } ?>
-        >
+    ?>
+        <select id="<?php echo esc_html($id); ?>" <?php foreach ($html_options as $opt => $values) {
+                                                        echo esc_html($opt) . ' ="' . esc_html($values) . '"';
+                                                    } ?>>
 
             <option value="NONE">--select-one--</option>
             <option value="IGNORE">don't import</option>
 
             <optgroup label="Standard Fields">
 
-                <option
-                    value="title" <?php selected( $field == 'title' ) ?> ><?php esc_attr( $this->post_label_singular ); ?>
+                <option value="title" <?php selected($field == 'title') ?>><?php esc_attr($this->post_label_singular); ?>
                     Name
                 </option>
 
                 <?php
-                foreach ( $channels as $label => $item ) {
-                    if ( 'address' == $label ) {
+                foreach ($channels as $label => $item) {
+                    if ('address' == $label) {
                         $label = 'contact_address';
                     } else {
-                        $label = sprintf( "%s_%s", strtolower( $this->post_label_singular ), $label );
+                        $label = sprintf("%s_%s", strtolower($this->post_label_singular), $label);
                     }
-                    ?>
-                    <option value="<?php echo esc_html( $label ); ?>"
-                        <?php selected( $field != null && $field == $label ) ?>
-                    ><?php echo esc_html( $item['label'] ); ?></option>
+                ?>
+                    <option value="<?php echo esc_html($label); ?>" <?php selected($field != null && $field == $label) ?>><?php echo esc_html($item['label']); ?></option>
                 <?php } ?>
             </optgroup>
 
             <?php
             $list_data = array();
-            foreach ( $data as $key => $item ) {
+            foreach ($data as $key => $item) {
                 $list_data[$key] = $item['name'];
             }
-            asort( $list_data );
+            asort($list_data);
 
             ?>
             <optgroup label="Other Fields">
                 <?php
-                $data_field = sprintf( '%s_%s', strtolower( $this->post_label_singular ), $field );
-                foreach ( $list_data as $key => $label ) {
-                    if ( $key === 'contact_address' ) {
+                $data_field = sprintf('%s_%s', strtolower($this->post_label_singular), $field);
+                foreach ($list_data as $key => $label) {
+                    if ($key === 'contact_address') {
                         continue;
                     }
-                    ?>
-                    <option value="<?php echo esc_html( $key ); ?>" <?php selected( $field != null && $field == $key || $data_field != null && $data_field == $key ) ?>><?php echo esc_html( $label ); ?></option>
+                ?>
+                    <option value="<?php echo esc_html($key); ?>" <?php selected($field != null && $field == $key || $data_field != null && $data_field == $key) ?>><?php echo esc_html($label); ?></option>
                 <?php } ?>
             </optgroup>
         </select>
-        <?php
+    <?php
     }
 
-    public function process_data( $import_settings, $mapping_data = [], $value_mapperi_data = [], $value_mapper_data = [] ) {
+    public function process_data($import_settings, $mapping_data = [], $value_mapperi_data = [], $value_mapper_data = [])
+    {
         $csv_headers     = $mapping_data;
         $data_rows       = $import_settings["data"]["temp_data"] ?? [];
         $assign          = $import_settings["assigned_to"] ?? "";
@@ -1113,8 +1254,8 @@ class DT_Import {
         $multi_separator = $this->multi_separator;
         $data            = [];
 
-        if ( is_array( $csv_headers ) ) {
-            $header_occurrence_counts = array_count_values( $csv_headers );
+        if (is_array($csv_headers)) {
+            $header_occurrence_counts = array_count_values($csv_headers);
         } else {
             $header_occurrence_counts = [];
         }
@@ -1122,28 +1263,28 @@ class DT_Import {
         //handle N columns to ONE column mapping
         //phone(primary)/phone(mobile) -> phone
         $mids = [];
-        foreach ( $header_occurrence_counts as $mch => $count ) {
-            if ( $count > 1 ) {
+        foreach ($header_occurrence_counts as $mch => $count) {
+            if ($count > 1) {
                 $mids[$mch]['count'] = $count;
-                foreach ( $csv_headers as $ci => $ch ) {
-                    if ( $mch == $ch ) {
+                foreach ($csv_headers as $ci => $ch) {
+                    if ($mch == $ch) {
                         $mids[$mch]['columIds'][] = $ci;
                     }
                 }
                 $mids[$mch]['primaryCol'] = $mids[$mch]['columIds'][0];
-                unset( $mids[$mch]['columIds'][0] ); //array_pop
+                unset($mids[$mch]['columIds'][0]); //array_pop
             }
         }
 
-        foreach ( $data_rows as $data_row_id => $data_row ) {
-            foreach ( $data_row as $col_id => $col_data ) {
-                if ( isset( $csv_headers[$col_id] ) ) {
+        foreach ($data_rows as $data_row_id => $data_row) {
+            foreach ($data_row as $col_id => $col_data) {
+                if (isset($csv_headers[$col_id])) {
                     $ch = $csv_headers[$col_id];
-                    if ( isset( $mids[$ch]['columIds'] ) ) {
-                        foreach ( $mids[$ch]['columIds'] as $xcolid ) {
-                            if ( $col_id == $xcolid ) {
-                                $data_rows[$data_row_id][ $mids[$ch]['primaryCol'] ] .= $multi_separator.$col_data;
-                                unset( $data_rows[$data_row_id][$xcolid] );
+                    if (isset($mids[$ch]['columIds'])) {
+                        foreach ($mids[$ch]['columIds'] as $xcolid) {
+                            if ($col_id == $xcolid) {
+                                $data_rows[$data_row_id][$mids[$ch]['primaryCol']] .= $multi_separator . $col_data;
+                                unset($data_rows[$data_row_id][$xcolid]);
                             }
                         }
                     }
@@ -1151,82 +1292,81 @@ class DT_Import {
             }
         }
 
-        foreach ( $mids as $ch => $xdata ) {
-            foreach ( $xdata['columIds'] as $xcolid ) {
-                if ( isset( $csv_headers[$xcolid] ) ) {
-                    unset( $csv_headers[$xcolid] );
+        foreach ($mids as $ch => $xdata) {
+            foreach ($xdata['columIds'] as $xcolid) {
+                if (isset($csv_headers[$xcolid])) {
+                    unset($csv_headers[$xcolid]);
                 }
             }
         }
         $cfs = $this->post_field_settings;
 
-        foreach ( $data_rows as $ri => $row ) {
+        foreach ($data_rows as $ri => $row) {
             $fields = [];
-            if ( $assign != '' ) {
+            if ($assign != '') {
                 $fields["assigned_to"] = (int) $assign;
             }
             foreach ($row as $index => $row_value) {
 
 
                 //cleanup
-                $row_value = str_replace( "\"", "", $row_value );
+                $row_value = str_replace("\"", "", $row_value);
 
-                if ( isset( $csv_headers[$index] ) ) {
+                if (isset($csv_headers[$index])) {
 
                     $ch = $csv_headers[$index];
-                    $type = isset( $cfs[$ch]['type'] ) ? $cfs[$ch]['type'] : null;
+                    $type = isset($cfs[$ch]['type']) ? $cfs[$ch]['type'] : null;
 
-                    if ( $ch == 'title' ) {
-                        $fields[ $ch ] = $row_value;
-                    } else if ( in_array( $ch, self::$contact_address_headings ) ) {
-                        $multivalued = explode( $multi_separator, $row_value );
-                        foreach ( $multivalued as $mx ) {
+                    if ($ch == 'title') {
+                        $fields[$ch] = $row_value;
+                    } else if (in_array($ch, self::$contact_address_headings)) {
+                        $multivalued = explode($multi_separator, $row_value);
+                        foreach ($multivalued as $mx) {
 
-                            $mx = trim( $mx );
+                            $mx = trim($mx);
 
-                            $fields[ $ch ]["values"][] = [ "value" => $mx ];
+                            $fields[$ch]["values"][] = ["value" => $mx];
                         }
-                    } else if ( $type == 'key_select' ) {
+                    } else if ($type == 'key_select') {
 
-                        if ( isset( $value_mapperi_data[ $index ] ) ) {
-                            foreach ( $value_mapperi_data[ $index ] as $vmdi => $vmdv ) {
-                                if ( wp_specialchars_decode( $vmdv ) == $row_value && isset( $value_mapper_data[ $index ][ $vmdi ] ) ) {
-                                    $fields[ $ch ] = wp_specialchars_decode( $value_mapper_data[ $index ][ $vmdi ] );
+                        if (isset($value_mapperi_data[$index])) {
+                            foreach ($value_mapperi_data[$index] as $vmdi => $vmdv) {
+                                if (wp_specialchars_decode($vmdv) == $row_value && isset($value_mapper_data[$index][$vmdi])) {
+                                    $fields[$ch] = wp_specialchars_decode($value_mapper_data[$index][$vmdi]);
                                 }
                             }
                         }
-                    } else if ( $type == 'tags' ) {
-                        $multivalued = explode( $multi_separator, $row_value );
+                    } else if ($type == 'tags') {
+                        $multivalued = explode($multi_separator, $row_value);
 
-                        foreach ( $multivalued as $mx ) {
+                        foreach ($multivalued as $mx) {
 
-                            $mx = trim( $mx );
+                            $mx = trim($mx);
 
-                            if ( isset( $value_mapperi_data[$index] ) ) {
+                            if (isset($value_mapperi_data[$index])) {
 
-                                foreach ( $value_mapperi_data[$index] as $vmdi => $vmdv ) {
-                                    if ( $vmdv == $mx && isset( $value_mapper_data[$index][$vmdi] ) ) {
+                                foreach ($value_mapperi_data[$index] as $vmdi => $vmdv) {
+                                    if ($vmdv == $mx && isset($value_mapper_data[$index][$vmdi])) {
                                         $mx = $vmdv;
                                     }
                                 }
                             }
 
-                            $fields[$ch]["values"][] = [ "value" => $mx ];
+                            $fields[$ch]["values"][] = ["value" => $mx];
                         }
-                    } else if ( $type == 'multi_select' ) {
+                    } else if ($type == 'multi_select') {
 
-                        $multivalued = explode( $multi_separator, $row_value );
+                        $multivalued = explode($multi_separator, $row_value);
 
-                        foreach ( $multivalued as $mx ) {
+                        foreach ($multivalued as $mx) {
 
-                            $mx = trim( $mx );
+                            $mx = trim($mx);
 
-                            if ( isset( $value_mapperi_data[$index] ) ) {
+                            if (isset($value_mapperi_data[$index])) {
 
-                                foreach ( $value_mapperi_data[$index] as $vmdi => $vmdv ) {
-                                    if ( $vmdv == $mx && isset( $value_mapper_data[$index][$vmdi] ) ) {
+                                foreach ($value_mapperi_data[$index] as $vmdi => $vmdv) {
+                                    if ($vmdv == $mx && isset($value_mapper_data[$index][$vmdi])) {
                                         $mx = $value_mapper_data[$index][$vmdi];
-
                                     }
                                 }
 
@@ -1235,43 +1375,41 @@ class DT_Import {
                                 //    $fields[$ch]["values"][] = [ "value" => trim($mx) ];
                             }
 
-                            $fields[$ch]["values"][] = [ "value" => $mx ];
-
+                            $fields[$ch]["values"][] = ["value" => $mx];
                         }
 
                         //
                         //} else if ( $type == 'user_select' ) {
                         //    $fields[$ch] = $i; /**/
 
-                    } else if ( $type == 'boolean' ) {
-                        $fields[$ch] = in_array( $row_value, [ "True", "true", "1" ], true );
-
-                    } else if ( $type == 'date' ) {
-                        $my_temp_time = strtotime( $row_value );
-                        if ( $my_temp_time ) {
-                            $fields[$ch] = gmdate( 'Y-m-d', $my_temp_time );
+                    } else if ($type == 'boolean') {
+                        $fields[$ch] = in_array($row_value, ["True", "true", "1"], true);
+                    } else if ($type == 'date') {
+                        $my_temp_time = strtotime($row_value);
+                        if ($my_temp_time) {
+                            $fields[$ch] = gmdate('Y-m-d', $my_temp_time);
                         } else {
                             $fields[$ch] = '';
                         }
-                    } else if ( $type === "communication_channel") {
+                    } else if ($type === "communication_channel") {
                         //handle multivalued data
-                        $pos = strpos( $row_value, $multi_separator );
-                        if ( $pos === false ) {
-                            $fields[$ch][] = [ "value" => $row_value ];
+                        $pos = strpos($row_value, $multi_separator);
+                        if ($pos === false) {
+                            $fields[$ch][] = ["value" => $row_value];
                         } else {
-                            $multivalued = explode( $multi_separator, $row_value );
-                            foreach ( $multivalued as $mx ) {
-                                $fields[$ch]["values"][] = [ "value" => trim( $mx ) ];
+                            $multivalued = explode($multi_separator, $row_value);
+                            foreach ($multivalued as $mx) {
+                                $fields[$ch]["values"][] = ["value" => trim($mx)];
                             }
                         }
-                    } else if ( $type === "user_select" ){
+                    } else if ($type === "user_select") {
                         $fields[$ch] = (int) $row_value[0];
-                    } else if ( $type === "text" ) {
-                        $fields[ $ch ] = $row_value[0];
-                    } else if ( $type === "number" ) {
-                        $fields[ $ch ] = (int) $row_value;
-                    } else if ( $type === "location_meta" || $type === "location" ) {
-                        $fields[ $ch ]["values"][] = [ "value" => trim( $row_value ) ];
+                    } else if ($type === "text") {
+                        $fields[$ch] = $row_value[0];
+                    } else if ($type === "number") {
+                        $fields[$ch] = (int) $row_value;
+                    } else if ($type === "location_meta" || $type === "location") {
+                        $fields[$ch]["values"][] = ["value" => trim($row_value)];
                     } else {
                         //field not recognized.
                         continue;
@@ -1279,215 +1417,221 @@ class DT_Import {
                 }
             }
 
-            if ( ! isset( $fields["sources"] ) && ! empty( $source ) ) {
-                $fields["sources"] = [ "values" => array( [ "value" => $source ] ) ];
+            if (!isset($fields["sources"]) && !empty($source)) {
+                $fields["sources"] = ["values" => array(["value" => $source])];
             }
 
             //add data
-            $data[] = array( $fields );
-
+            $data[] = array($fields);
         }
 
         return $data;
     }
 
-    public function display_data( $data ) {
+    public function display_data($data)
+    {
         $headings        = [];
         $multi_separator = $this->multi_separator;
-        $prefix          = sprintf( '%s_', strtolower( $this->post_label_singular ) );
+        $prefix          = sprintf('%s_', strtolower($this->post_label_singular));
         $channels        = $this->post_settings["channels"];
         $cfs             = $this->post_field_settings;
         $rowindex        = 0;
         $error_summary   = [];
-        if ( isset( $data[0][0] ) ) {
-            $headings = array_keys( $data[0][0] );
+        if (isset($data[0][0])) {
+            $headings = array_keys($data[0][0]);
 
-            if ( isset( $headings['assigned_to'] ) ) { unset( $headings['assigned_to'] ); }
+            if (isset($headings['assigned_to'])) {
+                unset($headings['assigned_to']);
+            }
         }
         ?>
 
         <table class="data-table">
             <thead>
-            <tr>
-                <th data-col-id=0></th>
+                <tr>
+                    <th data-col-id=0></th>
 
-                <th data-col-id=1>
-                    <span class="cflabel">
-                    <?php esc_attr( $this->post_label_plural ); ?>
-                    </span>
-                </th>
+                    <th data-col-id=1>
+                        <span class="cflabel">
+                            <?php esc_attr($this->post_label_plural); ?>
+                        </span>
+                    </th>
 
-                <?php
-                foreach ( $headings as $hi => $heading ) {
+                    <?php
+                    foreach ($headings as $hi => $heading) {
 
-                    if ( $heading == 'title' || $heading == 'assigned_to' ) {
-                        continue;
-                    } else {
-                        $ch = str_replace( $prefix, '', $heading );
-                        $str = '';
-                        if ( isset( $cfs[$ch], $cfs[$ch]['name'] ) ) {
-                            $str = strval( $cfs[$ch]['name'] );
-
-                        } else if ( isset( $channels[$ch], $channels[$ch]['name'] ) ) {
-                            $str = strval( $channels[$ch]['name'] );
-
-                        }
-                        ?>
-                        <th data-col-id="<?php echo esc_html( $hi ); ?>">
-                            <span class="cflabel">
-                                <?php echo esc_html( $str ); ?>
-                            </span>
-
-                            <br/>
-                        </th>
-                        <?php
-                    }
-                }
-                ?>
-
-            </tr>
-            </thead>
-            <tbody>
-            <?php foreach ( $data as $pid => $data_import_data ) {
-                $rowindex++;
-                $import_data = $data_import_data[0]; ?>
-
-
-                <tr id="group-data-item-<?php echo esc_html( $pid ) ?>" class="group-data-item">
-
-                    <td data-col-id="0"><?php echo esc_html( $rowindex ); ?></td>
-
-                    <td data-col-id="1" data-key="title">
-                        <?php echo esc_html( $import_data['title'] ); ?>
-                    </td>
-
-                    <?php foreach ( $headings as $hi => $ch ) {
-
-                        $type = isset( $cfs[$ch]['type'] ) ? $cfs[$ch]['type'] : null;
-
-                        if ( $type == null ){ $type = isset( $channels[$ch] ) ? $channels[$ch] : null; }
-
-                        if ( $ch == 'title' || $ch == 'assigned_to' ) {
+                        if ($heading == 'title' || $heading == 'assigned_to') {
                             continue;
                         } else {
-                            $errors = '';
+                            $ch = str_replace($prefix, '', $heading);
+                            $str = '';
+                            if (isset($cfs[$ch], $cfs[$ch]['name'])) {
+                                $str = strval($cfs[$ch]['name']);
+                            } else if (isset($channels[$ch], $channels[$ch]['name'])) {
+                                $str = strval($channels[$ch]['name']);
+                            }
+                    ?>
+                            <th data-col-id="<?php echo esc_html($hi); ?>">
+                                <span class="cflabel">
+                                    <?php echo esc_html($str); ?>
+                                </span>
 
-                            if ( $import_data[$ch] != null || strlen( trim( $import_data[$ch] ) ) > 0 ) {
-                                $errors = $this->validate_data( $ch, $import_data[$ch] );
-
-                                if ( $errors > 0 ) {
-                                    if ( isset( $error_summary[$ch] ) ) {
-                                        $error_summary[$ch]['error-count'] = intval( $error_summary[$ch]['error-count'] ) + 1;
-                                    } else {
-                                        $error_summary[$ch]['error-count'] = 1;
-                                    }
-                                }
-                            } ?>
-
-                            <td data-col-id='<?php echo esc_html( $hi ); ?>' data-key="<?php echo esc_html( $ch ); ?>" <?php echo esc_html( $errors > 0 ? 'class="data-error"' : '' ) ?> >
-
-                                <?php
-                                $value = '';
-                                if ( $type == 'key_select'
-                                     || $type == 'date'
-                                     || $type == 'boolean' ) {
-
-                                    $value = $import_data[$ch];
-
-                                } else if ( ( $type == 'multi_select' ) || in_array( $ch, self::$contact_address_headings ) || ( $type == 'tags' ) ) {
-
-                                    if ( isset( $import_data[ $ch ]["values"] ) && is_array( $import_data[ $ch ]["values"] ) ) {
-                                        $values = [];
-                                        foreach ( $import_data[ $ch ]["values"] as $mi => $v ) {
-                                            if ( isset( $v["value"] ) ) {
-                                                $label    = isset( $cfs[ $ch ]["default"][ esc_html( $v["value"] ) ]["label"] ) ? $cfs[ $ch ]["default"][ esc_html( $v["value"] ) ]["label"] : esc_html( $v["value"] );
-                                                $values[] = $label;
-                                            }
-                                        }
-                                        $value = implode( $multi_separator, (array) $values );
-                                    }
-                                } else if ( ( $type == 'number' ) ) {
-                                    echo esc_html( $import_data[ $ch ] );
-                                } else if ( isset( $import_data[$ch] ) ) {
-                                    $values = [];
-                                    if ( isset( $import_data[$ch]["values"] ) && is_array( $import_data[$ch]["values"] ) ) {
-                                        foreach ( $import_data[$ch]["values"] as $mi => $v ) {
-                                            if ( isset( $v["value"] ) ) { $values[] = esc_html( $v["value"] ); }
-                                        }
-                                    } else {
-                                        foreach ( $import_data[$ch] as $mi => $v ) {
-                                            if ( isset( $v["value"] ) ){ $values[] = esc_html( $v["value"] ); }
-                                        }
-                                    }
-
-                                    $value = implode( $multi_separator, (array) $values );
-                                }
-                                echo esc_html( $value );
-                                ?>
-                            </td> <?php
+                                <br />
+                            </th>
+                    <?php
                         }
                     }
                     ?>
 
                 </tr>
-            <?php } ?>
+            </thead>
+            <tbody>
+                <?php foreach ($data as $pid => $data_import_data) {
+                    $rowindex++;
+                    $import_data = $data_import_data[0]; ?>
+
+
+                    <tr id="group-data-item-<?php echo esc_html($pid) ?>" class="group-data-item">
+
+                        <td data-col-id="0"><?php echo esc_html($rowindex); ?></td>
+
+                        <td data-col-id="1" data-key="title">
+                            <?php echo esc_html($import_data['title']); ?>
+                        </td>
+
+                        <?php foreach ($headings as $hi => $ch) {
+
+                            $type = isset($cfs[$ch]['type']) ? $cfs[$ch]['type'] : null;
+
+                            if ($type == null) {
+                                $type = isset($channels[$ch]) ? $channels[$ch] : null;
+                            }
+
+                            if ($ch == 'title' || $ch == 'assigned_to') {
+                                continue;
+                            } else {
+                                $errors = '';
+
+                                if ($import_data[$ch] != null || strlen(trim($import_data[$ch])) > 0) {
+                                    $errors = $this->validate_data($ch, $import_data[$ch]);
+
+                                    if ($errors > 0) {
+                                        if (isset($error_summary[$ch])) {
+                                            $error_summary[$ch]['error-count'] = intval($error_summary[$ch]['error-count']) + 1;
+                                        } else {
+                                            $error_summary[$ch]['error-count'] = 1;
+                                        }
+                                    }
+                                } ?>
+
+                                <td data-col-id='<?php echo esc_html($hi); ?>' data-key="<?php echo esc_html($ch); ?>" <?php echo esc_html($errors > 0 ? 'class="data-error"' : '') ?>>
+
+                                    <?php
+                                    $value = '';
+                                    if (
+                                        $type == 'key_select'
+                                        || $type == 'date'
+                                        || $type == 'boolean'
+                                    ) {
+
+                                        $value = $import_data[$ch];
+                                    } else if (($type == 'multi_select') || in_array($ch, self::$contact_address_headings) || ($type == 'tags')) {
+
+                                        if (isset($import_data[$ch]["values"]) && is_array($import_data[$ch]["values"])) {
+                                            $values = [];
+                                            foreach ($import_data[$ch]["values"] as $mi => $v) {
+                                                if (isset($v["value"])) {
+                                                    $label    = isset($cfs[$ch]["default"][esc_html($v["value"])]["label"]) ? $cfs[$ch]["default"][esc_html($v["value"])]["label"] : esc_html($v["value"]);
+                                                    $values[] = $label;
+                                                }
+                                            }
+                                            $value = implode($multi_separator, (array) $values);
+                                        }
+                                    } else if (($type == 'number')) {
+                                        echo esc_html($import_data[$ch]);
+                                    } else if (isset($import_data[$ch])) {
+                                        $values = [];
+                                        if (isset($import_data[$ch]["values"]) && is_array($import_data[$ch]["values"])) {
+                                            foreach ($import_data[$ch]["values"] as $mi => $v) {
+                                                if (isset($v["value"])) {
+                                                    $values[] = esc_html($v["value"]);
+                                                }
+                                            }
+                                        } else {
+                                            foreach ($import_data[$ch] as $mi => $v) {
+                                                if (isset($v["value"])) {
+                                                    $values[] = esc_html($v["value"]);
+                                                }
+                                            }
+                                        }
+
+                                        $value = implode($multi_separator, (array) $values);
+                                    }
+                                    echo esc_html($value);
+                                    ?>
+                                </td> <?php
+                                    }
+                        }
+                        ?>
+
+                    </tr>
+                <?php } ?>
 
             </tbody>
 
         </table>
 
         <?php
-        $total_data_rows = count( (array) $data );
+        $total_data_rows = count((array) $data);
 
-        foreach ( $error_summary as $ch => $err ){
+        foreach ($error_summary as $ch => $err) {
             $column_type = null;
-            $channel_field = str_replace( $prefix, '', $ch );
+            $channel_field = str_replace($prefix, '', $ch);
             $error_html = '';
-            if ( isset( $cfs[$ch], $cfs[$ch]['name'] ) ) {
+            if (isset($cfs[$ch], $cfs[$ch]['name'])) {
                 $error_html .= $cfs[$ch]['name'];
-                if ( isset( $cfs[$ch]['type'] ) ) {
+                if (isset($cfs[$ch]['type'])) {
                     $column_type = $cfs[$ch]['type'];
                 }
-            } else if ( isset( $channels[$channel_field], $channels[$channel_field]['label'] ) ) {
+            } else if (isset($channels[$channel_field], $channels[$channel_field]['label'])) {
                 $error_html .= $channels[$channel_field]['label'];
-
             } else {
                 $error_html .= $ch;
             }
-            ?>
+        ?>
             <div class="error-summary-title">Column
 
                 <span class="error-field-name">
-                <?php echo esc_html( $error_html ); ?>
-            </span>
+                    <?php echo esc_html($error_html); ?>
+                </span>
 
                 <?php
                 $error_html = '';
-                if ( $column_type != null && in_array( $column_type, [ 'key_select', 'multi_select' ] ) ) {
+                if ($column_type != null && in_array($column_type, ['key_select', 'multi_select'])) {
                     $error_html .= ' match allowed values';
-                } else if ( $column_type == 'date' ) {
+                } else if ($column_type == 'date') {
                     $error_html .= ' needs to be in format yyyy-mm-dd';
                 } else {
                     $error_html .= ' needs to contain valid format';
                 }
                 ?>
-                <?php echo esc_html( $error_html ); ?>
+                <?php echo esc_html($error_html); ?>
 
             </div>
 
             <div class="error-summary-details">
-                <?php echo esc_html( $err['error-count'] ); ?> out of <?php echo esc_html( $total_data_rows ); ?> rows contain invalid format.<br/>
+                <?php echo esc_html($err['error-count']); ?> out of <?php echo esc_html($total_data_rows); ?> rows contain invalid format.<br />
             </div>
             <div style="clear:both;"></div>
         <?php }
 
-        if ( count( $error_summary ) > 0 ) : ?>
+        if (count($error_summary) > 0) : ?>
             <div class="error-summary-details">Please fix these issues before importing.</div>
         <?php endif;
-
     }
 
-    public function get_all_default_values() {
+    public function get_all_default_values()
+    {
         $data           = array();
         $data['data']   = $this->post_settings["channels"];
         $data['fields'] = $this->post_field_settings;
@@ -1495,28 +1639,29 @@ class DT_Import {
         return $data;
     }
 
-    private function validate_data( $field, $data ) {
+    private function validate_data($field, $data)
+    {
         $err_count = 0;
         $cfs = $this->post_field_settings;
 
-        if ( isset( $cfs[$field] ) ) {
+        if (isset($cfs[$field])) {
 
-            if ( isset( $cfs[$field]['type'] ) ) {
+            if (isset($cfs[$field]['type'])) {
                 $type = $cfs[$field]['type'];
-                if ( $type == 'boolean' && !filter_var( $data, FILTER_VALIDATE_BOOLEAN ) ) {
+                if ($type == 'boolean' && !filter_var($data, FILTER_VALIDATE_BOOLEAN)) {
                     $err_count++;
-                } else if ( $type == 'date' && !( preg_match( "/^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])$/", $data ) ) ) {
+                } else if ($type == 'date' && !(preg_match("/^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])$/", $data))) {
                     $err_count++;
                     // } else if ( $type == 'number' && is_numeric($data) ) {
                     // } else if ( $type == 'array' && !is_array($data) ) {
-                } else if ( $type == 'key_select' && !in_array( $data, array_keys( $cfs[$field]['default'] ) ) ) {
+                } else if ($type == 'key_select' && !in_array($data, array_keys($cfs[$field]['default']))) {
                     $err_count++;
-                } else if ( $type == 'multi_select' ) {
-                    if ( isset( $data['values'] ) ) {
-                        foreach ( $data['values'] as $mx ) {
-                            if ( isset( $mx['value'] ) ) {
-                                $value = trim( $mx['value'] );
-                                if ( !in_array( $value, array_keys( $cfs[$field]['default'] ) ) ) {
+                } else if ($type == 'multi_select') {
+                    if (isset($data['values'])) {
+                        foreach ($data['values'] as $mx) {
+                            if (isset($mx['value'])) {
+                                $value = trim($mx['value']);
+                                if (!in_array($value, array_keys($cfs[$field]['default']))) {
                                     $err_count++;
                                 }
                             }
@@ -1525,29 +1670,29 @@ class DT_Import {
                 }
             }
         } else {
-            $prefix   = sprintf( '%s_', strtolower( $this->post_label_singular ) );
-            $ch       = str_replace( $prefix, '', $field );
+            $prefix   = sprintf('%s_', strtolower($this->post_label_singular));
+            $ch       = str_replace($prefix, '', $field);
             $channels = $this->post_settings["channels"];
 
-            if ( isset( $channels[$ch] ) ) {
+            if (isset($channels[$ch])) {
                 $values = [];
-                if ( isset( $data['values'] ) ) {
-                    foreach ( $data['values'] as $mx ) {
-                        if ( isset( $mx['value'] ) ) {
-                            $values[] = trim( $mx['value'] );
+                if (isset($data['values'])) {
+                    foreach ($data['values'] as $mx) {
+                        if (isset($mx['value'])) {
+                            $values[] = trim($mx['value']);
                         }
                     }
                 } else {
-                    foreach ( $data as $mx ) {
-                        if ( isset( $mx['value'] ) ) {
-                            $values[] = trim( $mx['value'] );
+                    foreach ($data as $mx) {
+                        if (isset($mx['value'])) {
+                            $values[] = trim($mx['value']);
                         }
                     }
                 }
 
-                foreach ( $values as $value ) {
-                    if ( $ch == 'email' ) {
-                        if ( !filter_var( $value, FILTER_VALIDATE_EMAIL ) ) {
+                foreach ($values as $value) {
+                    if ($ch == 'email') {
+                        if (!filter_var($value, FILTER_VALIDATE_EMAIL)) {
                             $err_count++;
                         }
                     }
