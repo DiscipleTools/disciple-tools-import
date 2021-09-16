@@ -1,3 +1,5 @@
+
+![Import](https://raw.githubusercontent.com/DiscipleTools/disciple-tools-import/master/import-banner.png)
 # Disciple Tools Import
 
 Easily import your contact or group data into Disciple.Tools from a CSV file.
