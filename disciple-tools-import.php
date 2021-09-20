@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name: Disciple Tools - Import
+ *Plugin Name: Disciple.Tools - Import
  * Plugin URI: https://github.com/DiscipleTools/disciple-tools-import
  * Description: Disciple Tools - Import description
  * Version:  0.3
