@@ -1,6 +1,6 @@
 
 ![Import](https://raw.githubusercontent.com/DiscipleTools/disciple-tools-import/master/import-banner.png)
-# Disciple Tools Import
+# Disciple.Tools Import
 
 Easily import your contact or group data into Disciple.Tools from a CSV file.
 
@@ -19,7 +19,7 @@ If you have contact or group data in a CSV file, you don't need to manually crea
 
 ## Requirements
 
-- Disciple Tools Theme installed on a Wordpress Server
+- Disciple.Tools Theme installed on a Wordpress Server
 
 ## Installing
 

@@ -2,7 +2,7 @@
 /**
  *Plugin Name: Disciple.Tools - Import
  * Plugin URI: https://github.com/DiscipleTools/disciple-tools-import
- * Description: Disciple Tools - Import description
+ * Description: Disciple.Tools - Import description
  * Version:  0.3
  * Author URI: https://github.com/DiscipleTools
  * GitHub Plugin URI: https://github.com/DiscipleTools/disciple-tools-import
@@ -21,7 +21,7 @@
  * The starter plugin is equipped with:
  * 1. Wordpress style requirements
  * 2. Travis Continuous Integration
- * 3. Disciple Tools Theme presence check
+ * 3. Disciple.Tools Theme presence check
  * 4. Remote upgrade system for ongoing updates outside the Wordpress Directory
  * 5. Multilingual ready
  * 6. PHP Code Sniffer support (composer) @use /vendor/bin/phpcs and /vendor/bin/phpcbf
@@ -208,7 +208,7 @@ class Disciple_Tools_Import {
     public static function activation() {
 
         // Confirm 'Administrator' has 'manage_dt' privilege. This is key in 'remote' configuration when
-        // Disciple Tools theme is not installed, otherwise this will already have been installed by the Disciple Tools Theme
+        // Disciple.Tools theme is not installed, otherwise this will already have been installed by the Disciple.Tools Theme
         $role = get_role( 'administrator' );
         if ( !empty( $role ) ) {
             $role->add_cap( 'manage_dt' ); // gives access to dt plugin options
@@ -295,9 +295,9 @@ function disciple_tools_import_hook_admin_notice() {
     global $disciple_tools_import_required_dt_theme_version;
     $wp_theme = wp_get_theme();
     $current_version = $wp_theme->version;
-    $message = __( "'Disciple Tools - Starter Plugin' plugin requires 'Disciple Tools' theme to work. Please activate 'Disciple Tools' theme or make sure it is latest version.", "disciple_tools_import" );
+    $message = __( "'Disciple.Tools - Starter Plugin' plugin requires 'Disciple.Tools' theme to work. Please activate 'Disciple.Tools' theme or make sure it is latest version.", "disciple_tools_import" );
     if ( $wp_theme->get_template() === "disciple-tools-theme" ){
-        $message .= sprintf( esc_html__( 'Current Disciple Tools version: %1$s, required version: %2$s', 'disciple_tools_import' ), esc_html( $current_version ), esc_html( $disciple_tools_import_required_dt_theme_version ) );
+        $message .= sprintf( esc_html__( 'Current Disciple.Tools version: %1$s, required version: %2$s', 'disciple_tools_import' ), esc_html( $current_version ), esc_html( $disciple_tools_import_required_dt_theme_version ) );
     }
     // Check if it's been dismissed...
     if ( ! get_option( 'dismissed-dt-import', false ) ) { ?>

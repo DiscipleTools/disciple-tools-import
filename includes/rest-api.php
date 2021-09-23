@@ -32,11 +32,11 @@ class Disciple_Tools_Import_Endpoints
 
     /**
      * Public and Private endpoints.
-     * Public endpoints are for integrating with systems outside the Disciple Tools site. Connection to other sites
+     * Public endpoints are for integrating with systems outside the Disciple.Tools site. Connection to other sites
      * can be done using the Site_Link_System class found in /disciple-tools-theme/dt-core/admin/site-link-post-type.php
      *
      * Private endpoints can use the Wordpress nonce system and user login to verify connections. Private connections
-     * are used for extending the disciple tools system and should be used for all plugin extensions, except those
+     * are used for extending the Disciple.Tools system and should be used for all plugin extensions, except those
      * integrating to outside systems.
      */
     public function add_api_routes() {
