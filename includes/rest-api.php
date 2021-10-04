@@ -162,7 +162,12 @@ class Disciple_Tools_Import_Endpoints
                         : $addr;
 
                     if ( false !== $result ) {
-                        $is_valid_address = true; // setting as valid address
+
+                        $relevance = $params['geocoder'] === 'Google'
+                            ? 0.6 // to change if there's any data equals to Mapbox's relevance 
+                            : $result['features']['relevance'];
+
+                        $is_valid_address = $relevance >= 0.5 ? true : false; // setting as valid address
 
                         // inserting to location grid meta
                         $geocoder = new Location_Grid_Geocoder();
