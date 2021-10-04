@@ -164,7 +164,7 @@ class Disciple_Tools_Import_Endpoints
                     if ( false !== $result ) {
 
                         $relevance = $params['geocoder'] === 'Google'
-                            ? 0.6 // to change if there's any data equals to Mapbox's relevance 
+                            ? 0.6 // to change if there's any data equals to Mapbox's relevance
                             : $result['features']['relevance'];
 
                         $is_valid_address = $relevance >= 0.5 ? true : false; // setting as valid address
