@@ -1048,8 +1048,7 @@ class DT_Import {
                                     success: function(record) {
 
                                         // if geocode api is not selected 'none'
-                                        if(geocoderType !== 'none') {
-
+                                        if(geocoderType !== 'none' && location !== '') {
                                             // adding location grid meta
                                             const payload = {
                                                 id: record.ID,
