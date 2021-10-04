@@ -69,7 +69,7 @@ class Disciple_Tools_Import_Endpoints
             $namespace, '/add_location_grid_meta', [
                 [
                     'methods'               => WP_REST_Server::CREATABLE,
-                    'callback'              => [ $this, 'private_endpoint'],
+                    'callback'              => [ $this, 'private_endpoint' ],
                     'permission_callback'   => '__return_true',
                 ]
             ]
@@ -102,32 +102,32 @@ class Disciple_Tools_Import_Endpoints
             if ( DT_Mapbox_API::get_key() || Disciple_Tools_Google_Geocode_API::get_key() ) {
 
                 // validating address params if coordinates or just address
-                $API_class = $params['geocoder'] === 'Google'
+                $api_class = $params['geocoder'] === 'Google'
                     ? 'Disciple_Tools_Google_Geocode_API'
                     : 'DT_Mapbox_API';
-                
-                $addresses = explode(";", $params['address']);
-                $isValidAddress = false;
+
+                $addresses = explode( ";", $params['address'] );
+                $is_valid_address = false;
                 $results = [];
 
                 foreach ($addresses as $addr) {
-                    $lookup = $this->validateLatLong($addr);
+                    $lookup = $this->validate_lat_long( $addr );
 
                     // checking if address or coordinates and if coordinates splitting into latitude and longitude
                     $address = $lookup === 'coordinates'
-                        ? explode(",", preg_replace('/\s/', '', $addr))
+                        ? explode( ",", preg_replace( '/\s/', '', $addr ) )
                         : $addr;
 
                     // getting results
                     $result = $lookup === 'coordinates'
                         ? (
                             $params['geocoder'] === 'Google'
-                                ? $API_class::query_google_api_reverse($addr)
-                                : $API_class::reverse_lookup($address[1], $address[0])
+                                ? $api_class::query_google_api_reverse( $addr )
+                                : $api_class::reverse_lookup( $address[1], $address[0] )
                         ) : (
                             $params['geocoder'] === 'Google'
-                                ? $API_class::query_google_api($address, 'core')
-                                : $API_class::forward_lookup($address)
+                                ? $api_class::query_google_api( $address, 'core' )
+                                : $api_class::forward_lookup( $address )
                         );
 
                     // getting longitude
@@ -136,33 +136,33 @@ class Disciple_Tools_Import_Endpoints
                         : (
                             $params['geocoder'] === 'Google'
                                 ? $result['lng']
-                                : $API_class::parse_raw_result($result, 'lng', true)
+                                : $api_class::parse_raw_result( $result, 'lng', true )
                         );
-                    
+
                     // getting latitude
                     $lat = $lookup === 'coordinates'
                         ? $address[0]
                         : (
                             $params['geocoder'] === 'Google'
                                 ? $result['lat']
-                                : $API_class::parse_raw_result( $result, 'lat', true )
+                                : $api_class::parse_raw_result( $result, 'lat', true )
                         );
-                    
+
                     // reformatting $address
                     $address = $lookup === 'coordinates'
                         ? (
                             $params['geocoder'] === 'Google'
                                 ? (
-                                    $result 
-                                        ? $API_class::parse_raw_result($result, 'formatted_address')
+                                    $result
+                                        ? $api_class::parse_raw_result( $result, 'formatted_address' )
                                         : $addr
                                 )
-                                : $API_class::parse_raw_result($result, 'full_location_name', true)
+                                : $api_class::parse_raw_result( $result, 'full_location_name', true )
                         )
                         : $addr;
 
                     if ( false !== $result ) {
-                        $isValidAddress = true; // setting as valid address
+                        $is_valid_address = true; // setting as valid address
 
                         // inserting to location grid meta
                         $geocoder = new Location_Grid_Geocoder();
@@ -198,7 +198,7 @@ class Disciple_Tools_Import_Endpoints
 
                 return json_encode(array(
                     'address' => $params['address'],
-                    'has_valid_address' => $isValidAddress,
+                    'has_valid_address' => $is_valid_address,
                     'results' => $results,
                     'addresses' => $addresses
                 ));
@@ -208,7 +208,7 @@ class Disciple_Tools_Import_Endpoints
                     'message' => 'No geocoder APIs available.'
                 ));
             }
-        } catch(Exception $e) {
+        } catch (Exception $e) {
             return json_encode(array(
                 'message' => 'Error Adding Location Grid Meta.',
                 'error' => $e
@@ -256,8 +256,8 @@ class Disciple_Tools_Import_Endpoints
         return $params;
     }
 
-    private function validateLatLong($address) {
-        $split_address = explode(",", $address);
-        return preg_match('/^[-]?(([0-8]?[0-9])\.(\d+))|(90(\.0+)?),[-]?((((1[0-7][0-9])|([0-9]?[0-9]))\.(\d+))|180(\.0+)?)$/', $split_address[0].','.$split_address[1]) === 1 ? 'coordinates' : 'address'; 
+    private function validate_lat_long( $address) {
+        $split_address = explode( ",", $address );
+        return preg_match( '/^[-]?(([0-8]?[0-9])\.(\d+))|(90(\.0+)?),[-]?((((1[0-7][0-9])|([0-9]?[0-9]))\.(\d+))|180(\.0+)?)$/', $split_address[0].','.$split_address[1] ) === 1 ? 'coordinates' : 'address';
     }
 }

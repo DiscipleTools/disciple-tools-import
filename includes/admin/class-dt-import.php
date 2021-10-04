@@ -165,19 +165,19 @@ class DT_Import {
                 }
 
                 $selected_geocode_api = 'none';
-                if ( isset( $_POST['selected_geocode_api'])) {
-                    $selected_geocode_api = sanitize_text_field( wp_unslash( $_POST['selected_geocode_api']));
+                if ( isset( $_POST['selected_geocode_api'] )) {
+                    $selected_geocode_api = sanitize_text_field( wp_unslash( $_POST['selected_geocode_api'] ) );
                 }
 
                 $import_settings = [
                     "source"                => $file_source,
                     "assigned_to"           => $file_assigned_to,
-                    "data"                  => $this->mapping_process( $temp_name, $file_source, $file_assigned_to, $selected_geocode_api),
+                    "data"                  => $this->mapping_process( $temp_name, $file_source, $file_assigned_to, $selected_geocode_api ),
                     "selected_geocode_api"  => $selected_geocode_api
                 ];
 
                 set_transient( "disciple_tools_import_settings", $import_settings, 3600 * 24 );
-                set_transient('selected_geocode_api', $selected_geocode_api, HOUR_IN_SECONDS);
+                set_transient( 'selected_geocode_api', $selected_geocode_api, HOUR_IN_SECONDS );
                 $this->display_field_mapping_step();
 
             } /**end-of condition --isset( $_FILES["csv_file"] )-- */
@@ -452,14 +452,14 @@ class DT_Import {
     public function import_form() {
             $geocode_apis_are_available = false;
             $available_geocode_apis = [];
-            if (Disciple_Tools_Google_Geocode_API::get_key()) {
-                array_push($available_geocode_apis, 'Google');
-                $geocode_apis_are_available = true;
-            }
-            if (DT_Mapbox_API::get_key()) {
-                array_push($available_geocode_apis, 'Mapbox');
-                $geocode_apis_are_available = true;
-            }
+        if (Disciple_Tools_Google_Geocode_API::get_key()) {
+            array_push( $available_geocode_apis, 'Google' );
+            $geocode_apis_are_available = true;
+        }
+        if (DT_Mapbox_API::get_key()) {
+            array_push( $available_geocode_apis, 'Mapbox' );
+            $geocode_apis_are_available = true;
+        }
         ?>
         <!-- Box -->
         <!-- Box -->
@@ -539,16 +539,16 @@ class DT_Import {
                                 <tr>
                                     <td>
                                         <label for="selected__geocode_api">
-                                            <?php esc_html_e( "Use the following Geocode API", 'disciple_tools'); ?>
+                                            <?php esc_html_e( "Use the following Geocode API", 'disciple_tools' ); ?>
                                         </label>
                                         <br>
                                         <select name="selected_geocode_api" id="selected_geocode_api">
                                             <?php
-                                                foreach ($available_geocode_apis as $api) {
-                                            ?>
-                                                <option value="<?php echo $api ?>"><?php echo $api; ?></option>
-                                            <?php
-                                                }
+                                            foreach ($available_geocode_apis as $api) {
+                                                ?>
+                                                <option value="<?php echo esc_html( $api ) ?>"><?php echo esc_html( $api ); ?></option>
+                                                <?php
+                                            }
                                             ?>
                                                 <option value="none">None</option>
                                         </select>
@@ -918,7 +918,7 @@ class DT_Import {
 
     public function insert_data() {
         $import_settings = get_transient( "disciple_tools_import_settings" );
-        $selected_geocode_api = get_transient('selected_geocode_api');
+        $selected_geocode_api = get_transient( 'selected_geocode_api' );
         $data_keys       = array_filter( array_keys( $import_settings ), 'is_numeric' );
         foreach ( $data_keys as $data_key ) {
             $data[] = $import_settings[ $data_key ];
@@ -927,8 +927,8 @@ class DT_Import {
 
         $js_data = [];
         foreach ($data as $num => $f) {
-            $js_array = (isset($f[0])) ? wp_json_encode($f[0]) : [];
-            if (false !== $js_array && !empty($f)) {
+            $js_array = ( isset( $f[0] ) ) ? wp_json_encode( $f[0] ) : [];
+            if (false !== $js_array && !empty( $f )) {
                 $js_data[] = $js_array;
             }
         }
@@ -949,8 +949,8 @@ class DT_Import {
                         <div style="height: 50px; line-height: 50px;">
                             <span>
                                 <?php
-                                $num = count($js_data);
-                                printf('Creating %s %s DO NOT LEAVE THE PAGE until the "All Done" message appears.', esc_attr($num), esc_attr($this->post_label_plural));
+                                $num = count( $js_data );
+                                printf( 'Creating %s %s DO NOT LEAVE THE PAGE until the "All Done" message appears.', esc_attr( $num ), esc_attr( $this->post_label_plural ) );
                                 ?>
                             </span>
                         </div>
@@ -960,8 +960,8 @@ class DT_Import {
                         <div style="height: 50px; line-height: 50px;">
                             <span>
                                 <?php
-                                $num = count($js_data);
-                                printf('Created all %s %s.', esc_attr($num), esc_attr($this->post_label_plural));
+                                $num = count( $js_data );
+                                printf( 'Created all %s %s.', esc_attr( $num ), esc_attr( $this->post_label_plural ) );
                                 ?>
                             </span>
                         </div>
@@ -1010,10 +1010,10 @@ class DT_Import {
                             ?>
                             let rest_route_post_type = "<?php echo esc_attr( $lowercase_post_type ); ?>";
                             let rest_url = "<?php echo esc_url_raw( rest_url() ); ?>dt-posts/v2/" + rest_route_post_type + "?silent=true";
-                            const url_add_location_grid_meta = "<?php echo esc_url_raw(rest_url()); ?>dt_import/v1/add_location_grid_meta";
+                            const url_add_location_grid_meta = "<?php echo esc_url_raw( rest_url() ); ?>dt_import/v1/add_location_grid_meta";
                             const url_update_post = "<?php echo esc_url_raw( rest_url() ); ?>dt-posts/v2/" + rest_route_post_type;
 
-                            const geocoderType = '<?php echo $selected_geocode_api; ?>'
+                            const geocoderType = '<?php echo esc_html( $selected_geocode_api ); ?>'
 
                             // sect : modifying item
                             // removing contact_address from item to avoid address duplication
@@ -1065,7 +1065,7 @@ class DT_Import {
                                                 dataType: 'json',
                                                 url: url_add_location_grid_meta,
                                                 beforeSend: function(xhr) {
-                                                    xhr.setRequestHeader('X-WP-Nonce', "<?php echo esc_html(wp_create_nonce('wp_rest')); ?>");
+                                                    xhr.setRequestHeader('X-WP-Nonce', "<?php echo esc_html( wp_create_nonce( 'wp_rest' ) ); ?>");
                                                 },
                                                 success: function(data) {
                                                     const responseGridMeta = JSON.parse(data);
