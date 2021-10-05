@@ -1084,21 +1084,21 @@ class DT_Import {
                                                             contentType: "application/json; charset=utf-8",
                                                             dataType: "json",
                                                             url: url_update_post + '/' + record.ID + '?silent=true',
-                                                            beforeSend: function(xhr) {                                                    
+                                                            beforeSend: function(xhr) {
                                                                 xhr.setRequestHeader('X-WP-Nonce', "<?php echo esc_html( wp_create_nonce( 'wp_rest' ) ); ?>");
                                                             },
                                                             success: function(record) {
-                                                                showAddedRow(pid, responseGridMeta, record.permalink);
+                                                                showAddedRow(pid, responseGridMeta, record.permalink, record.name);
                                                                 done();
                                                             },
-                                                            error: function () { 
+                                                            error: function () {
                                                                 alert("Error occured.please try again");
                                                                 console.log("%o",xhr);
                                                                 t('PID#'+pid+' Error occurred. please try again');
                                                             }
                                                         });
                                                     } else {
-                                                        showAddedRow(pid, responseGridMeta, record.permalink);
+                                                        showAddedRow(pid, responseGridMeta, record.permalink, record.name);
                                                         done();
                                                     }
                                                 },
@@ -1109,6 +1109,7 @@ class DT_Import {
                                                 }
                                             });
                                         } else {
+                                            showAddedRow(pid, null, record.permalink, record.name);
                                             done();
                                         }
                                     },
@@ -1152,10 +1153,10 @@ class DT_Import {
                             }
                         }
 
-                        function showAddedRow(pid, data, permalink) {
+                        function showAddedRow(pid, data, permalink, name = null) {
                             console.group(pid + ' added.');
                             console.log(data);
-                            t(`PID# ${pid} done. <a href="${permalink}" target="_blank">See record</a>`);
+                            t(`PID# ${pid} done. <a href="${permalink}" target="_blank">See ${name ? name : record}</a>`);
                             console.groupEnd();
                         }
 
