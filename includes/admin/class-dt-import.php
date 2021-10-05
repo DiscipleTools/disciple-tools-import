@@ -164,13 +164,20 @@ class DT_Import {
                     $file_assigned_to = sanitize_text_field( wp_unslash( $_POST['csv_assign'] ) );
                 }
 
+                $selected_geocode_api = 'none';
+                if ( isset( $_POST['selected_geocode_api'] )) {
+                    $selected_geocode_api = sanitize_text_field( wp_unslash( $_POST['selected_geocode_api'] ) );
+                }
+
                 $import_settings = [
-                    "source"      => $file_source,
-                    "assigned_to" => $file_assigned_to,
-                    "data"        => $this->mapping_process( $temp_name, $file_source, $file_assigned_to ),
+                    "source"                => $file_source,
+                    "assigned_to"           => $file_assigned_to,
+                    "data"                  => $this->mapping_process( $temp_name, $file_source, $file_assigned_to, $selected_geocode_api ),
+                    "selected_geocode_api"  => $selected_geocode_api
                 ];
 
                 set_transient( "disciple_tools_import_settings", $import_settings, 3600 * 24 );
+                set_transient( 'selected_geocode_api', $selected_geocode_api, HOUR_IN_SECONDS );
                 $this->display_field_mapping_step();
 
             } /**end-of condition --isset( $_FILES["csv_file"] )-- */
@@ -312,8 +319,10 @@ class DT_Import {
 
                                                                     <select id="value-mapper-<?php echo esc_attr( $ci ) ?>-<?php echo esc_attr( $vi ) ?>"
                                                                             name="VM[<?php echo esc_attr( $ci ) ?>][<?php echo esc_attr( $vi ) ?>]"
-                                                                            class="value-mapper-<?php echo esc_attr( $ci ) ?>"
-                                                                            data-value="<?php echo esc_attr( $v ) ?>">
+                                                                            class="value-mappers value-mapper-<?php echo esc_attr( $ci ) ?>"
+                                                                            data-value="<?php echo esc_attr( $v ) ?>"
+                                                                            data-subid="<?php echo esc_attr( $vi ) ?>"
+                                                                            >
                                                                         <option>--Not Selected--</option>
                                                                         <?php if ( isset( $my_opt_fields['fields'][$ch]['default'] ) && is_array( $my_opt_fields['fields'][$ch]['default'] ) ):
                                                                             foreach ( $my_opt_fields['fields'][$ch]['default'] as $option_key => $option_value ): ?>
@@ -416,6 +425,16 @@ class DT_Import {
                                     });
                                 });
 
+                                jQuery('.value-mappers').each(function(){
+                                    let h_sel = jQuery(this).data('value');
+
+                                    jQuery(this).find('option').each(function() {
+                                        if(h_sel === jQuery(this).text()){
+                                            jQuery(this).attr('selected','selected');
+                                        }
+                                    });
+                                });
+
                             } else {
                                 jQuery('#unique-values-'+id).hide();
                             }
@@ -431,6 +450,16 @@ class DT_Import {
     }
 
     public function import_form() {
+            $geocode_apis_are_available = false;
+            $available_geocode_apis = [];
+        if (Disciple_Tools_Google_Geocode_API::get_key()) {
+            array_push( $available_geocode_apis, 'Google' );
+            $geocode_apis_are_available = true;
+        }
+        if (DT_Mapbox_API::get_key()) {
+            array_push( $available_geocode_apis, 'Mapbox' );
+            $geocode_apis_are_available = true;
+        }
         ?>
         <!-- Box -->
         <!-- Box -->
@@ -505,6 +534,28 @@ class DT_Import {
                                 </tr>
                                 <?php
                             endif;
+                            if ($geocode_apis_are_available) {
+                                ?>
+                                <tr>
+                                    <td>
+                                        <label for="selected__geocode_api">
+                                            <?php esc_html_e( "Use the following Geocode API", 'disciple_tools' ); ?>
+                                        </label>
+                                        <br>
+                                        <select name="selected_geocode_api" id="selected_geocode_api">
+                                            <?php
+                                            foreach ($available_geocode_apis as $api) {
+                                                ?>
+                                                <option value="<?php echo esc_html( $api ) ?>"><?php echo esc_html( $api ); ?></option>
+                                                <?php
+                                            }
+                                            ?>
+                                                <option value="none">None</option>
+                                        </select>
+                                    </td>
+                                </tr>
+                                <?php
+                            }
                             ?>
                             <tr>
                                 <td>
@@ -867,22 +918,64 @@ class DT_Import {
 
     public function insert_data() {
         $import_settings = get_transient( "disciple_tools_import_settings" );
+        $selected_geocode_api = get_transient( 'selected_geocode_api' );
         $data_keys       = array_filter( array_keys( $import_settings ), 'is_numeric' );
         foreach ( $data_keys as $data_key ) {
             $data[] = $import_settings[ $data_key ];
         }
         $data = disciple_tools_import_sanitize_array( $data );
+
+        $js_data = [];
+        foreach ($data as $num => $f) {
+            $js_array = ( isset( $f[0] ) ) ? wp_json_encode( $f[0] ) : [];
+            if (false !== $js_array && !empty( $f )) {
+                $js_data[] = $js_array;
+            }
+        }
         ?>
         <!-- Box -->
         <table class="widefat striped">
             <tbody>
             <tr>
                 <td>
-                    <div id="import-logs">&nbsp;</div>
+                    <div
+                        id="import-logs"
+                        style="max-height: 150px; overflow: hidden; overflow-y: auto;"
+                    ></div>
                     <div id="data-links">&nbsp;</div>
 
+                    <!-- Notices -->
+                    <div id="notice_Creating" class="notice notice-warning">
+                        <div style="height: 50px; line-height: 50px;">
+                            <span>
+                                <?php
+                                $num = count( $js_data );
+                                printf( 'Creating %s %s DO NOT LEAVE THE PAGE until the "All Done" message appears.', esc_attr( $num ), esc_attr( $this->post_label_plural ) );
+                                ?>
+                            </span>
+                        </div>
+                    </div>
+
+                    <div id="notice_Created" class="notice notice-success">
+                        <div style="height: 50px; line-height: 50px;">
+                            <span>
+                                <?php
+                                $num = count( $js_data );
+                                printf( 'Created all %s %s.', esc_attr( $num ), esc_attr( $this->post_label_plural ) );
+                                ?>
+                            </span>
+                        </div>
+                    </div>
+                    <!-- e.o Notices -->
+
+                    <!-- Scripts -->
                     <script type="text/javascript">
                         let pid = 1;
+                        let completed = false;
+                        const creating = document.getElementById('notice_Creating');
+                        const created = document.getElementById('notice_Created');
+
+                        // import process
                         function process( q, num, fn, done ) {
                             // remove a batch of items from the queue
                             let items = q.splice(0, num),
@@ -917,32 +1010,121 @@ class DT_Import {
                             ?>
                             let rest_route_post_type = "<?php echo esc_attr( $lowercase_post_type ); ?>";
                             let rest_url = "<?php echo esc_url_raw( rest_url() ); ?>dt-posts/v2/" + rest_route_post_type + "?silent=true";
+                            const url_add_location_grid_meta = "<?php echo esc_url_raw( rest_url() ); ?>dt_import/v1/add_location_grid_meta";
+                            const url_update_post = "<?php echo esc_url_raw( rest_url() ); ?>dt-posts/v2/" + rest_route_post_type;
 
-                            console.log('starting ...' ); //t('starting ...');
-                            jQuery.ajax({
-                                type: "POST",
-                                data: item,
-                                contentType: "application/json; charset=utf-8",
-                                dataType: "json",
-                                url: rest_url,
-                                beforeSend: function(xhr) {
-                                    xhr.setRequestHeader('X-WP-Nonce', "<?php echo esc_html( wp_create_nonce( 'wp_rest' ) ); ?>");
-                                },
-                                success: function(record) {
-                                    t(`PID# ${pid} done. <a href="${record.permalink}" target="_blank">See record</a>`);
-                                    done();
-                                },
-                                error: function(xhr) { // if error occured
-                                    alert("Error occured.please try again");
-                                    console.log("%o",xhr);
-                                    t('PID#'+pid+' Error occurred. please try again');
-                                }
+                            const geocoderType = '<?php echo esc_html( $selected_geocode_api ); ?>'
+
+                            // sect : modifying item
+                            // removing contact_address from item to avoid address duplication
+                            const modifiedItem = JSON.parse(item);
+                            const tmpLocations = modifiedItem.contact_address.values;
+
+                            const arrLocations = [];
+
+                            tmpLocations.forEach(l => {
+                                arrLocations.push(l.value);
                             });
+
+                            const location = arrLocations.join(';');
+                            console.log(location)
+
+                            delete(modifiedItem.contact_address);
+                            const modifiedItemString = JSON.stringify(modifiedItem);
+                            // e.o. sect : modifying item
+
+
+                            console.log('starting ...'); //t('starting ...');
+
+                                jQuery.ajax({
+                                    type: "POST",
+                                    data: modifiedItemString,
+                                    contentType: "application/json; charset=utf-8",
+                                    dataType: "json",
+                                    url: rest_url,
+                                    beforeSend: function(xhr) {
+                                        xhr.setRequestHeader('X-WP-Nonce', "<?php echo esc_html( wp_create_nonce( 'wp_rest' ) ); ?>");
+                                    },
+                                    success: function(record) {
+
+                                        // if geocode api is not selected 'none'
+                                        if(geocoderType !== 'none' && location !== '') {
+                                            // adding location grid meta
+                                            const payload = {
+                                                id: record.ID,
+                                                post_type: record.post_type,
+                                                geocoder: geocoderType,
+                                                address: location
+                                            }
+
+                                            jQuery.ajax({
+                                                type: 'POST',
+                                                data: JSON.stringify(payload),
+                                                contentType: 'application/json; charset=utf-8',
+                                                dataType: 'json',
+                                                url: url_add_location_grid_meta,
+                                                beforeSend: function(xhr) {
+                                                    xhr.setRequestHeader('X-WP-Nonce', "<?php echo esc_html( wp_create_nonce( 'wp_rest' ) ); ?>");
+                                                },
+                                                success: function(data) {
+                                                    const responseGridMeta = JSON.parse(data);
+
+                                                    if(!responseGridMeta.has_valid_address) {
+
+                                                        const updatePayload = {
+                                                            contact_address: {
+                                                                values: tmpLocations
+                                                            }
+                                                        }
+
+                                                        // update post : add address
+                                                        jQuery.ajax({
+                                                            type: "POST",
+                                                            data: JSON.stringify(updatePayload),
+                                                            contentType: "application/json; charset=utf-8",
+                                                            dataType: "json",
+                                                            url: url_update_post + '/' + record.ID + '?silent=true',
+                                                            beforeSend: function(xhr) {                                                    
+                                                                xhr.setRequestHeader('X-WP-Nonce', "<?php echo esc_html( wp_create_nonce( 'wp_rest' ) ); ?>");
+                                                            },
+                                                            success: function(record) {
+                                                                showAddedRow(pid, responseGridMeta, record.permalink);
+                                                                done();
+                                                            },
+                                                            error: function () { 
+                                                                alert("Error occured.please try again");
+                                                                console.log("%o",xhr);
+                                                                t('PID#'+pid+' Error occurred. please try again');
+                                                            }
+                                                        });
+                                                    } else {
+                                                        showAddedRow(pid, responseGridMeta, record.permalink);
+                                                        done();
+                                                    }
+                                                },
+                                                error: function(err) {
+                                                    alert('Error occured. Please try again.');
+                                                    console.error(err);
+                                                    t('PID#' + pid + ' Error occurred. please try again');
+                                                }
+                                            });
+                                        } else {
+                                            done();
+                                        }
+                                    },
+                                    error: function(xhr) { // if error occured
+                                        alert("Error occured.please try again");
+                                        console.log("%o",xhr);
+                                        t('PID#'+pid+' Error occurred. please try again');
+                                    }
+                                });
                         }
 
                         // an all-done action
                         function doDone() {
-                            console.log('All Done!'); t('All Done');
+                            console.log('All Done!');
+                            completed = true;
+                            t('All Done');
                             jQuery("#back").show();
                         }
 
@@ -952,23 +1134,30 @@ class DT_Import {
                             v = el.innerHTML;
                             v = v + '<br/>' + m;
                             el.innerHTML = v;
+                            el.scrollTop = el.scrollHeight;
+                            showNotice();
                         }
 
                         function reset(){
                             document.getElementById("import-logs").value = '';
                         }
-                    </script>
 
-                    <?php
-                    $js_data = [];
-                    foreach ( $data as $num => $f ) {
-                        $js_array = ( isset( $f[0] ) ) ? wp_json_encode( $f[0] ) : [];
-                        if ( false !== $js_array && !empty( $f ) ) {
-                            $js_data[] = $js_array;
+                        function showNotice() {
+                            if(completed) {
+                                creating.style.display = 'none';
+                                created.style.display = 'block';
+                            } else {
+                                creating.style.display = 'block';
+                                created.style.display = 'none';
+                            }
                         }
-                    }
-                    ?>
-                    <script type="text/javascript">
+
+                        function showAddedRow(pid, data, permalink) {
+                            console.group(pid + ' added.');
+                            console.log(data);
+                            t(`PID# ${pid} done. <a href="${permalink}" target="_blank">See record</a>`);
+                            console.groupEnd();
+                        }
 
                         reset();
                         t('started processing queue!');
@@ -977,12 +1166,6 @@ class DT_Import {
                         let queue = <?php echo wp_json_encode( $js_data ); ?>;
                         process(queue, 5, doEach, doDone);
                     </script>
-
-                    <?php
-                    $num = count( $js_data );
-                    printf( 'Creating %s %s DO NOT LEAVE THE PAGE until the "All Done" message appears.', esc_attr( $num ), esc_attr( $this->post_label_plural ) );
-                    ?>
-
                 </td>
             </tr>
             </tbody>
