@@ -564,7 +564,7 @@ class DT_Import {
                                                name="submit"
                                                id="submit"
                                                class="button"
-                                               value=<?php esc_html_e( "Proceed to Mapping Fields", 'disciple_tools' ) ?>>
+                                               value="<?php esc_html_e( "Proceed to Mapping Fields", 'disciple_tools' ) ?>">
                                     </p>
                                 </td>
                             </tr>
