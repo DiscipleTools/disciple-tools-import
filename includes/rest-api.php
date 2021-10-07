@@ -165,27 +165,27 @@ class Disciple_Tools_Import_Endpoints
 
                         $relevance = $params['geocoder'] === 'Google'
                             ? 0.6 // to change if there's any data equals to Mapbox's relevance
-                            : $result['features']['relevance'];
+                            : $result['features'][0]['relevance'];
 
-                        $is_valid_address = $relevance >= 0.5 ? true : false; // setting as valid address
+                        $is_valid_address = $relevance >= 0.5; // setting as valid address
 
-                        // inserting to location grid meta
-                        $geocoder = new Location_Grid_Geocoder();
-                        $grid_row = $geocoder->get_grid_id_by_lnglat( $lng, $lat );
-
-                        $location_meta_grid = [
-                            'post_id'   => $params['id'],
-                            'post_type' => $params['post_type'],
-                            'grid_id'   => $grid_row['grid_id'],
-                            'lng'       => $lng,
-                            'lat'       => $lat,
-                            'level'     => '',
-                            'label'     => $address
-                        ];
-
-                        // validating and adding to location grid meta
-                        Location_Grid_Meta::validate_location_grid_meta( $location_meta_grid );
-                        Location_Grid_Meta::add_location_grid_meta( $params['id'], $location_meta_grid );
+                        if ( $is_valid_address ){
+                            // inserting to location grid meta
+                            $geocoder = new Location_Grid_Geocoder();
+                            $grid_row = $geocoder->get_grid_id_by_lnglat( $lng, $lat );
+                            $location_meta_grid = [
+                                'post_id'   => $params['id'],
+                                'post_type' => $params['post_type'],
+                                'grid_id'   => $grid_row['grid_id'],
+                                'lng'       => $lng,
+                                'lat'       => $lat,
+                                'level'     => '',
+                                'label'     => $address
+                            ];
+                            // validating and adding to location grid meta
+                            Location_Grid_Meta::validate_location_grid_meta( $location_meta_grid );
+                            Location_Grid_Meta::add_location_grid_meta( $params['id'], $location_meta_grid );
+                        }
                     }
 
                     // prepping for response
