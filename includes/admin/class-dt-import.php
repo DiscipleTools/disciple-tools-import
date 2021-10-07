@@ -564,7 +564,7 @@ class DT_Import {
                                                name="submit"
                                                id="submit"
                                                class="button"
-                                               value=<?php esc_html_e( "Upload", 'disciple_tools' ) ?>>
+                                               value=<?php esc_html_e( "Proceed to Mapping Fields", 'disciple_tools' ) ?>>
                                     </p>
                                 </td>
                             </tr>
@@ -1590,17 +1590,21 @@ class DT_Import {
                                         }
                                         $value = implode( $multi_separator, (array) $values );
                                     }
-                                } else if ( ( $type == 'number' ) ) {
+                                } else if ( ( $type == 'number' || $type === "text" || $type === "textarea" ) ) {
                                     echo esc_html( $import_data[ $ch ] );
                                 } else if ( isset( $import_data[$ch] ) ) {
-                                    $values = [];
-                                    if ( isset( $import_data[$ch]["values"] ) && is_array( $import_data[$ch]["values"] ) ) {
-                                        foreach ( $import_data[$ch]["values"] as $mi => $v ) {
-                                            if ( isset( $v["value"] ) ) { $values[] = esc_html( $v["value"] ); }
-                                        }
+                                    if ( !is_array( $import_data[$ch] ) ){
+                                        echo esc_html( $import_data[ $ch ] );
                                     } else {
-                                        foreach ( $import_data[$ch] as $mi => $v ) {
-                                            if ( isset( $v["value"] ) ){ $values[] = esc_html( $v["value"] ); }
+                                        $values = [];
+                                        if ( isset( $import_data[$ch]["values"] ) && is_array( $import_data[$ch]["values"] ) ) {
+                                            foreach ( $import_data[$ch]["values"] as $mi => $v ) {
+                                                if ( isset( $v["value"] ) ) { $values[] = esc_html( $v["value"] ); }
+                                            }
+                                        } else {
+                                            foreach ( $import_data[$ch] as $mi => $v ) {
+                                                if ( isset( $v["value"] ) ){ $values[] = esc_html( $v["value"] ); }
+                                            }
                                         }
                                     }
 
