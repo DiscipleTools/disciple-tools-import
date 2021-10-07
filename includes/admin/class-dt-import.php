@@ -1018,7 +1018,7 @@ class DT_Import {
                             // sect : modifying item
                             // removing contact_address from item to avoid address duplication
                             const modifiedItem = JSON.parse(item);
-                            const tmpLocations = modifiedItem.contact_address.values;
+                            const tmpLocations = modifiedItem.contact_address?.values || [];
 
                             const arrLocations = [];
 
@@ -1451,7 +1451,7 @@ class DT_Import {
                     } else if ( $type === "user_select" ){
                         $fields[$ch] = (int) $row_value[0];
                     } else if ( $type === "text" ) {
-                        $fields[ $ch ] = $row_value[0];
+                        $fields[ $ch ] = $row_value;
                     } else if ( $type === "number" ) {
                         $fields[ $ch ] = (int) $row_value;
                     } else if ( $type === "location_meta" || $type === "location" ) {
