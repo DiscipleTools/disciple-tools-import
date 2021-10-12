@@ -3,7 +3,7 @@
  *Plugin Name: Disciple.Tools - Import
  * Plugin URI: https://github.com/DiscipleTools/disciple-tools-import
  * Description: Disciple.Tools - Import description
- * Version:  0.3
+ * Version:  0.4
  * Author URI: https://github.com/DiscipleTools
  * GitHub Plugin URI: https://github.com/DiscipleTools/disciple-tools-import
  * Requires at least: 4.7.0
