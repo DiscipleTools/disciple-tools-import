@@ -1070,33 +1070,8 @@ class DT_Import {
                                                     const responseGridMeta = JSON.parse(data);
 
                                                     if(!responseGridMeta.has_valid_address) {
+                                                        addAddress(tmpLocations, url_update_post, record, responseGridMeta, done);
 
-                                                        const updatePayload = {
-                                                            contact_address: {
-                                                                values: tmpLocations
-                                                            }
-                                                        }
-
-                                                        // update post : add address
-                                                        jQuery.ajax({
-                                                            type: "POST",
-                                                            data: JSON.stringify(updatePayload),
-                                                            contentType: "application/json; charset=utf-8",
-                                                            dataType: "json",
-                                                            url: url_update_post + '/' + record.ID + '?silent=true',
-                                                            beforeSend: function(xhr) {
-                                                                xhr.setRequestHeader('X-WP-Nonce', "<?php echo esc_html( wp_create_nonce( 'wp_rest' ) ); ?>");
-                                                            },
-                                                            success: function(record) {
-                                                                showAddedRow(pid, responseGridMeta, record.permalink, record.name);
-                                                                done();
-                                                            },
-                                                            error: function () {
-                                                                alert("Error occured.please try again");
-                                                                console.log("%o",xhr);
-                                                                t('PID#'+pid+' Error occurred. please try again');
-                                                            }
-                                                        });
                                                     } else {
                                                         showAddedRow(pid, responseGridMeta, record.permalink, record.name);
                                                         done();
@@ -1108,7 +1083,11 @@ class DT_Import {
                                                     t('PID#' + pid + ' Error occurred. please try again');
                                                 }
                                             });
-                                        } else {
+
+                                        }else if( location !== '' ) {
+                                            addAddress(tmpLocations, url_update_post, record, null, done);
+
+                                        }else {
                                             showAddedRow(pid, null, record.permalink, record.name);
                                             done();
                                         }
@@ -1119,6 +1098,38 @@ class DT_Import {
                                         t('PID#'+pid+' Error occurred. please try again');
                                     }
                                 });
+                        }
+
+                        // add address
+                        function addAddress(tmpLocations, url_update_post, record, responseGridMeta, done) {
+
+                            const updatePayload = {
+                                contact_address: {
+                                    values: tmpLocations
+                                }
+                            }
+
+                            // update post : add address
+                            jQuery.ajax({
+                                type: "POST",
+                                data: JSON.stringify(updatePayload),
+                                contentType: "application/json; charset=utf-8",
+                                dataType: "json",
+                                url: url_update_post + '/' + record.ID + '?silent=true',
+                                beforeSend: function(xhr) {
+                                    xhr.setRequestHeader('X-WP-Nonce', "<?php echo esc_html( wp_create_nonce( 'wp_rest' ) ); ?>");
+                                },
+                                success: function(record) {
+                                    showAddedRow(pid, responseGridMeta, record.permalink, record.name);
+                                    done();
+                                },
+                                error: function () {
+                                    alert("Error occured.please try again");
+                                    console.log("%o",xhr);
+                                    t('PID#'+pid+' Error occurred. please try again');
+                                }
+                            });
+
                         }
 
                         // an all-done action
