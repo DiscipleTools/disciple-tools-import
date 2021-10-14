@@ -1493,6 +1493,8 @@ class DT_Import {
                         $fields[ $ch ] = (int) $row_value;
                     } else if ( $type === "location_meta" || $type === "location" ) {
                         $fields[ $ch ]["values"][] = [ "value" => trim( $row_value ) ];
+                    } else if ( $type === "connection" ) {
+                        $fields[ $ch ]["values"][] = [ "value" => trim( $row_value ) ];
                     } else {
                         //field not recognized.
                         continue;
