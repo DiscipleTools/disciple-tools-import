@@ -708,7 +708,7 @@ class DT_Import {
 
         foreach ( $data_rows as $ri => $row ) {
             foreach ( $row as $index => $cell ) {
-                $data_rows[$ri][$index] = utf8_decode( utf8_encode( $cell ) );
+                $data_rows[$ri][$index] = $cell;
             }
         }
         $temp_data = $data_rows;
