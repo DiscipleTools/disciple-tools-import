@@ -1280,7 +1280,9 @@ class DT_Import {
             <?php
             $list_data = array();
             foreach ( $data as $key => $item ) {
-                $list_data[$key] = $item['name'];
+                if ( ! $this->ignore_field_mapping( $this->post_type, $key ) ) {
+                    $list_data[ $key ] = $item['name'];
+                }
             }
             asort( $list_data );
 
@@ -1298,6 +1300,32 @@ class DT_Import {
             </optgroup>
         </select>
         <?php
+    }
+
+    private function ignore_field_mapping( $post_type, $field_key ): bool {
+        switch ( $post_type ) {
+            case 'contacts':
+                return in_array( $field_key, [
+                    'accepted',
+                    'baptism_generation',
+                    'duplicate_of',
+                    'duplicate_data',
+                    'last_modified',
+                    'quick_button_meeting_complete',
+                    'quick_button_no_show',
+                    'quick_button_meeting_scheduled',
+                    'quick_button_no_answer',
+                    'reason_closed',
+                    'reason_unassignable',
+                    'reason_paused',
+                    'requires_update',
+                    'tasks'
+                ] );
+            case 'groups':
+                return in_array( $field_key, [] );
+            default:
+                return false;
+        }
     }
 
     public function process_data( $import_settings, $mapping_data = [], $value_mapperi_data = [], $value_mapper_data = [] ) {
