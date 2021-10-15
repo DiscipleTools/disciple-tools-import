@@ -1029,7 +1029,11 @@ class DT_Import {
                             const location = arrLocations.join(';');
                             console.log(location)
 
-                            delete(modifiedItem.contact_address);
+                            // If geolocation enabled, then remove address
+                            let geolocationEnabled = (geocoderType !== 'none' && location !== '');
+                            if (geolocationEnabled) {
+                                delete (modifiedItem.contact_address);
+                            }
                             const modifiedItemString = JSON.stringify(modifiedItem);
                             // e.o. sect : modifying item
 
@@ -1048,7 +1052,7 @@ class DT_Import {
                                     success: function(record) {
 
                                         // if geocode api is not selected 'none'
-                                        if(geocoderType !== 'none' && location !== '') {
+                                        if (geolocationEnabled) {
                                             // adding location grid meta
                                             const payload = {
                                                 id: record.ID,
@@ -1083,9 +1087,6 @@ class DT_Import {
                                                     t('PID#' + pid + ' Error occurred. please try again');
                                                 }
                                             });
-
-                                        }else if( location !== '' ) {
-                                            addAddress(tmpLocations, url_update_post, record, null, done);
 
                                         }else {
                                             showAddedRow(pid, null, record.permalink, record.name);
