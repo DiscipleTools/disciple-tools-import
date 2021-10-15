@@ -224,6 +224,17 @@ function disciple_tools_import_sanitize_array( &$array ) {
     return $array;
 }
 
+function disciple_tools_import_array_utf8_decode( &$array ) {
+    foreach ( $array as &$value ) {
+        if ( ! is_array( $value ) ) {
+            $value = utf8_decode( $value );
+        } else {
+            disciple_tools_import_array_utf8_decode( $value );
+        }
+    }
+
+    return $array;
+}
 function disciple_tools_import_keep_unsanitized( $value ): bool {
     $unsanitized = [ '<19', '<26', '<41', '>41' ];
 
