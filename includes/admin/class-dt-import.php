@@ -925,6 +925,9 @@ class DT_Import {
         }
         $data = disciple_tools_import_sanitize_array( $data );
 
+        // Decode utf8 encoded values post transient, ahead of post record creation
+        $data = disciple_tools_import_array_utf8_decode( $data );
+
         $js_data = [];
         foreach ($data as $num => $f) {
             $js_array = ( isset( $f[0] ) ) ? wp_json_encode( $f[0] ) : [];
@@ -1630,7 +1633,7 @@ class DT_Import {
                                         $value = implode( $multi_separator, (array) $values );
                                     }
                                 } else if ( ( $type == 'number' || $type === "text" || $type === "textarea" ) ) {
-                                    echo esc_html( $import_data[ $ch ] );
+                                    echo esc_html( utf8_decode( $import_data[ $ch ] ) );
                                 } else if ( isset( $import_data[$ch] ) ) {
                                     if ( !is_array( $import_data[$ch] ) ){
                                         echo esc_html( $import_data[ $ch ] );
