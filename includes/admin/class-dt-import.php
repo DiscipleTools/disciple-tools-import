@@ -1006,7 +1006,7 @@ class DT_Import {
                         // a per-item action
                         function doEach( item, done ) {
                             <?php
-                            $lowercase_post_type = strtolower( $this->post_label_plural );
+                            $lowercase_post_type = strtolower( $this->post_type );
                             ?>
                             let rest_route_post_type = "<?php echo esc_attr( $lowercase_post_type ); ?>";
                             let rest_url = "<?php echo esc_url_raw( rest_url() ); ?>dt-posts/v2/" + rest_route_post_type + "?silent=true";
