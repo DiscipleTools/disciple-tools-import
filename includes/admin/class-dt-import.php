@@ -1281,7 +1281,7 @@ class DT_Import {
             <?php
             $list_data = array();
             foreach ( $data as $key => $item ) {
-                if ( ! $this->ignore_field_mapping( $this->post_type, $key ) ) {
+                if ( $this->valid_field_type_mapping( $item['type'] ) ) {
                     $list_data[ $key ] = $item['name'];
                 }
             }
@@ -1303,30 +1303,20 @@ class DT_Import {
         <?php
     }
 
-    private function ignore_field_mapping( $post_type, $field_key ): bool {
-        switch ( $post_type ) {
-            case 'contacts':
-                return in_array( $field_key, [
-                    'accepted',
-                    'baptism_generation',
-                    'duplicate_of',
-                    'duplicate_data',
-                    'last_modified',
-                    'quick_button_meeting_complete',
-                    'quick_button_no_show',
-                    'quick_button_meeting_scheduled',
-                    'quick_button_no_answer',
-                    'reason_closed',
-                    'reason_unassignable',
-                    'reason_paused',
-                    'requires_update',
-                    'tasks'
-                ] );
-            case 'groups':
-                return in_array( $field_key, [] );
-            default:
-                return false;
-        }
+    private function valid_field_type_mapping( $field_type ): bool {
+        return in_array( trim( strtolower( $field_type ) ), [
+            'key_select',
+            'tags',
+            'multi_select',
+            'boolean',
+            'date',
+            'communication_channel',
+            'user_select',
+            'text',
+            'number',
+            'location',
+            'connection'
+        ] );
     }
 
     public function process_data( $import_settings, $mapping_data = [], $value_mapperi_data = [], $value_mapper_data = [] ) {
@@ -1489,7 +1479,7 @@ class DT_Import {
                             }
                         }
                     } else if ( $type === "user_select" ){
-                        $fields[$ch] = (int) $row_value[0];
+                        $fields[$ch] = (int) $row_value;
                     } else if ( $type === "text" ) {
                         $fields[ $ch ] = $row_value;
                     } else if ( $type === "number" ) {
