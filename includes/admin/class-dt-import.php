@@ -1313,6 +1313,7 @@ class DT_Import {
             'communication_channel',
             'user_select',
             'text',
+            'textarea',
             'number',
             'location',
             'connection'
