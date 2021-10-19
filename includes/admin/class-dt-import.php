@@ -1032,96 +1032,105 @@ class DT_Import {
                             const location = arrLocations.join(';');
                             console.log(location)
 
-                            delete(modifiedItem.contact_address);
+                            // If geolocation enabled, then remove address
+                            let geolocationEnabled = (geocoderType !== 'none' && location !== '');
+                            if (geolocationEnabled) {
+                                delete (modifiedItem.contact_address);
+                            }
                             const modifiedItemString = JSON.stringify(modifiedItem);
                             // e.o. sect : modifying item
 
+                            jQuery.ajax({
+                                type: "POST",
+                                data: modifiedItemString,
+                                contentType: "application/json; charset=utf-8",
+                                dataType: "json",
+                                url: rest_url,
+                                beforeSend: function(xhr) {
+                                    xhr.setRequestHeader('X-WP-Nonce', "<?php echo esc_html( wp_create_nonce( 'wp_rest' ) ); ?>");
+                                },
+                                success: function(record) {
 
-                            console.log('starting ...'); //t('starting ...');
-
-                                jQuery.ajax({
-                                    type: "POST",
-                                    data: modifiedItemString,
-                                    contentType: "application/json; charset=utf-8",
-                                    dataType: "json",
-                                    url: rest_url,
-                                    beforeSend: function(xhr) {
-                                        xhr.setRequestHeader('X-WP-Nonce', "<?php echo esc_html( wp_create_nonce( 'wp_rest' ) ); ?>");
-                                    },
-                                    success: function(record) {
-
-                                        // if geocode api is not selected 'none'
-                                        if(geocoderType !== 'none' && location !== '') {
-                                            // adding location grid meta
-                                            const payload = {
-                                                id: record.ID,
-                                                post_type: record.post_type,
-                                                geocoder: geocoderType,
-                                                address: location
-                                            }
-
-                                            jQuery.ajax({
-                                                type: 'POST',
-                                                data: JSON.stringify(payload),
-                                                contentType: 'application/json; charset=utf-8',
-                                                dataType: 'json',
-                                                url: url_add_location_grid_meta,
-                                                beforeSend: function(xhr) {
-                                                    xhr.setRequestHeader('X-WP-Nonce', "<?php echo esc_html( wp_create_nonce( 'wp_rest' ) ); ?>");
-                                                },
-                                                success: function(data) {
-                                                    const responseGridMeta = JSON.parse(data);
-
-                                                    if(!responseGridMeta.has_valid_address) {
-
-                                                        const updatePayload = {
-                                                            contact_address: {
-                                                                values: tmpLocations
-                                                            }
-                                                        }
-
-                                                        // update post : add address
-                                                        jQuery.ajax({
-                                                            type: "POST",
-                                                            data: JSON.stringify(updatePayload),
-                                                            contentType: "application/json; charset=utf-8",
-                                                            dataType: "json",
-                                                            url: url_update_post + '/' + record.ID + '?silent=true',
-                                                            beforeSend: function(xhr) {
-                                                                xhr.setRequestHeader('X-WP-Nonce', "<?php echo esc_html( wp_create_nonce( 'wp_rest' ) ); ?>");
-                                                            },
-                                                            success: function(record) {
-                                                                showAddedRow(pid, responseGridMeta, record.permalink, record.name);
-                                                                done();
-                                                            },
-                                                            error: function () {
-                                                                alert("Error occured.please try again");
-                                                                console.log("%o",xhr);
-                                                                t('PID#'+pid+' Error occurred. please try again');
-                                                            }
-                                                        });
-                                                    } else {
-                                                        showAddedRow(pid, responseGridMeta, record.permalink, record.name);
-                                                        done();
-                                                    }
-                                                },
-                                                error: function(err) {
-                                                    alert('Error occured. Please try again.');
-                                                    console.error(err);
-                                                    t('PID#' + pid + ' Error occurred. please try again');
-                                                }
-                                            });
-                                        } else {
-                                            showAddedRow(pid, null, record.permalink, record.name);
-                                            done();
+                                    // if geocode api is not selected 'none'
+                                    if (geolocationEnabled) {
+                                        // adding location grid meta
+                                        const payload = {
+                                            id: record.ID,
+                                            post_type: record.post_type,
+                                            geocoder: geocoderType,
+                                            address: location
                                         }
-                                    },
-                                    error: function(xhr) { // if error occured
-                                        alert("Error occured.please try again");
-                                        console.log("%o",xhr);
-                                        t('PID#'+pid+' Error occurred. please try again');
+
+                                        jQuery.ajax({
+                                            type: 'POST',
+                                            data: JSON.stringify(payload),
+                                            contentType: 'application/json; charset=utf-8',
+                                            dataType: 'json',
+                                            url: url_add_location_grid_meta,
+                                            beforeSend: function(xhr) {
+                                                xhr.setRequestHeader('X-WP-Nonce', "<?php echo esc_html( wp_create_nonce( 'wp_rest' ) ); ?>");
+                                            },
+                                            success: function(data) {
+                                                const responseGridMeta = JSON.parse(data);
+
+                                                if(!responseGridMeta.has_valid_address) {
+                                                    addAddress(tmpLocations, url_update_post, record, responseGridMeta, done);
+
+                                                } else {
+                                                    showAddedRow(pid, responseGridMeta, record.permalink, record.name);
+                                                    done();
+                                                }
+                                            },
+                                            error: function(err) {
+                                                alert('Error occured. Please try again.');
+                                                console.error(err);
+                                                t('PID#' + pid + ' Error occurred. please try again');
+                                            }
+                                        });
+
+                                    }else {
+                                        showAddedRow(pid, null, record.permalink, record.name);
+                                        done();
                                     }
-                                });
+                                },
+                                error: function(xhr) { // if error occured
+                                    alert("Error occured.please try again");
+                                    console.log("%o",xhr);
+                                    t('PID#'+pid+' Error occurred. please try again');
+                                }
+                            });
+                        }
+
+                        // add address
+                        function addAddress(tmpLocations, url_update_post, record, responseGridMeta, done) {
+
+                            const updatePayload = {
+                                contact_address: {
+                                    values: tmpLocations
+                                }
+                            }
+
+                            // update post : add address
+                            jQuery.ajax({
+                                type: "POST",
+                                data: JSON.stringify(updatePayload),
+                                contentType: "application/json; charset=utf-8",
+                                dataType: "json",
+                                url: url_update_post + '/' + record.ID + '?silent=true',
+                                beforeSend: function(xhr) {
+                                    xhr.setRequestHeader('X-WP-Nonce', "<?php echo esc_html( wp_create_nonce( 'wp_rest' ) ); ?>");
+                                },
+                                success: function(record) {
+                                    showAddedRow(pid, responseGridMeta, record.permalink, record.name);
+                                    done();
+                                },
+                                error: function () {
+                                    alert("Error occured.please try again");
+                                    console.log("%o",xhr);
+                                    t('PID#'+pid+' Error occurred. please try again');
+                                }
+                            });
+
                         }
 
                         // an all-done action
@@ -1272,7 +1281,9 @@ class DT_Import {
             <?php
             $list_data = array();
             foreach ( $data as $key => $item ) {
-                $list_data[$key] = $item['name'];
+                if ( $this->valid_field_type_mapping( $item['type'] ) ) {
+                    $list_data[ $key ] = $item['name'];
+                }
             }
             asort( $list_data );
 
@@ -1290,6 +1301,23 @@ class DT_Import {
             </optgroup>
         </select>
         <?php
+    }
+
+    private function valid_field_type_mapping( $field_type ): bool {
+        return in_array( trim( strtolower( $field_type ) ), [
+            'key_select',
+            'tags',
+            'multi_select',
+            'boolean',
+            'date',
+            'communication_channel',
+            'user_select',
+            'text',
+            'textarea',
+            'number',
+            'location',
+            'connection'
+        ] );
     }
 
     public function process_data( $import_settings, $mapping_data = [], $value_mapperi_data = [], $value_mapper_data = [] ) {
@@ -1452,7 +1480,7 @@ class DT_Import {
                             }
                         }
                     } else if ( $type === "user_select" ){
-                        $fields[$ch] = (int) $row_value[0];
+                        $fields[$ch] = (int) $row_value;
                     } else if ( $type === "text" ) {
                         $fields[ $ch ] = $row_value;
                     } else if ( $type === "number" ) {
