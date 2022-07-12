@@ -757,15 +757,18 @@ class DT_Import {
 
                         if ( $pos === false ) {
                             if ( isset( $field_options[$ch] ) && in_array( $ch, [ "multi_select", "communication_channel", "key_select" ] ) ){
-                                $fields[$ch][] = [ "value" => $i ];
+                                if ( !empty( trim( $i ) ) ) {
+                                    $fields[$ch][] = ["value" => $i];
+                                }
                             } else {
                                 $fields[$ch] = $i;
                             }
                         } else {
                             $multivalued = explode( $multi_separator, $i );
                             foreach ( $multivalued as $mx ) {
-                                //$fields[$ch][] = [ "value" => $mx ];
-                                $fields[$ch][] = [ "value" => trim( $mx ) ];
+                                if ( !empty(trim( $mx )) ) {
+                                    $fields[$ch][] = ["value" => trim($mx)];
+                                }
                             }
                         }
                     }
@@ -1385,6 +1388,7 @@ class DT_Import {
 
                 //cleanup
                 $row_value = str_replace( "\"", "", $row_value );
+                if ( empty( $row_value ) ) continue;
 
                 if ( isset( $csv_headers[$index] ) ) {
 
@@ -1393,6 +1397,8 @@ class DT_Import {
 
                     if ( $ch == 'title' ) {
                         $fields[ $ch ] = $row_value;
+                    } else if ( $ch == 'notes' ) {
+                        $fields[ $ch ] = explode( $multi_separator, $row_value );
                     } else if ( in_array( $ch, self::$contact_address_headings ) ) {
                         $multivalued = explode( $multi_separator, $row_value );
                         foreach ( $multivalued as $mx ) {
@@ -1488,7 +1494,15 @@ class DT_Import {
                     } else if ( $type === "location_meta" || $type === "location" ) {
                         $fields[ $ch ]["values"][] = [ "value" => trim( $row_value ) ];
                     } else if ( $type === "connection" ) {
-                        $fields[ $ch ]["values"][] = [ "value" => trim( $row_value ) ];
+                        $multivalued = explode( $multi_separator, $row_value );
+                        foreach ( $multivalued as $mx ) {
+
+                            $mx = trim( $mx );
+
+                            if ( !empty( $mx ) ) {
+                                $fields[ $ch ]["values"][] = [ "value" => $mx ];
+                            }
+                        }
                     } else {
                         //field not recognized.
                         continue;
@@ -1624,7 +1638,11 @@ class DT_Import {
                                         $value = implode( $multi_separator, (array) $values );
                                     }
                                 } else if ( ( $type == 'number' || $type === "text" || $type === "textarea" ) ) {
-                                    echo esc_html( utf8_decode( $import_data[ $ch ] ) );
+                                    if ( $ch == 'notes' ) {
+                                        echo esc_html(utf8_decode(implode($multi_separator, $import_data[$ch])));
+                                    } else {
+                                        echo esc_html(utf8_decode($import_data[$ch]));
+                                    }
                                 } else if ( isset( $import_data[$ch] ) ) {
                                     if ( !is_array( $import_data[$ch] ) ){
                                         echo esc_html( $import_data[ $ch ] );
