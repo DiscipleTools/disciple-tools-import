@@ -758,7 +758,7 @@ class DT_Import {
                         if ( $pos === false ) {
                             if ( isset( $field_options[$ch] ) && in_array( $ch, [ "multi_select", "communication_channel", "key_select" ] ) ){
                                 if ( !empty( trim( $i ) ) ) {
-                                    $fields[$ch][] = ["value" => $i];
+                                    $fields[$ch][] = [ "value" => $i ];
                                 }
                             } else {
                                 $fields[$ch] = $i;
@@ -766,8 +766,9 @@ class DT_Import {
                         } else {
                             $multivalued = explode( $multi_separator, $i );
                             foreach ( $multivalued as $mx ) {
-                                if ( !empty(trim( $mx )) ) {
-                                    $fields[$ch][] = ["value" => trim($mx)];
+                                if ( !empty( trim( $mx ) ) ) {
+                                    //$fields[$ch][] = [ "value" => $mx ];
+                                    $fields[$ch][] = [ "value" => trim( $mx ) ];
                                 }
                             }
                         }
@@ -1388,7 +1389,9 @@ class DT_Import {
 
                 //cleanup
                 $row_value = str_replace( "\"", "", $row_value );
-                if ( empty( $row_value ) ) continue;
+                if ( empty( $row_value ) ) {
+                    continue;
+                }
 
                 if ( isset( $csv_headers[$index] ) ) {
 
@@ -1396,9 +1399,9 @@ class DT_Import {
                     $type = isset( $cfs[$ch]['type'] ) ? $cfs[$ch]['type'] : null;
 
                     if ( $ch == 'title' ) {
-                        $fields[ $ch ] = $row_value;
+                        $fields[$ch] = $row_value;
                     } else if ( $ch == 'notes' ) {
-                        $fields[ $ch ] = explode( $multi_separator, $row_value );
+                        $fields[$ch] = explode( $multi_separator, $row_value );
                     } else if ( in_array( $ch, self::$contact_address_headings ) ) {
                         $multivalued = explode( $multi_separator, $row_value );
                         foreach ( $multivalued as $mx ) {
@@ -1639,9 +1642,9 @@ class DT_Import {
                                     }
                                 } else if ( ( $type == 'number' || $type === "text" || $type === "textarea" ) ) {
                                     if ( $ch == 'notes' ) {
-                                        echo esc_html(utf8_decode(implode($multi_separator, $import_data[$ch])));
+                                        echo esc_html( utf8_decode( implode( $multi_separator, $import_data[$ch] ) ) );
                                     } else {
-                                        echo esc_html(utf8_decode($import_data[$ch]));
+                                        echo esc_html( utf8_decode( $import_data[$ch] ) );
                                     }
                                 } else if ( isset( $import_data[$ch] ) ) {
                                     if ( !is_array( $import_data[$ch] ) ){
