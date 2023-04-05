@@ -1025,7 +1025,7 @@ class DT_Import {
                             // sect : modifying item
                             // removing contact_address from item to avoid address duplication
                             const modifiedItem = JSON.parse(item);
-                            const tmpLocations = modifiedItem.contact_address?.values || [];
+                            const tmpLocations = modifiedItem.contact_address?.values || modifiedItem.location_grid?.values || [];
 
                             const arrLocations = [];
 
