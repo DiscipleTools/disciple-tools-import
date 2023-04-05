@@ -1267,6 +1267,10 @@ class DT_Import {
                     value="title" <?php selected( $field == 'title' ) ?> ><?php esc_attr( $this->post_label_singular ); ?>
                     Name
                 </option>
+                <option
+                    value="notes" <?php selected( $field == 'notes' ) ?> ><?php esc_attr( $this->post_label_singular ); ?>
+                    Notes
+                </option>
 
                 <?php
                 foreach ( $channels as $label => $item ) {
