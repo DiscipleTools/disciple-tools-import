@@ -1025,7 +1025,7 @@ class DT_Import {
                             // sect : modifying item
                             // removing contact_address from item to avoid address duplication
                             const modifiedItem = JSON.parse(item);
-                            const tmpLocations = modifiedItem.contact_address?.values || [];
+                            const tmpLocations = modifiedItem.contact_address?.values || modifiedItem.location_grid?.values || [];
 
                             const arrLocations = [];
 
@@ -1266,6 +1266,10 @@ class DT_Import {
                 <option
                     value="title" <?php selected( $field == 'title' ) ?> ><?php esc_attr( $this->post_label_singular ); ?>
                     Name
+                </option>
+                <option
+                    value="notes" <?php selected( $field == 'notes' ) ?> ><?php esc_attr( $this->post_label_singular ); ?>
+                    Notes
                 </option>
 
                 <?php
