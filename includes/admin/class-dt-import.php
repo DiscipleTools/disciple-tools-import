@@ -173,11 +173,11 @@ class DT_Import {
                     "source"                => $file_source,
                     "assigned_to"           => $file_assigned_to,
                     "data"                  => $this->mapping_process( $temp_name, $file_source, $file_assigned_to, $selected_geocode_api ),
-                    "selected_geocode_api"  => $selected_geocode_api
+                    "selected_geocode_api"  => $selected_geocode_api,
+                    'check_for_duplicates'  => isset( $_POST['check_for_duplicates'] ),
                 ];
 
                 set_transient( "disciple_tools_import_settings", $import_settings, 3600 * 24 );
-                set_transient( 'selected_geocode_api', $selected_geocode_api, HOUR_IN_SECONDS );
                 $this->display_field_mapping_step();
 
             } /**end-of condition --isset( $_FILES["csv_file"] )-- */
@@ -556,7 +556,17 @@ class DT_Import {
                                 </tr>
                                 <?php
                             }
-                            ?>
+                            if ( $this->post_type === 'contacts' ): ?>
+                                <tr>
+                                    <td>
+                                        <label>
+                                            <?php esc_html_e( 'Merge with existing record with same email or phone', 'disciple_tools' ); ?>
+                                            <br>
+                                            <input type="checkbox" name="check_for_duplicates" id="check_for_duplicates">
+                                        </label>
+                                    </td>
+                                </tr>
+                            <?php endif; ?>
                             <tr>
                                 <td>
                                     <p class="submit">
@@ -869,8 +879,7 @@ class DT_Import {
         }
 
         $import_settings                                  = get_transient( "disciple_tools_import_settings" );
-        $data                                             = $this->process_data( $import_settings, $mapping_data, $value_mapperi_data, $value_mapper_data );
-        $import_settings                                  = $data;
+        $import_settings['data']['data']                  = $this->process_data( $import_settings, $mapping_data, $value_mapperi_data, $value_mapper_data );
         $import_settings['data']['csv_headers']           = $mapping_data;
         $import_settings['data']['my_opt_fields']         = $this->get_all_default_values();
         $import_settings['data']['delimiter']             = $this->delimiter;
@@ -893,7 +902,7 @@ class DT_Import {
             <tr>
                 <td>
 
-                    <?php $this->display_data( $data );?>
+                    <?php $this->display_data( $import_settings['data']['data'] );?>
 
 
                     <form method="post" enctype="multipart/form-data">
@@ -922,12 +931,12 @@ class DT_Import {
 
     public function insert_data() {
         $import_settings = get_transient( "disciple_tools_import_settings" );
-        $selected_geocode_api = get_transient( 'selected_geocode_api' );
+        $selected_geocode_api = $import_settings['selected_geocode_api'];
         $data_keys       = array_filter( array_keys( $import_settings ), 'is_numeric' );
         foreach ( $data_keys as $data_key ) {
             $data[] = $import_settings[ $data_key ];
         }
-        $data = disciple_tools_import_sanitize_array( $data );
+        $data = disciple_tools_import_sanitize_array( $import_settings['data']['data'] );
 
         // Decode utf8 encoded values post transient, ahead of post record creation
         $data = disciple_tools_import_array_utf8_decode( $data );
@@ -938,6 +947,10 @@ class DT_Import {
             if (false !== $js_array && !empty( $f )) {
                 $js_data[] = $js_array;
             }
+        }
+        $rest_url = rest_url() . 'dt-posts/v2/' . $this->post_type . '?silent=true';
+        if ( $import_settings['check_for_duplicates'] ){
+            $rest_url .= '&check_for_duplicates=contact_phone,contact_email';
         }
         ?>
         <!-- Box -->
@@ -1016,7 +1029,7 @@ class DT_Import {
                             $lowercase_post_type = strtolower( $this->post_type );
                             ?>
                             let rest_route_post_type = "<?php echo esc_attr( $lowercase_post_type ); ?>";
-                            let rest_url = "<?php echo esc_url_raw( rest_url() ); ?>dt-posts/v2/" + rest_route_post_type + "?silent=true";
+                            let rest_url = "<?php echo esc_url_raw( $rest_url ); ?>";
                             const url_add_location_grid_meta = "<?php echo esc_url_raw( rest_url() ); ?>dt_import/v1/add_location_grid_meta";
                             const url_update_post = "<?php echo esc_url_raw( rest_url() ); ?>dt-posts/v2/" + rest_route_post_type;
 
@@ -1610,7 +1623,7 @@ class DT_Import {
                         } else {
                             $errors = '';
 
-                            if ( $import_data[$ch] != null || strlen( trim( $import_data[$ch] ) ) > 0 ) {
+                            if ( isset( $import_data[$ch] ) && ( $import_data[$ch] != null || strlen( trim( $import_data[$ch] ) ) > 0 ) ) {
                                 $errors = $this->validate_data( $ch, $import_data[$ch] );
 
                                 if ( $errors > 0 ) {
