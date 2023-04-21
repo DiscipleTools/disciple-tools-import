@@ -1609,7 +1609,7 @@ class DT_Import {
                     <td data-col-id="0"><?php echo esc_html( $rowindex ); ?></td>
 
                     <td data-col-id="1" data-key="title">
-                        <?php echo esc_html( $import_data['title'] ); ?>
+                        <?php echo esc_html( $import_data['title'] ?? $import_data['name'] ); ?>
                     </td>
 
                     <?php foreach ( $headings as $hi => $ch ) {
