@@ -126,30 +126,30 @@ class DT_Import {
 
             $csv_file_tmp_name = '';
 
-            if ( isset( $_FILES["csv_file"]["tmp_name"] ) ) {
-                $csv_file_tmp_name = wp_normalize_path( $_FILES["csv_file"]["tmp_name"] ); // phpcs:ignore WordPress.Security.EscapeOutput,WordPress.Security.ValidatedSanitizedInput -- $FILES has unslash a bit further down.
+            if ( isset( $_FILES['csv_file']['tmp_name'] ) ) {
+                $csv_file_tmp_name = wp_normalize_path( $_FILES['csv_file']['tmp_name'] ); // phpcs:ignore WordPress.Security.EscapeOutput,WordPress.Security.ValidatedSanitizedInput -- $FILES has unslash a bit further down.
             }
 
-            if ( isset( $_FILES["csv_file"]["name"] ) ) {
+            if ( isset( $_FILES['csv_file']['name'] ) ) {
                 // phpcs:ignore WordPress.Security.EscapeOutput
                 // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated
-                $csv_file_name = wp_normalize_path( $_FILES["csv_file"]["name"] ); // phpcs:ignore WordPress.Security.EscapeOutput,WordPress.Security.ValidatedSanitizedInput -- $FILES has unslash a bit further down.
-                $temp_name     = isset( $_FILES["csv_file"]["tmp_name"] ) ? sanitize_text_field( wp_unslash( $csv_file_tmp_name ) ) : '';
-                $file_parts    = explode( ".", sanitize_text_field( wp_unslash( $csv_file_name ) ) )[ count( explode( ".", sanitize_text_field( wp_unslash( $csv_file_name ) ) ) ) - 1 ];
+                $csv_file_name = wp_normalize_path( $_FILES['csv_file']['name'] ); // phpcs:ignore WordPress.Security.EscapeOutput,WordPress.Security.ValidatedSanitizedInput -- $FILES has unslash a bit further down.
+                $temp_name     = isset( $_FILES['csv_file']['tmp_name'] ) ? sanitize_text_field( wp_unslash( $csv_file_tmp_name ) ) : '';
+                $file_parts    = explode( '.', sanitize_text_field( wp_unslash( $csv_file_name ) ) )[ count( explode( '.', sanitize_text_field( wp_unslash( $csv_file_name ) ) ) ) - 1 ];
                 // phpcs:ignore WordPress.Security.EscapeOutput
                 // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated
-                if ( isset( $_FILES["csv_file"]["error"] ) && $_FILES["csv_file"]["error"] > 0 ) {
-                    esc_html_e( "ERROR UPLOADING FILE", 'disciple_tools' );
+                if ( isset( $_FILES['csv_file']['error'] ) && $_FILES['csv_file']['error'] > 0 ) {
+                    esc_html_e( 'ERROR UPLOADING FILE', 'disciple_tools' );
                     $this->go_back();
                     exit;
 
                 } else if ( $file_parts != 'csv' ) {
-                    esc_html_e( "NOT CSV", 'disciple_tools' );
+                    esc_html_e( 'NOT CSV', 'disciple_tools' );
                     $this->go_back();
                     exit;
 
                 } else if ( mb_detect_encoding( file_get_contents( $temp_name, false, null, 0, 100 ), 'UTF-8', true ) === false ) {
-                    esc_html_e( "FILE IS NOT UTF-8", 'disciple_tools' );
+                    esc_html_e( 'FILE IS NOT UTF-8', 'disciple_tools' );
                     $this->go_back();
                     exit;
                 }
@@ -165,19 +165,19 @@ class DT_Import {
                 }
 
                 $selected_geocode_api = 'none';
-                if ( isset( $_POST['selected_geocode_api'] )) {
+                if ( isset( $_POST['selected_geocode_api'] ) ) {
                     $selected_geocode_api = sanitize_text_field( wp_unslash( $_POST['selected_geocode_api'] ) );
                 }
 
                 $import_settings = [
-                    "source"                => $file_source,
-                    "assigned_to"           => $file_assigned_to,
-                    "data"                  => $this->mapping_process( $temp_name, $file_source, $file_assigned_to, $selected_geocode_api ),
-                    "selected_geocode_api"  => $selected_geocode_api,
+                    'source'                => $file_source,
+                    'assigned_to'           => $file_assigned_to,
+                    'data'                  => $this->mapping_process( $temp_name, $file_source, $file_assigned_to, $selected_geocode_api ),
+                    'selected_geocode_api'  => $selected_geocode_api,
                     'check_for_duplicates'  => isset( $_POST['check_for_duplicates'] ),
                 ];
 
-                set_transient( "disciple_tools_import_settings", $import_settings, 3600 * 24 );
+                set_transient( 'disciple_tools_import_settings', $import_settings, 3600 * 24 );
                 $this->display_field_mapping_step();
 
             } /**end-of condition --isset( $_FILES["csv_file"] )-- */
@@ -186,7 +186,7 @@ class DT_Import {
                     && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['csv_mappings_nonce'] ) ), 'csv_mappings' )
                     && $run ) {
 
-            if ( isset( $_POST["csv_mapper"] ) ) {
+            if ( isset( $_POST['csv_mapper'] ) ) {
 
                 $mapping_data = $this->dt_sanitize_post_request_array_field( $_POST, 'csv_mapper' );
                 $value_mapperi_data = isset( $_POST['VMD'] ) ? $this->dt_sanitize_post_request_array_field( $_POST, 'VMD' ) : [];
@@ -199,7 +199,7 @@ class DT_Import {
                     && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['csv_correct_nonce'] ) ), 'csv_correct' )
                     && $run ) {
 
-            if ( isset( $_POST["go_back"] ) ){
+            if ( isset( $_POST['go_back'] ) ){
                 $this->display_field_mapping_step();
             } else {
                 $this->insert_data();
@@ -216,8 +216,8 @@ class DT_Import {
      * Tool to map fields to their correct field options
      */
     private function display_field_mapping_step() {
-        $import_settings       = get_transient( "disciple_tools_import_settings" );
-        $data                  = $import_settings["data"];
+        $import_settings       = get_transient( 'disciple_tools_import_settings' );
+        $data                  = $import_settings['data'];
         $csv_headers           = $data['csv_headers'];
         $uploaded_file_headers = $data['uploaded_file_headers'];
         $my_opt_fields         = $data['my_opt_fields'];
@@ -228,7 +228,7 @@ class DT_Import {
             <thead>
             <tr>
                 <th>
-                    <h1><?php esc_html_e( "Step 2: Map Columns", 'disciple_tools' ); ?></h1>
+                    <h1><?php esc_html_e( 'Step 2: Map Columns', 'disciple_tools' ); ?></h1>
                 </th>
             </tr>
             </thead>
@@ -352,7 +352,7 @@ class DT_Import {
                                         <input type="submit" name="submit" id="submit"
                                                style="background-color:#4CAF50; color:white"
                                                class="button"
-                                               value=<?php esc_html_e( "Next", 'disciple_tools' ) ?>>
+                                               value=<?php esc_html_e( 'Next', 'disciple_tools' ) ?>>
                                     </td>
                                 </tr>
 
@@ -452,11 +452,11 @@ class DT_Import {
     public function import_form() {
             $geocode_apis_are_available = false;
             $available_geocode_apis = [];
-        if (Disciple_Tools_Google_Geocode_API::get_key()) {
+        if ( Disciple_Tools_Google_Geocode_API::get_key() ) {
             array_push( $available_geocode_apis, 'Google' );
             $geocode_apis_are_available = true;
         }
-        if (DT_Mapbox_API::get_key()) {
+        if ( DT_Mapbox_API::get_key() ) {
             array_push( $available_geocode_apis, 'Mapbox' );
             $geocode_apis_are_available = true;
         }
@@ -466,7 +466,7 @@ class DT_Import {
         <table class="widefat striped">
             <thead>
             <tr>
-                <th><h1><?php esc_html_e( "Step 1: Upload File", 'disciple_tools' ); ?></h1></th>
+                <th><h1><?php esc_html_e( 'Step 1: Upload File', 'disciple_tools' ); ?></h1></th>
             </tr>
             </thead>
             <tbody>
@@ -491,12 +491,12 @@ class DT_Import {
                                         <label for="csv_source">
                                             <?php
                                             $post_label_plural = $this->post_label_plural;
-                                            printf( "Where did these %s come from? Add a source.", esc_attr( $post_label_plural ) );
+                                            printf( 'Where did these %s come from? Add a source.', esc_attr( $post_label_plural ) );
                                             ?>
                                         </label><br>
                                         <select name="csv_source" id="csv_source">
                                             <?php
-                                            $sources = isset( $this->post_settings["fields"]["sources"]["default"] ) ? $this->post_settings["fields"]["sources"]["default"] : [];
+                                            $sources = isset( $this->post_settings['fields']['sources']['default'] ) ? $this->post_settings['fields']['sources']['default'] : [];
                                             foreach ( $sources as $key => $value ) {
                                                 ?>
                                                 <option value=<?php echo esc_html( $key ); ?>><?php echo esc_html( $value['label'] ); ?></option>
@@ -513,7 +513,7 @@ class DT_Import {
                                 <tr>
                                     <td>
                                         <label for="csv_assign">
-                                            <?php esc_html_e( "Which user do you want these assigned to?", 'disciple_tools' ) ?>
+                                            <?php esc_html_e( 'Which user do you want these assigned to?', 'disciple_tools' ) ?>
                                         </label><br>
                                         <select name="csv_assign" id="csv_assign">
                                             <option value=""></option>
@@ -534,17 +534,17 @@ class DT_Import {
                                 </tr>
                                 <?php
                             endif;
-                            if ($geocode_apis_are_available) {
+                            if ( $geocode_apis_are_available ) {
                                 ?>
                                 <tr>
                                     <td>
                                         <label for="selected__geocode_api">
-                                            <?php esc_html_e( "Use the following Geocode API", 'disciple_tools' ); ?>
+                                            <?php esc_html_e( 'Use the following Geocode API', 'disciple_tools' ); ?>
                                         </label>
                                         <br>
                                         <select name="selected_geocode_api" id="selected_geocode_api">
                                             <?php
-                                            foreach ($available_geocode_apis as $api) {
+                                            foreach ( $available_geocode_apis as $api ) {
                                                 ?>
                                                 <option value="<?php echo esc_html( $api ) ?>"><?php echo esc_html( $api ); ?></option>
                                                 <?php
@@ -574,7 +574,7 @@ class DT_Import {
                                                name="submit"
                                                id="submit"
                                                class="button"
-                                               value="<?php esc_html_e( "Proceed to Mapping Fields", 'disciple_tools' ) ?>">
+                                               value="<?php esc_html_e( 'Proceed to Mapping Fields', 'disciple_tools' ) ?>">
                                     </p>
                                 </td>
                             </tr>
@@ -603,7 +603,7 @@ class DT_Import {
             <tbody>
             <tr>
                 <td>
-                    <p><?php esc_html_e( "use utf-8 file format", 'disciple_tools' ) ?></p>
+                    <p><?php esc_html_e( 'use utf-8 file format', 'disciple_tools' ) ?></p>
                     <p><?php esc_html_e( 'Example CSV\'s:', 'disciple_tools' ); ?></p>
                     <ul>
                         <li>
@@ -669,7 +669,7 @@ class DT_Import {
             <tbody>
             <tr>
                 <td>
-                    <a href="" class="button button-primary"> <?php esc_html_e( "Back", 'disciple_tools' ) ?> </a>
+                    <a href="" class="button button-primary"> <?php esc_html_e( 'Back', 'disciple_tools' ) ?> </a>
                 </td>
             </tr>
             </tbody>
@@ -689,7 +689,7 @@ class DT_Import {
 
         //open file
         ini_set( 'auto_detect_line_endings', true );
-        $file_data = fopen( $filepath, "r" );
+        $file_data = fopen( $filepath, 'r' );
 
         $data_rows = array();
         while ( $row = fgetcsv( $file_data, 0, $delimiter, '"', '"' ) ){
@@ -706,7 +706,7 @@ class DT_Import {
         $headers_info          = $this->get_header_info();
         $headers_info_keys     = array_keys( $headers_info );
 
-        if ( $incl_headers == "yes" && isset( $data_rows[0] ) ) {
+        if ( $incl_headers == 'yes' && isset( $data_rows[0] ) ) {
             $csv_headers           = $data_rows[0];
             $uploaded_file_headers = $data_rows[0];
             unset( $data_rows[0] );
@@ -734,14 +734,14 @@ class DT_Import {
 
             $fields = [];
 
-            if ( $file_assigned_to != '') { $fields["assigned_to"] = (int) $file_assigned_to; }
+            if ( $file_assigned_to != '' ) { $fields['assigned_to'] = (int) $file_assigned_to; }
 
             $fields['sources'] = [ 'values' => array( [ 'value' => $file_source ] ) ];
 
             foreach ( $row as $index => $i ) {
 
                 //cleanup
-                $i = str_replace( "\"", "", $i );
+                $i = str_replace( '"', '', $i );
 
                 if ( isset( $csv_headers[$index] ) ) {
                     $ch = $csv_headers[$index];
@@ -754,9 +754,9 @@ class DT_Import {
 
                         $i = strtolower( $i );
                         $i = substr( $i, 0, 1 );
-                        $gender = "not-set";
-                        if ( $i == "m" ){ $gender = "male";
-                        } else if ( $i == "f" ){ $gender = "female"; }
+                        $gender = 'not-set';
+                        if ( $i == 'm' ){ $gender = 'male';
+                        } else if ( $i == 'f' ){ $gender = 'female'; }
                         $fields['cf_gender'] = $gender;
 
                     } else if ( $ch == 'cf_notes' ) {
@@ -766,9 +766,9 @@ class DT_Import {
                     } else {
 
                         if ( $pos === false ) {
-                            if ( isset( $field_options[$ch] ) && in_array( $ch, [ "multi_select", "communication_channel", "key_select" ] ) ){
+                            if ( isset( $field_options[$ch] ) && in_array( $ch, [ 'multi_select', 'communication_channel', 'key_select' ] ) ){
                                 if ( !empty( trim( $i ) ) ) {
-                                    $fields[$ch][] = [ "value" => $i ];
+                                    $fields[$ch][] = [ 'value' => $i ];
                                 }
                             } else {
                                 $fields[$ch] = $i;
@@ -778,7 +778,7 @@ class DT_Import {
                             foreach ( $multivalued as $mx ) {
                                 if ( !empty( trim( $mx ) ) ) {
                                     //$fields[$ch][] = [ "value" => $mx ];
-                                    $fields[$ch][] = [ "value" => trim( $mx ) ];
+                                    $fields[$ch][] = [ 'value' => trim( $mx ) ];
                                 }
                             }
                         }
@@ -851,10 +851,10 @@ class DT_Import {
 
         $data          = [];
         $post_settings = $this->post_settings;
-        $channels      = $post_settings["channels"];
+        $channels      = $post_settings['channels'];
 
         foreach ( $channels as $label => $channel ) {
-            $label = sprintf( "%s_%s", strtolower( $this->post_label_singular ), $label );  // @NOTE: prefix %singular_post_type_label_% e.g. contact_
+            $label = sprintf( '%s_%s', strtolower( $this->post_label_singular ), $label );  // @NOTE: prefix %singular_post_type_label_% e.g. contact_
 
             $data[$label] = [
                 'name' => $channel['label'],
@@ -873,12 +873,12 @@ class DT_Import {
 
     public function preview( $mapping_data = [], $value_mapperi_data = [], $value_mapper_data = [] ) {
         foreach ( (array) $mapping_data as $my_id => $my_data ){
-            if ( $my_data == 'IGNORE' || $my_data == 'NONE'){
+            if ( $my_data == 'IGNORE' || $my_data == 'NONE' ){
                 unset( $mapping_data[$my_id] );
             }
         }
 
-        $import_settings                                  = get_transient( "disciple_tools_import_settings" );
+        $import_settings                                  = get_transient( 'disciple_tools_import_settings' );
         $import_settings['data']['data']                  = $this->process_data( $import_settings, $mapping_data, $value_mapperi_data, $value_mapper_data );
         $import_settings['data']['csv_headers']           = $mapping_data;
         $import_settings['data']['my_opt_fields']         = $this->get_all_default_values();
@@ -889,7 +889,7 @@ class DT_Import {
         $import_settings['data']['uploaded_file_headers'] = get_transient( 'disciple_tools_uploaded_file_headers' );
         $import_settings['data']['temp_data']             = get_transient( 'disciple_tools_temp_data' );
 
-        set_transient( "disciple_tools_import_settings", $import_settings, 3600 * 24 );
+        set_transient( 'disciple_tools_import_settings', $import_settings, 3600 * 24 );
         ?>
 
         <table class="widefat striped">
@@ -909,13 +909,13 @@ class DT_Import {
 
                         <?php wp_nonce_field( 'csv_correct', 'csv_correct_nonce' ); ?>
 
-                        <input type="submit" name="go_back" class="button button-primary" value="<?php esc_html_e( "Back - Something is wrong!", 'disciple_tools' ) ?>" />
+                        <input type="submit" name="go_back" class="button button-primary" value="<?php esc_html_e( 'Back - Something is wrong!', 'disciple_tools' ) ?>" />
 
                         <input type="submit" name="submit"
                                id="submit"
                                style="background-color:#4CAF50; color:white"
                                class="button"
-                               value=<?php esc_html_e( "Import", 'disciple_tools' ) ?> />
+                               value=<?php esc_html_e( 'Import', 'disciple_tools' ) ?> />
 
                     </form>
 
@@ -930,7 +930,7 @@ class DT_Import {
     }
 
     public function insert_data() {
-        $import_settings = get_transient( "disciple_tools_import_settings" );
+        $import_settings = get_transient( 'disciple_tools_import_settings' );
         $selected_geocode_api = $import_settings['selected_geocode_api'];
         $data_keys       = array_filter( array_keys( $import_settings ), 'is_numeric' );
         foreach ( $data_keys as $data_key ) {
@@ -942,9 +942,9 @@ class DT_Import {
         $data = disciple_tools_import_array_utf8_decode( $data );
 
         $js_data = [];
-        foreach ($data as $num => $f) {
+        foreach ( $data as $num => $f ) {
             $js_array = ( isset( $f[0] ) ) ? wp_json_encode( $f[0] ) : [];
-            if (false !== $js_array && !empty( $f )) {
+            if ( false !== $js_array && !empty( $f ) ) {
                 $js_data[] = $js_array;
             }
         }
@@ -1219,14 +1219,14 @@ class DT_Import {
             $column_name = "{$prefix}email";
 
         } else if ( array_search( $src, self::$contact_address_headings ) > 0 ) {
-            $column_name = "contact_address";
+            $column_name = 'contact_address';
 
         } else {
             $fields = $this->post_field_settings;
             if ( isset( $fields[$src] ) ) {
                 $column_name = $src;
             } else {
-                $channels = $this->post_settings["channels"];
+                $channels = $this->post_settings['channels'];
                 if ( isset( $channels[$src] ) ) {
                     //$column_name = $src;
                     $column_name = "{$prefix}{$src}";
@@ -1247,7 +1247,7 @@ class DT_Import {
             }
 
             if ( $column_name == null ) {
-                $channels = $this->post_settings["channels"];
+                $channels = $this->post_settings['channels'];
                 foreach ( $channels as $f => $field ) {
                     if ( isset( $field['name'] ) && strtolower( trim( $field['name'] ) ) == $src ) {
                         $column_name = $f;
@@ -1290,7 +1290,7 @@ class DT_Import {
                     if ( 'address' == $label ) {
                         $label = 'contact_address';
                     } else {
-                        $label = sprintf( "%s_%s", strtolower( $this->post_label_singular ), $label );
+                        $label = sprintf( '%s_%s', strtolower( $this->post_label_singular ), $label );
                     }
                     ?>
                     <option value="<?php echo esc_html( $label ); ?>"
@@ -1343,9 +1343,9 @@ class DT_Import {
 
     public function process_data( $import_settings, $mapping_data = [], $value_mapperi_data = [], $value_mapper_data = [] ) {
         $csv_headers     = $mapping_data;
-        $data_rows       = $import_settings["data"]["temp_data"] ?? [];
-        $assign          = $import_settings["assigned_to"] ?? "";
-        $source          = $import_settings["source"] ?? "";
+        $data_rows       = $import_settings['data']['temp_data'] ?? [];
+        $assign          = $import_settings['assigned_to'] ?? '';
+        $source          = $import_settings['source'] ?? '';
         $multi_separator = $this->multi_separator;
         $data            = [];
 
@@ -1399,13 +1399,13 @@ class DT_Import {
         foreach ( $data_rows as $ri => $row ) {
             $fields = [];
             if ( $assign != '' ) {
-                $fields["assigned_to"] = (int) $assign;
+                $fields['assigned_to'] = (int) $assign;
             }
-            foreach ($row as $index => $row_value) {
+            foreach ( $row as $index => $row_value ) {
 
 
                 //cleanup
-                $row_value = str_replace( "\"", "", $row_value );
+                $row_value = str_replace( '"', '', $row_value );
                 if ( empty( $row_value ) ) {
                     continue;
                 }
@@ -1425,7 +1425,7 @@ class DT_Import {
 
                             $mx = trim( $mx );
 
-                            $fields[ $ch ]["values"][] = [ "value" => $mx ];
+                            $fields[ $ch ]['values'][] = [ 'value' => $mx ];
                         }
                     } else if ( $type == 'key_select' ) {
 
@@ -1452,7 +1452,7 @@ class DT_Import {
                                 }
                             }
 
-                            $fields[$ch]["values"][] = [ "value" => $mx ];
+                            $fields[$ch]['values'][] = [ 'value' => $mx ];
                         }
                     } else if ( $type == 'multi_select' ) {
 
@@ -1476,7 +1476,7 @@ class DT_Import {
                                 //    $fields[$ch]["values"][] = [ "value" => trim($mx) ];
                             }
 
-                            $fields[$ch]["values"][] = [ "value" => $mx ];
+                            $fields[$ch]['values'][] = [ 'value' => $mx ];
 
                         }
 
@@ -1485,7 +1485,7 @@ class DT_Import {
                         //    $fields[$ch] = $i; /**/
 
                     } else if ( $type == 'boolean' ) {
-                        $fields[$ch] = in_array( $row_value, [ "True", "true", "1" ], true );
+                        $fields[$ch] = in_array( $row_value, [ 'True', 'true', '1' ], true );
 
                     } else if ( $type == 'date' ) {
                         $my_temp_time = strtotime( $row_value );
@@ -1494,33 +1494,33 @@ class DT_Import {
                         } else {
                             $fields[$ch] = '';
                         }
-                    } else if ( $type === "communication_channel") {
+                    } else if ( $type === 'communication_channel' ) {
                         //handle multivalued data
                         $pos = strpos( $row_value, $multi_separator );
                         if ( $pos === false ) {
-                            $fields[$ch][] = [ "value" => $row_value ];
+                            $fields[$ch][] = [ 'value' => $row_value ];
                         } else {
                             $multivalued = explode( $multi_separator, $row_value );
                             foreach ( $multivalued as $mx ) {
-                                $fields[$ch]["values"][] = [ "value" => trim( $mx ) ];
+                                $fields[$ch]['values'][] = [ 'value' => trim( $mx ) ];
                             }
                         }
-                    } else if ( $type === "user_select" ){
+                    } else if ( $type === 'user_select' ){
                         $fields[$ch] = (int) $row_value;
-                    } else if ( $type === "text" ) {
+                    } else if ( $type === 'text' ) {
                         $fields[ $ch ] = $row_value;
-                    } else if ( $type === "number" ) {
+                    } else if ( $type === 'number' ) {
                         $fields[ $ch ] = (int) $row_value;
-                    } else if ( $type === "location_meta" || $type === "location" ) {
-                        $fields[ $ch ]["values"][] = [ "value" => trim( $row_value ) ];
-                    } else if ( $type === "connection" ) {
+                    } else if ( $type === 'location_meta' || $type === 'location' ) {
+                        $fields[ $ch ]['values'][] = [ 'value' => trim( $row_value ) ];
+                    } else if ( $type === 'connection' ) {
                         $multivalued = explode( $multi_separator, $row_value );
                         foreach ( $multivalued as $mx ) {
 
                             $mx = trim( $mx );
 
                             if ( !empty( $mx ) ) {
-                                $fields[ $ch ]["values"][] = [ "value" => $mx ];
+                                $fields[ $ch ]['values'][] = [ 'value' => $mx ];
                             }
                         }
                     } else {
@@ -1530,8 +1530,8 @@ class DT_Import {
                 }
             }
 
-            if ( ! isset( $fields["sources"] ) && ! empty( $source ) ) {
-                $fields["sources"] = [ "values" => array( [ "value" => $source ] ) ];
+            if ( ! isset( $fields['sources'] ) && ! empty( $source ) ) {
+                $fields['sources'] = [ 'values' => array( [ 'value' => $source ] ) ];
             }
 
             //add data
@@ -1546,7 +1546,7 @@ class DT_Import {
         $headings        = [];
         $multi_separator = $this->multi_separator;
         $prefix          = sprintf( '%s_', strtolower( $this->post_label_singular ) );
-        $channels        = $this->post_settings["channels"];
+        $channels        = $this->post_settings['channels'];
         $cfs             = $this->post_field_settings;
         $rowindex        = 0;
         $error_summary   = [];
@@ -1647,17 +1647,17 @@ class DT_Import {
 
                                 } else if ( ( $type == 'multi_select' ) || in_array( $ch, self::$contact_address_headings ) || ( $type == 'tags' ) ) {
 
-                                    if ( isset( $import_data[ $ch ]["values"] ) && is_array( $import_data[ $ch ]["values"] ) ) {
+                                    if ( isset( $import_data[ $ch ]['values'] ) && is_array( $import_data[ $ch ]['values'] ) ) {
                                         $values = [];
-                                        foreach ( $import_data[ $ch ]["values"] as $mi => $v ) {
-                                            if ( isset( $v["value"] ) ) {
-                                                $label    = isset( $cfs[ $ch ]["default"][ esc_html( $v["value"] ) ]["label"] ) ? $cfs[ $ch ]["default"][ esc_html( $v["value"] ) ]["label"] : esc_html( $v["value"] );
+                                        foreach ( $import_data[ $ch ]['values'] as $mi => $v ) {
+                                            if ( isset( $v['value'] ) ) {
+                                                $label    = isset( $cfs[ $ch ]['default'][ esc_html( $v['value'] ) ]['label'] ) ? $cfs[ $ch ]['default'][ esc_html( $v['value'] ) ]['label'] : esc_html( $v['value'] );
                                                 $values[] = $label;
                                             }
                                         }
                                         $value = implode( $multi_separator, (array) $values );
                                     }
-                                } else if ( ( $type == 'number' || $type === "text" || $type === "textarea" ) ) {
+                                } else if ( ( $type == 'number' || $type === 'text' || $type === 'textarea' ) ) {
                                     if ( $ch == 'notes' ) {
                                         echo esc_html( utf8_decode( implode( $multi_separator, $import_data[$ch] ) ) );
                                     } else {
@@ -1668,13 +1668,13 @@ class DT_Import {
                                         echo esc_html( $import_data[ $ch ] );
                                     } else {
                                         $values = [];
-                                        if ( isset( $import_data[$ch]["values"] ) && is_array( $import_data[$ch]["values"] ) ) {
-                                            foreach ( $import_data[$ch]["values"] as $mi => $v ) {
-                                                if ( isset( $v["value"] ) ) { $values[] = esc_html( $v["value"] ); }
+                                        if ( isset( $import_data[$ch]['values'] ) && is_array( $import_data[$ch]['values'] ) ) {
+                                            foreach ( $import_data[$ch]['values'] as $mi => $v ) {
+                                                if ( isset( $v['value'] ) ) { $values[] = esc_html( $v['value'] ); }
                                             }
                                         } else {
                                             foreach ( $import_data[$ch] as $mi => $v ) {
-                                                if ( isset( $v["value"] ) ){ $values[] = esc_html( $v["value"] ); }
+                                                if ( isset( $v['value'] ) ){ $values[] = esc_html( $v['value'] ); }
                                             }
                                         }
                                     }
@@ -1748,7 +1748,7 @@ class DT_Import {
 
     public function get_all_default_values() {
         $data           = array();
-        $data['data']   = $this->post_settings["channels"];
+        $data['data']   = $this->post_settings['channels'];
         $data['fields'] = $this->post_field_settings;
 
         return $data;
@@ -1764,7 +1764,7 @@ class DT_Import {
                 $type = $cfs[$field]['type'];
                 if ( $type == 'boolean' && !filter_var( $data, FILTER_VALIDATE_BOOLEAN ) ) {
                     $err_count++;
-                } else if ( $type == 'date' && !( preg_match( "/^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])$/", $data ) ) ) {
+                } else if ( $type == 'date' && !( preg_match( '/^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])$/', $data ) ) ) {
                     $err_count++;
                     // } else if ( $type == 'number' && is_numeric($data) ) {
                     // } else if ( $type == 'array' && !is_array($data) ) {
@@ -1786,7 +1786,7 @@ class DT_Import {
         } else {
             $prefix   = sprintf( '%s_', strtolower( $this->post_label_singular ) );
             $ch       = str_replace( $prefix, '', $field );
-            $channels = $this->post_settings["channels"];
+            $channels = $this->post_settings['channels'];
 
             if ( isset( $channels[$ch] ) ) {
                 $values = [];

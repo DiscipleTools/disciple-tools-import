@@ -1,5 +1,4 @@
-
-![Plugin Banner](https://raw.githubusercontent.com/DiscipleTools/disciple-tools-import/master/import-banner.png)
+![Build Status](https://github.com/DiscipleTools/disciple-tools-import/actions/workflows/ci.yml/badge.svg?branch=master)
 # Disciple.Tools Import
 
 Easily import your contact or group data into Disciple.Tools from a CSV file.

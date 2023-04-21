@@ -91,7 +91,7 @@ class Disciple_Tools_Import_Endpoints
     public function private_endpoint( WP_REST_Request $request ) {
         // check permission
         if ( !$this->has_permission() ){
-            return new WP_Error( "private_endpoint", "Missing Permissions", [ 'status' => 400 ] );
+            return new WP_Error( 'private_endpoint', 'Missing Permissions', [ 'status' => 400 ] );
         }
 
         $params = $request->get_params();
@@ -106,16 +106,16 @@ class Disciple_Tools_Import_Endpoints
                     ? 'Disciple_Tools_Google_Geocode_API'
                     : 'DT_Mapbox_API';
 
-                $addresses = explode( ";", $params['address'] );
+                $addresses = explode( ';', $params['address'] );
                 $is_valid_address = false;
                 $results = [];
 
-                foreach ($addresses as $addr) {
+                foreach ( $addresses as $addr ) {
                     $lookup = $this->validate_lat_long( $addr );
 
                     // checking if address or coordinates and if coordinates splitting into latitude and longitude
                     $address = $lookup === 'coordinates'
-                        ? explode( ",", preg_replace( '/\s/', '', $addr ) )
+                        ? explode( ',', preg_replace( '/\s/', '', $addr ) )
                         : $addr;
 
                     // getting results
@@ -213,7 +213,7 @@ class Disciple_Tools_Import_Endpoints
                     'message' => 'No geocoder APIs available.'
                 ));
             }
-        } catch (Exception $e) {
+        } catch ( Exception $e ) {
             return json_encode(array(
                 'message' => 'Error Adding Location Grid Meta.',
                 'error' => $e
@@ -261,8 +261,8 @@ class Disciple_Tools_Import_Endpoints
         return $params;
     }
 
-    private function validate_lat_long( $address) {
-        $split_address = explode( ",", $address );
+    private function validate_lat_long( $address ) {
+        $split_address = explode( ',', $address );
         return preg_match( '/^[-]?(([0-8]?[0-9])\.(\d+))|(90(\.0+)?),[-]?((((1[0-7][0-9])|([0-9]?[0-9]))\.(\d+))|180(\.0+)?)$/', $split_address[0].','.$split_address[1] ) === 1 ? 'coordinates' : 'address';
     }
 }

@@ -47,7 +47,7 @@ class Disciple_Tools_Import_Menu {
      * @since   0.1.0
      */
     public function __construct() {
-        add_action( "admin_menu", array( $this, "register_menu" ) );
+        add_action( 'admin_menu', array( $this, 'register_menu' ) );
     } // End __construct()
 
     /**
@@ -94,11 +94,11 @@ class Disciple_Tools_Import_Menu {
 
             <?php
             $post_types = DT_Posts::get_post_types();
-            $post_types = array_values( array_diff( $post_types, [ "peoplegroups" ] ) ); //skip people groups for now.
+            $post_types = array_values( array_diff( $post_types, [ 'peoplegroups' ] ) ); //skip people groups for now.
             $active_post_type_object = null;
 
-            if ( isset( $_GET["tab"] ) ) {
-                $tab = sanitize_key( wp_unslash( $_GET["tab"] ) );
+            if ( isset( $_GET['tab'] ) ) {
+                $tab = sanitize_key( wp_unslash( $_GET['tab'] ) );
             } else {
                 $tab = $post_types[0];
             }
@@ -199,7 +199,7 @@ class Disciple_Tools_Import_Tab_General
             <tbody>
             <tr>
                 <td>
-                    <p><?php esc_html_e( "use utf-8 file format", 'disciple_tools' ) ?></p>
+                    <p><?php esc_html_e( 'use utf-8 file format', 'disciple_tools' ) ?></p>
                 </td>
             </tr>
             </tbody>
