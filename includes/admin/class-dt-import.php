@@ -1192,7 +1192,7 @@ class DT_Import {
                         function showAddedRow(pid, data, permalink, name = null) {
                             console.group(pid + ' added.');
                             console.log(data);
-                            t(`PID# ${pid} done. <a href="${permalink}" target="_blank">See ${name ? name : record}</a>`);
+                            t(`PID# ${pid} done. <a href="${permalink}" target="_blank">See ${name ? name : pid}</a>`);
                             console.groupEnd();
                         }
 
