@@ -172,7 +172,7 @@ class DT_Import {
                 $import_settings = [
                     'source'                => $file_source,
                     'assigned_to'           => $file_assigned_to,
-                    'data'                  => $this->mapping_process( $temp_name, $file_source, $file_assigned_to, $selected_geocode_api ),
+                    'data'                  => $this->mapping_process( $temp_name ),
                     'selected_geocode_api'  => $selected_geocode_api,
                     'check_for_duplicates'  => isset( $_POST['check_for_duplicates'] ),
                 ];
@@ -218,10 +218,11 @@ class DT_Import {
     private function display_field_mapping_step() {
         $import_settings       = get_transient( 'disciple_tools_import_settings' );
         $data                  = $import_settings['data'];
-        $csv_headers           = $data['csv_headers'];
         $uploaded_file_headers = $data['uploaded_file_headers'];
         $my_opt_fields         = $data['my_opt_fields'];
-        $unique                = $data['unique'];
+        $rows                  = $this->get_mapped_rows( $import_settings );
+        $csv_headers           = $rows['csv_headers'];
+        $unique                = $rows['unique'];
         ?>
         <!-- Box -->
         <table class="widefat striped">
@@ -680,9 +681,8 @@ class DT_Import {
         <?php
     }
 
-    public function mapping_process( $filepath, $file_source = 'web', $file_assigned_to = '' ) {
+    public function mapping_process( $filepath ) {
 
-        $data            = [];
         $delimiter       = $this->delimiter;
         $incl_headers    = 'yes';
         $multi_separator = $this->multi_separator;
@@ -699,6 +699,8 @@ class DT_Import {
             }
             $data_rows[] = $row;
         }
+        //close the file
+        fclose( $file_data );
 
         $field_options         = $this->post_field_settings;
         $uploaded_file_headers = [];
@@ -721,7 +723,26 @@ class DT_Import {
                 $data_rows[$ri][$index] = utf8_encode( $cell );
             }
         }
-        $temp_data = $data_rows;
+        return [
+            'raw_rows'              => $data_rows,
+            'uploaded_file_headers' => $uploaded_file_headers,
+            'my_opt_fields'         => $my_opt_fields,
+            'csv_headers'           => $csv_headers,
+            'headers_info'          => $headers_info,
+            'delimiter'             => $delimiter,
+            'multi_separator'       => $multi_separator
+        ];
+    }
+
+    public function get_mapped_rows( $import_settings ){
+
+        $file_source = $import_settings['source'];
+        $file_assigned_to = $import_settings['assigned_to'];
+        $data_rows = $import_settings['data']['raw_rows'];
+        $csv_headers = $import_settings['data']['csv_headers'];
+        $multi_separator = $import_settings['data']['multi_separator'];
+        $delimiter = $import_settings['data']['delimiter'];
+        $data            = [];
 
         //correct csv headers
         foreach ( $csv_headers as $ci => $ch ) {
@@ -791,8 +812,6 @@ class DT_Import {
             unset( $fields );
 
         }
-        //close the file
-        fclose( $file_data );
 
 
         $unique       = array();
@@ -823,27 +842,17 @@ class DT_Import {
 
             $unique[$ci] = array_unique( $unique[$ci] );
             asort( $unique[$ci] ); //sort-the-value(s)
+
+            //Too many values means this filed is likely not intended to be mapped. Breaks the form submit.
+            if ( count( $unique[$ci] ) > 50 ) {
+                unset( $unique[$ci] );
+            }
         }
 
-        // save $unique value so we can access it again when hitting back button.
-        set_transient( 'disciple_tools_unique_data', $unique, 3600 * 24 );
-
-        // save $uploaded_file_headers so we can access it again when hitting back button.
-        set_transient( 'disciple_tools_uploaded_file_headers', $uploaded_file_headers, 3600 * 24 );
-
-        // save $temp_data so we can access it agaian when hitting back button
-        set_transient( 'disciple_tools_temp_data', $temp_data, 3600 * 24 );
-
         return [
-            'data'                  => $data,
-            'temp_data'             => $temp_data,
-            'uploaded_file_headers' => $uploaded_file_headers,
-            'my_opt_fields'         => $my_opt_fields,
-            'csv_headers'           => $csv_headers,
-            'headers_info'          => $headers_info,
-            'unique'                => $unique,
-            'delimiter'             => $delimiter,
-            'multi_separator'       => $multi_separator
+            'unique' => $unique,
+            'rows' => $data,
+            'csv_headers' => $csv_headers
         ];
     }
 
@@ -879,15 +888,12 @@ class DT_Import {
         }
 
         $import_settings                                  = get_transient( 'disciple_tools_import_settings' );
-        $import_settings['data']['data']                  = $this->process_data( $import_settings, $mapping_data, $value_mapperi_data, $value_mapper_data );
-        $import_settings['data']['csv_headers']           = $mapping_data;
-        $import_settings['data']['my_opt_fields']         = $this->get_all_default_values();
-        $import_settings['data']['delimiter']             = $this->delimiter;
-        $import_settings['data']['multi_separator']       = $this->multi_separator;
-        $import_settings['data']['headers_info']          = $this->get_header_info();
-        $import_settings['data']['unique']                = get_transient( 'disciple_tools_unique_data' );
-        $import_settings['data']['uploaded_file_headers'] = get_transient( 'disciple_tools_uploaded_file_headers' );
-        $import_settings['data']['temp_data']             = get_transient( 'disciple_tools_temp_data' );
+        $import_settings['mapping'] = [
+            'mapping_data' => $mapping_data,
+            'value_mapperi_data' => $value_mapperi_data,
+            'value_mapper_data' => $value_mapper_data
+        ];
+        $mapped_data                  = $this->process_data( $import_settings, $mapping_data, $value_mapperi_data, $value_mapper_data );
 
         set_transient( 'disciple_tools_import_settings', $import_settings, 3600 * 24 );
         ?>
@@ -902,7 +908,7 @@ class DT_Import {
             <tr>
                 <td>
 
-                    <?php $this->display_data( $import_settings['data']['data'] );?>
+                    <?php $this->display_data( $mapped_data );?>
 
 
                     <form method="post" enctype="multipart/form-data">
@@ -936,7 +942,8 @@ class DT_Import {
         foreach ( $data_keys as $data_key ) {
             $data[] = $import_settings[ $data_key ];
         }
-        $data = disciple_tools_import_sanitize_array( $import_settings['data']['data'] );
+        $mapped_data = $this->process_data( $import_settings, $import_settings['mapping']['mapping_data'], $import_settings['mapping']['value_mapperi_data'], $import_settings['mapping']['value_mapper_data'] );
+        $data = disciple_tools_import_sanitize_array( $mapped_data );
 
         // Decode utf8 encoded values post transient, ahead of post record creation
         $data = disciple_tools_import_array_utf8_decode( $data );
@@ -1343,7 +1350,7 @@ class DT_Import {
 
     public function process_data( $import_settings, $mapping_data = [], $value_mapperi_data = [], $value_mapper_data = [] ) {
         $csv_headers     = $mapping_data;
-        $data_rows       = $import_settings['data']['temp_data'] ?? [];
+        $data_rows       = $import_settings['data']['raw_rows'] ?? [];
         $assign          = $import_settings['assigned_to'] ?? '';
         $source          = $import_settings['source'] ?? '';
         $multi_separator = $this->multi_separator;
