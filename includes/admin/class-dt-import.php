@@ -1064,7 +1064,6 @@ class DT_Import {
                             });
 
                             const location = arrLocations.join(';');
-                            console.log(location)
 
                             // If geolocation enabled, then remove address
                             let geolocationEnabled = (geocoderType !== 'none' && location !== '');
@@ -1106,7 +1105,6 @@ class DT_Import {
                                             },
                                             success: function(data) {
                                                 const responseGridMeta = data;
-                                                console.log(responseGridMeta);
 
                                               if(!responseGridMeta.has_valid_address) {
                                                     addAddress(tmpLocations, url_update_post, record, responseGridMeta, done);
