@@ -479,9 +479,12 @@ class DT_Import {
                         <?php wp_nonce_field( 'csv_import', 'csv_import_nonce' ); ?>
                         <table class="widefat striped">
                             <tr>
-                                <td>
+                                <td style="min-width: 30%">
                                     <label for="csv_file"><?php esc_html_e( 'Select your csv file (comma separated file)' ) ?></label><br>
-                                    <input class="button" type="file" name="csv_file" id="csv_file" />
+
+                                </td>
+                                <td style='width: 70%'>
+                                    <input class='button' type='file' name='csv_file' id='csv_file'/>
                                 </td>
                             </tr>
                             <?php
@@ -494,7 +497,9 @@ class DT_Import {
                                             $post_label_plural = $this->post_label_plural;
                                             printf( 'Where did these %s come from? Add a source.', esc_attr( $post_label_plural ) );
                                             ?>
-                                        </label><br>
+                                        </label>
+                                    </td>
+                                    <td>
                                         <select name="csv_source" id="csv_source">
                                             <?php
                                             $sources = isset( $this->post_settings['fields']['sources']['default'] ) ? $this->post_settings['fields']['sources']['default'] : [];
@@ -516,6 +521,8 @@ class DT_Import {
                                         <label for="csv_assign">
                                             <?php esc_html_e( 'Which user do you want these assigned to?', 'disciple_tools' ) ?>
                                         </label><br>
+                                    </td>
+                                    <td>
                                         <select name="csv_assign" id="csv_assign">
                                             <option value=""></option>
                                             <?php
@@ -542,7 +549,8 @@ class DT_Import {
                                         <label for="selected__geocode_api">
                                             <?php esc_html_e( 'Use the following Geocode API', 'disciple_tools' ); ?>
                                         </label>
-                                        <br>
+                                    </td>
+                                    <td>
                                         <select name="selected_geocode_api" id="selected_geocode_api">
                                             <?php
                                             foreach ( $available_geocode_apis as $api ) {
@@ -560,10 +568,12 @@ class DT_Import {
                             if ( $this->post_type === 'contacts' ): ?>
                                 <tr>
                                     <td>
+                                            Merge with Existing
+                                    </td>
+                                    <td>
                                         <label>
-                                            <?php esc_html_e( 'Merge with existing record with same email or phone', 'disciple_tools' ); ?>
-                                            <br>
-                                            <input type="checkbox" name="check_for_duplicates" id="check_for_duplicates">
+                                        <input type='checkbox' name='check_for_duplicates' id='check_for_duplicates'>
+                                            <?php echo esc_html( printf( 'Instead of creating new %1$s, update existing %2$s that have the same email or phone number if a match is found.', $this->post_label_plural, $this->post_label_plural ) ); ?>
                                         </label>
                                     </td>
                                 </tr>
@@ -1095,9 +1105,10 @@ class DT_Import {
                                                 xhr.setRequestHeader('X-WP-Nonce', "<?php echo esc_html( wp_create_nonce( 'wp_rest' ) ); ?>");
                                             },
                                             success: function(data) {
-                                                const responseGridMeta = JSON.parse(data);
+                                                const responseGridMeta = data;
+                                                console.log(responseGridMeta);
 
-                                                if(!responseGridMeta.has_valid_address) {
+                                              if(!responseGridMeta.has_valid_address) {
                                                     addAddress(tmpLocations, url_update_post, record, responseGridMeta, done);
 
                                                 } else {
@@ -1643,8 +1654,10 @@ class DT_Import {
                             } ?>
 
                             <td data-col-id='<?php echo esc_html( $hi ); ?>' data-key="<?php echo esc_html( $ch ); ?>" <?php echo esc_html( $errors > 0 ? 'class="data-error"' : '' ) ?> >
-
                                 <?php
+                                if ( empty( $import_data[$ch] ) ){
+                                    continue;
+                                }
                                 $value = '';
                                 if ( $type == 'key_select'
                                      || $type == 'date'

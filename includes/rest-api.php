@@ -201,23 +201,23 @@ class Disciple_Tools_Import_Endpoints
                     );
                 }
 
-                return json_encode(array(
+                return [
                     'address' => $params['address'],
                     'has_valid_address' => $is_valid_address,
                     'results' => $results,
                     'addresses' => $addresses
-                ));
+                ];
             } else {
                 // returning info : no geocoders apis available.
-                return json_encode(array(
+                return [
                     'message' => 'No geocoder APIs available.'
-                ));
+                ];
             }
         } catch ( Exception $e ) {
-            return json_encode(array(
+            return [
                 'message' => 'Error Adding Location Grid Meta.',
                 'error' => $e
-            ));
+            ];
         }
     }
 
