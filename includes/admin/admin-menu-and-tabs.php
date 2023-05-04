@@ -55,7 +55,7 @@ class Disciple_Tools_Import_Menu {
      * @since 0.1
      */
     public function register_menu() {
-        add_submenu_page( 'dt_extensions', __( 'Import', 'disciple_tools_import' ), __( 'Import', 'disciple_tools_import' ), 'manage_dt', $this->token, [ $this, 'content' ] );
+        add_submenu_page( 'dt_extensions', __( 'CSV Import', 'disciple_tools_import' ), __( 'CSV Import', 'disciple_tools_import' ), 'manage_dt', $this->token, [ $this, 'content' ] );
     }
 
     /**
