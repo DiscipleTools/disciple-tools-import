@@ -327,7 +327,7 @@ class DT_Import {
                                                                         <option>--Not Selected--</option>
                                                                         <?php if ( isset( $my_opt_fields['fields'][$ch]['default'] ) && is_array( $my_opt_fields['fields'][$ch]['default'] ) ):
                                                                             foreach ( $my_opt_fields['fields'][$ch]['default'] as $option_key => $option_value ): ?>
-                                                                                <option value="<?php echo esc_attr( $option_key ) ?>"<?php if ( $option_key == $v ): ?> selected="selected"<?php endif; ?>><?php echo esc_attr( $option_value['label'] ) ?></option>
+                                                                                <option value="<?php echo esc_attr( $option_key ) ?>"<?php if ( strcasecmp($option_key, $v) == 0 ): ?> selected="selected"<?php endif; ?>><?php echo esc_attr( $option_value['label'] ) ?></option>
                                                                             <?php endforeach;
                                                                         endif; ?>
                                                                     </select>
@@ -418,9 +418,12 @@ class DT_Import {
                                 });
 
                                 value_mapper_select.each(function(){
-                                    let h_sel = jQuery(this).attr('data-value');
+                                    let h_sel = jQuery(this).attr('data-value').toLowerCase();
                                     jQuery(this).find('option').each(function(){
-                                        if(h_sel===jQuery(this).attr('value')){
+                                        if (
+                                            h_sel == jQuery(this).attr('value').toLowerCase()
+                                            || h_sel == jQuery(this).text().toLowerCase()
+                                        ) {
                                             jQuery(this).attr('selected','selected');
                                         }
                                     });
@@ -429,11 +432,13 @@ class DT_Import {
                                 jQuery('.value-mappers').each(function(){
                                     let h_sel = jQuery(this).data('value');
 
-                                    jQuery(this).find('option').each(function() {
-                                        if(h_sel === jQuery(this).text()){
-                                            jQuery(this).attr('selected','selected');
-                                        }
-                                    });
+                                    if (h_sel && h_sel.toLowerCase) {
+                                        jQuery(this).find('option').each(function () {
+                                            if (h_sel.toLowerCase() == jQuery(this).text().toLowerCase()) {
+                                                jQuery(this).attr('selected', 'selected');
+                                            }
+                                        });
+                                    }
                                 });
 
                             } else {
