@@ -327,7 +327,7 @@ class DT_Import {
                                                                         <option>--Not Selected--</option>
                                                                         <?php if ( isset( $my_opt_fields['fields'][$ch]['default'] ) && is_array( $my_opt_fields['fields'][$ch]['default'] ) ):
                                                                             foreach ( $my_opt_fields['fields'][$ch]['default'] as $option_key => $option_value ): ?>
-                                                                                <option value="<?php echo esc_attr( $option_key ) ?>"<?php if ( strcasecmp($option_key, $v) == 0 ): ?> selected="selected"<?php endif; ?>><?php echo esc_attr( $option_value['label'] ) ?></option>
+                                                                                <option value="<?php echo esc_attr( $option_key ) ?>"<?php if ( strcasecmp( $option_key, $v ) == 0 ): ?> selected="selected"<?php endif; ?>><?php echo esc_attr( $option_value['label'] ) ?></option>
                                                                             <?php endforeach;
                                                                         endif; ?>
                                                                     </select>
