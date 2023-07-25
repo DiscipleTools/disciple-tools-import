@@ -735,7 +735,7 @@ class DT_Import {
 
         foreach ( $data_rows as $ri => $row ) {
             foreach ( $row as $index => $cell ) {
-                $data_rows[$ri][$index] = utf8_encode( $cell );
+                $data_rows[$ri][$index] = mb_convert_encoding( $cell, 'UTF-8', mb_detect_encoding( $cell ) );
             }
         }
         return [
@@ -1683,9 +1683,9 @@ class DT_Import {
                                 } else if ( ( $type == 'number' || $type === 'text' || $type === 'textarea' ) ) {
                                     if ( $ch == 'notes' ) {
                                         $imploded = implode( $multi_separator, $import_data[$ch] );
-                                        echo esc_html( mb_convert_encoding( $imploded, 'UTF-8', mb_detect_encoding( $imploded ) ) );
+                                        echo esc_html( mb_convert_encoding( $imploded, mb_detect_encoding( $imploded ), 'UTF-8' ) );
                                     } else {
-                                        echo esc_html( mb_convert_encoding( $import_data[$ch], 'UTF-8', mb_detect_encoding( $import_data[$ch] ) ) );
+                                        echo esc_html( mb_convert_encoding( $import_data[$ch], mb_detect_encoding( $import_data[$ch] ), 'UTF-8' ) );
                                     }
                                 } else if ( isset( $import_data[$ch] ) ) {
                                     if ( !is_array( $import_data[$ch] ) ){
