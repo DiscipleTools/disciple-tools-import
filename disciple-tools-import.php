@@ -298,7 +298,7 @@ function disciple_tools_import_hook_admin_notice() {
     global $disciple_tools_import_required_dt_theme_version;
     $wp_theme = wp_get_theme();
     $current_version = $wp_theme->version;
-    $message = __( "'Disciple.Tools - CSV Import' plugin requires 'Disciple.Tools' theme to work. Please activate 'Disciple.Tools' theme or make sure it is latest version.", 'disciple_tools_import' );
+    $message = __( "'Disciple.Tools - CSV Import' plugin requires 'Disciple.Tools' theme to work. Please activate 'Disciple.Tools' theme or make sure it is the latest version.", 'disciple_tools_import' );
     if ( $wp_theme->get_template() === 'disciple-tools-theme' ){
         if ( version_compare( $current_version, $disciple_tools_import_required_dt_theme_version, '<' ) ){
             $message .= sprintf( esc_html__( ' Current Disciple.Tools version: %1$s, required version: %2$s', 'disciple_tools_import' ), esc_html( $current_version ), esc_html( $disciple_tools_import_required_dt_theme_version ) );
