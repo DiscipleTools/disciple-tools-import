@@ -227,7 +227,7 @@ function disciple_tools_import_sanitize_array( &$array ) {
 function disciple_tools_import_array_utf8_decode( &$array ) {
     foreach ( $array as &$value ) {
         if ( ! is_array( $value ) ) {
-            $value = utf8_decode( $value );
+            $value = mb_convert_encoding( $value, mb_detect_encoding( $value ), 'UTF-8' );
         } else {
             disciple_tools_import_array_utf8_decode( $value );
         }

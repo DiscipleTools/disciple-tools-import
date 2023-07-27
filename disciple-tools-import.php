@@ -48,7 +48,7 @@ function disciple_tools_import() {
      * Check if the Disciple.Tools theme is loaded and is the latest required version
      */
     $is_theme_dt = class_exists( 'Disciple_Tools' );
-    if ( $is_theme_dt && version_compare( $version, $disciple_tools_import_required_dt_theme_version, '<' ) ) {
+    if ( $is_theme_dt && ( ( version_compare( $version, $disciple_tools_import_required_dt_theme_version, '<' ) ) || ! extension_loaded( 'mbstring' ) ) ){
         add_action( 'admin_notices', 'disciple_tools_import_hook_admin_notice' );
         add_action( 'wp_ajax_dismissed_notice_handler', 'dt_hook_ajax_notice_handler' );
         return false;
@@ -298,9 +298,14 @@ function disciple_tools_import_hook_admin_notice() {
     global $disciple_tools_import_required_dt_theme_version;
     $wp_theme = wp_get_theme();
     $current_version = $wp_theme->version;
-    $message = __( "'Disciple.Tools - Starter Plugin' plugin requires 'Disciple.Tools' theme to work. Please activate 'Disciple.Tools' theme or make sure it is latest version.", 'disciple_tools_import' );
+    $message = __( "'Disciple.Tools - CSV Import' plugin requires 'Disciple.Tools' theme to work. Please activate 'Disciple.Tools' theme or make sure it is the latest version.", 'disciple_tools_import' );
     if ( $wp_theme->get_template() === 'disciple-tools-theme' ){
-        $message .= sprintf( esc_html__( 'Current Disciple.Tools version: %1$s, required version: %2$s', 'disciple_tools_import' ), esc_html( $current_version ), esc_html( $disciple_tools_import_required_dt_theme_version ) );
+        if ( version_compare( $current_version, $disciple_tools_import_required_dt_theme_version, '<' ) ){
+            $message .= sprintf( esc_html__( ' Current Disciple.Tools version: %1$s, required version: %2$s', 'disciple_tools_import' ), esc_html( $current_version ), esc_html( $disciple_tools_import_required_dt_theme_version ) );
+        }
+        if ( ! extension_loaded( 'mbstring' ) ){
+            $message .= esc_html__( ' Please ensure latest version of MBString PHP Extension is installed and enabled.', 'disciple_tools_import' );
+        }
     }
     // Check if it's been dismissed...
     if ( ! get_option( 'dismissed-dt-import', false ) ) { ?>
