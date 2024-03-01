@@ -262,7 +262,7 @@ class DT_Import {
                                     $col_data_type = isset( $my_opt_fields['fields'][$ch]['type'] ) ? $my_opt_fields['fields'][$ch]['type'] : null;
                                     ?>
                                     <tr class="mapper-coloumn" data-row-id="<?php echo esc_attr( $ci ) ?>">
-                                        <th data-field="<?php echo esc_attr( $ch ) ?>" class="src-column">
+                                        <th data-field="<?php echo esc_attr( $ch ) ?>" class="src-column" style="vertical-align: top;">
                                             <?php echo esc_html( $uploaded_file_headers[$ci] ) ?>
                                         </th>
 
@@ -1540,7 +1540,8 @@ class DT_Import {
 
                             $mx = trim( $mx );
 
-                            if ( !empty( $mx ) ) {
+                            // Ensure referenced value is numerical, to satisfy downstream connection processing.
+                            if ( !empty( $mx ) && is_numeric( $mx ) ) {
                                 $fields[ $ch ]['values'][] = [ 'value' => $mx ];
                             }
                         }

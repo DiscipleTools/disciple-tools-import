@@ -165,7 +165,7 @@ class Disciple_Tools_Import_Endpoints
 
                         $relevance = $params['geocoder'] === 'Google'
                             ? 0.6 // to change if there's any data equals to Mapbox's relevance
-                            : $result['features'][0]['relevance'];
+                            : ( isset( $result['features'], $result['features'][0], $result['features'][0]['relevance'] ) ? $result['features'][0]['relevance'] : 0.6 );
 
                         $is_valid_address = $relevance >= 0.5; // setting as valid address
 
@@ -263,6 +263,7 @@ class Disciple_Tools_Import_Endpoints
 
     private function validate_lat_long( $address ) {
         $split_address = explode( ',', $address );
-        return preg_match( '/^[-]?(([0-8]?[0-9])\.(\d+))|(90(\.0+)?),[-]?((((1[0-7][0-9])|([0-9]?[0-9]))\.(\d+))|180(\.0+)?)$/', $split_address[0].','.$split_address[1] ) === 1 ? 'coordinates' : 'address';
+
+        return preg_match( '/^[-]?(([0-8]?[0-9])\.(\d+))|(90(\.0+)?),[-]?((((1[0-7][0-9])|([0-9]?[0-9]))\.(\d+))|180(\.0+)?)$/', ( $split_address[0] . ( isset( $split_address[1] ) ? ( ',' . $split_address[1] ) : '' ) ) ) === 1 ? 'coordinates' : 'address';
     }
 }
