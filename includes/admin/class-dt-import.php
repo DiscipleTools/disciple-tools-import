@@ -703,7 +703,6 @@ class DT_Import {
         $multi_separator = $this->multi_separator;
 
         //open file
-        ini_set( 'auto_detect_line_endings', true );
         $file_data = fopen( $filepath, 'r' );
 
         $data_rows = array();
