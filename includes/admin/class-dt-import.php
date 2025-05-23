@@ -111,7 +111,6 @@ class DT_Import {
 
         $this->required_fields = [
             'common_fields' => [ // Common fields across post_types.
-                'title',
                 'name'
             ]
         ];
@@ -185,8 +184,7 @@ class DT_Import {
                     'assigned_to'           => $file_assigned_to,
                     'data'                  => $this->mapping_process( $temp_name ),
                     'selected_geocode_api'  => $selected_geocode_api,
-                    'check_for_duplicates'  => isset( $_POST['check_for_duplicates'] ),
-                    'overwrite_existing_fields'  => isset( $_POST['overwrite_existing_fields'] )
+                    'check_for_duplicates'  => isset( $_POST['check_for_duplicates'] )
                 ];
 
                 set_transient( 'disciple_tools_import_settings', $import_settings, 3600 * 24 );
@@ -591,11 +589,6 @@ class DT_Import {
                                         <label>
                                         <input type='checkbox' name='check_for_duplicates' id='check_for_duplicates'>
                                             <?php echo esc_html( printf( 'Instead of creating new %1$s, update existing %2$s that have the same email or phone number if a match is found.', $this->post_label_plural, $this->post_label_plural ) ); ?>
-                                        </label>
-                                        <br><br>
-                                        <label>
-                                            <input type='checkbox' checked name='overwrite_existing_fields' id='overwrite_existing_fields'>
-                                            <?php echo esc_html( 'Overwrite all existing fields?' ); ?>
                                         </label>
                                     </td>
                                 </tr>
@@ -1023,7 +1016,6 @@ class DT_Import {
         $rest_url = rest_url() . 'dt-posts/v2/' . $this->post_type . '?silent=true';
         if ( $import_settings['check_for_duplicates'] ){
             $rest_url .= '&check_for_duplicates=contact_phone,contact_email';
-            $rest_url .= '&overwrite_existing_fields=' . ( ( isset( $import_settings['overwrite_existing_fields'] ) && $import_settings['overwrite_existing_fields'] ) ? 'true' : 'false' );
         }
         ?>
         <!-- Box -->
