@@ -50,6 +50,11 @@ class DT_Import {
      * @var string
      */
     private $post_label_plural = '';
+    /**
+     * This array stores the required fields for a given post type.
+     * @var array
+     */
+    private $required_fields = [];
 
     /**
      * DT_Import constructor.
@@ -104,6 +109,11 @@ class DT_Import {
             'comments'
         ];
 
+        $this->required_fields = [
+            'common_fields' => [ // Common fields across post_types.
+                'name'
+            ]
+        ];
     }
 
     private function dt_sanitize_post_request_array_field( $post, $key ) {
@@ -174,7 +184,7 @@ class DT_Import {
                     'assigned_to'           => $file_assigned_to,
                     'data'                  => $this->mapping_process( $temp_name ),
                     'selected_geocode_api'  => $selected_geocode_api,
-                    'check_for_duplicates'  => isset( $_POST['check_for_duplicates'] ),
+                    'check_for_duplicates'  => isset( $_POST['check_for_duplicates'] )
                 ];
 
                 set_transient( 'disciple_tools_import_settings', $import_settings, 3600 * 24 );
@@ -910,6 +920,15 @@ class DT_Import {
         $mapped_data                  = $this->process_data( $import_settings, $mapping_data, $value_mapperi_data, $value_mapper_data );
 
         set_transient( 'disciple_tools_import_settings', $import_settings, 3600 * 24 );
+
+        /**
+         * Ensure required fields are present.
+         */
+
+        $has_required_fields = true;
+        if ( !empty( $this->required_fields['common_fields'] ) ) {
+            $has_required_fields = count( array_intersect( $this->required_fields['common_fields'], $mapping_data ) ) > 0;
+        }
         ?>
 
         <table class="widefat striped">
@@ -921,25 +940,50 @@ class DT_Import {
             <tbody>
             <tr>
                 <td>
+                    <?php
+                    if ( $has_required_fields ) {
+                        $this->display_data( $mapped_data );
 
-                    <?php $this->display_data( $mapped_data );?>
+                        ?>
+                        <form method="post" enctype="multipart/form-data">
 
+                            <?php wp_nonce_field( 'csv_correct', 'csv_correct_nonce' ); ?>
 
-                    <form method="post" enctype="multipart/form-data">
+                            <input type="submit" name="go_back" class="button button-primary" value="<?php esc_html_e( 'Back - Something is wrong!', 'disciple_tools' ) ?>" />
 
-                        <?php wp_nonce_field( 'csv_correct', 'csv_correct_nonce' ); ?>
+                            <input type="submit" name="submit"
+                                   id="submit"
+                                   style="background-color:#4CAF50; color:white"
+                                   class="button"
+                                   value=<?php esc_html_e( 'Import', 'disciple_tools' ) ?> />
 
-                        <input type="submit" name="go_back" class="button button-primary" value="<?php esc_html_e( 'Back - Something is wrong!', 'disciple_tools' ) ?>" />
+                        </form>
+                        <?php
 
-                        <input type="submit" name="submit"
-                               id="submit"
-                               style="background-color:#4CAF50; color:white"
-                               class="button"
-                               value=<?php esc_html_e( 'Import', 'disciple_tools' ) ?> />
+                    } else {
+                        ?>
+                        <span><?php esc_html_e( 'These following fields are required. Please make sure at lease one of your CSV columns is mapped to these fields:', 'disciple_tools' ) ?></span>
+                        <br>
+                        <ol>
+                            <?php
+                            foreach ( $this->required_fields['common_fields'] ?? [] as $field ) {
+                                ?>
+                                <li><?php echo esc_html( $this->post_field_settings[$field]['name'] ?? $field ); ?></li>
+                                <?php
+                            }
+                            ?>
+                        </ol>
+                        <br>
+                        <form method="post" enctype="multipart/form-data">
 
-                    </form>
+                            <?php wp_nonce_field( 'csv_correct', 'csv_correct_nonce' ); ?>
 
+                            <input type="submit" name="go_back" class="button button-primary" value="<?php esc_html_e( 'Back - Something is wrong!', 'disciple_tools' ) ?>" />
 
+                        </form>
+                        <?php
+                    }
+                    ?>
                 </td>
             </tr>
             </tbody>
@@ -1630,7 +1674,7 @@ class DT_Import {
                     <td data-col-id="0"><?php echo esc_html( $rowindex ); ?></td>
 
                     <td data-col-id="1" data-key="title">
-                        <?php echo esc_html( $import_data['title'] ?? $import_data['name'] ); ?>
+                        <?php echo esc_html( $import_data['title'] ?? ( $import_data['name'] ?? '' ) ); ?>
                     </td>
 
                     <?php foreach ( $headings as $hi => $ch ) {
