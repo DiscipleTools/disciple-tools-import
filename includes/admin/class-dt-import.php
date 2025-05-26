@@ -962,7 +962,7 @@ class DT_Import {
 
                     } else {
                         ?>
-                        <span><?php esc_html_e( 'Please ensure the following required fields are present.', 'disciple_tools' ) ?></span>
+                        <span><?php esc_html_e( 'These following fields are required. Please make sure at lease one of your CSV columns is mapped to these fields:', 'disciple_tools' ) ?></span>
                         <br>
                         <ol>
                             <?php
