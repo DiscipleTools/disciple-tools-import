@@ -588,7 +588,7 @@ class DT_Import {
                                     <td>
                                         <label>
                                         <input type='checkbox' name='check_for_duplicates' id='check_for_duplicates'>
-                                            <?php echo esc_html( printf( 'Instead of creating new %1$s, update existing %2$s that have the same email or phone number if a match is found.', $this->post_label_plural, $this->post_label_plural ) ); ?>
+                                            <?php echo esc_html( sprintf( 'Instead of creating new %1$s, update existing %2$s that have the same email or phone number if a match is found.', $this->post_label_plural, $this->post_label_plural ) ); ?>
                                         </label>
                                     </td>
                                 </tr>
