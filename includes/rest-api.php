@@ -85,7 +85,6 @@ class Disciple_Tools_Import_Endpoints
         // run your function here
 
         return true;
-
     }
 
     public function private_endpoint( WP_REST_Request $request ) {
