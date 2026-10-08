@@ -208,7 +208,6 @@ class Disciple_Tools_Import_Tab_General
         <!-- End Box -->
         <?php
     }
-
 }
 
 function disciple_tools_import_sanitize_array( &$array ) {

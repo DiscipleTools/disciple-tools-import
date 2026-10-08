@@ -219,7 +219,6 @@ class DT_Import {
         } else {
             $this->import_form();
         }
-
     }
 
     /**
@@ -1381,7 +1380,7 @@ class DT_Import {
                         continue;
                     }
                     ?>
-                    <option value="<?php echo esc_html( $key ); ?>" <?php selected( $field != null && $field == $key || $data_field != null && $data_field == $key ) ?>><?php echo esc_html( $label ); ?></option>
+                    <option value="<?php echo esc_html( $key ); ?>" <?php selected( ( $field != null && $field == $key ) || ( $data_field != null && $data_field == $key ) ) ?>><?php echo esc_html( $label ); ?></option>
                 <?php } ?>
             </optgroup>
         </select>
@@ -1811,7 +1810,6 @@ class DT_Import {
         if ( count( $error_summary ) > 0 ) : ?>
             <div class="error-summary-details">Please fix these issues before importing.</div>
         <?php endif;
-
     }
 
     public function get_all_default_values() {
