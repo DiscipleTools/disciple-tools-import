@@ -25,8 +25,8 @@ jobs:
     # Build the plugin zip and publish it as the asset of a GitHub release for the pushed tag
     - name: Build project
       run: |
-        mkdir disciple-tools-import |
-        cp -r disciple-tools-import.php LICENSE includes assets languages version-control.json disciple-tools-import/ |
+        mkdir disciple-tools-import &&
+        cp -r disciple-tools-import.php LICENSE includes assets languages version-control.json disciple-tools-import/ &&
         zip -r disciple-tools-import.zip disciple-tools-import
     - name: Create Release
       env:
