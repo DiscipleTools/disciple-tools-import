@@ -3,7 +3,7 @@
  *Plugin Name: DEPRECATED - Disciple.Tools - Import
  * Plugin URI: https://github.com/DiscipleTools/disciple-tools-import
  * Description: DELETE ME - I'm a deprecated plugin
- * Version:  1.4.0
+ * Version:  1.4.1
  * Author URI: https://github.com/DiscipleTools
  * GitHub Plugin URI: https://github.com/DiscipleTools/disciple-tools-import
  * Requires at least: 4.7.0
