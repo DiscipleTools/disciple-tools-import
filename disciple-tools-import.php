@@ -1,8 +1,8 @@
 <?php
 /**
- *Plugin Name: Disciple.Tools - Import
+ *Plugin Name: DEPRECATED - Disciple.Tools - Import
  * Plugin URI: https://github.com/DiscipleTools/disciple-tools-import
- * Description: Disciple.Tools - Import description
+ * Description: DELETE ME - I'm a deprecated plugin
  * Version:  1.3.1
  * Author URI: https://github.com/DiscipleTools
  * GitHub Plugin URI: https://github.com/DiscipleTools/disciple-tools-import
@@ -73,7 +73,7 @@ function disciple_tools_import() {
     */
     return Disciple_Tools_Import::get_instance();
 }
-add_action( 'after_setup_theme', 'disciple_tools_import' );
+//add_action( 'after_setup_theme', 'disciple_tools_import' );
 
 /**
  * Singleton class for setting up the plugin.

@@ -17,14 +17,14 @@
   "readme_url": "https://raw.githubusercontent.com/DiscipleTools/disciple-tools-import/master/README.md",
   "requires": "4.7",
   "tested": "5.6",
-  "upgrade_notice": "Upgrade to get the latest features.",
+  "upgrade_notice": "Deprecated: CSV import is built into the Disciple.Tools theme as of version 1.71.0. Deactivate and delete this plugin.",
   "banners": {
     "low": "https://raw.githubusercontent.com/DiscipleTools/disciple-tools-import/master/import-banner.png",
     "high": "https://raw.githubusercontent.com/DiscipleTools/disciple-tools-import/master/import-banner.png"
   },
   "icon": "https://raw.githubusercontent.com/DiscipleTools/disciple-tools-import/master/import-icon.png",
   "sections": {
-    "description": "Easily import your contact or group data into Disciple.Tools from a CSV file.",
+    "description": "Deprecated: CSV import is built into the Disciple.Tools theme as of version 1.71.0 (Utilities (D.T) > CSV Import). Deactivate and delete this plugin.",
     "installation": "(Required) You must have Disciple.Tools Theme installed before using this plugin. Once Disciple.Tools is installed, you can use the normal Plugin system to install the plugin.",
     "changelog": ""
   }
